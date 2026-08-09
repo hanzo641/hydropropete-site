@@ -758,6 +758,66 @@ html.js .reveal.is-visible {
   font-weight: 500;
 }
 
+/* ---------- 10b. Tarifs (prix fixe / sur devis) ---------- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 960px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+.price-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.price-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+
+.price-card h3 { font-size: 1.05rem; }
+
+.price-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.price-badge.is-fixed { background: rgba(22, 163, 74, 0.12); color: #0E6B34; }
+.price-badge.is-devis { background: var(--color-light); color: #475569; border: 1px solid var(--color-border); }
+
+.price-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  line-height: 1;
+}
+
+.price-value .devis-label {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.price-card p { color: var(--color-text-muted); font-size: 0.9rem; }
+
+.price-card .btn { margin-top: auto; }
+
 /* ---------- 11. Before / After slider ---------- */
 .compare {
   position: relative;
