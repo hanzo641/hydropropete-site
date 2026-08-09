@@ -365,10 +365,16 @@ h1, h2, h3, h4 {
   transition: all 0.3s var(--ease);
 }
 
-.has-dropdown:hover .dropdown {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
+/* Scoped to real pointer devices at desktop widths: on touch screens a tap
+   can leave :hover "stuck" (notably iOS Safari), and this selector's higher
+   specificity would otherwise override the mobile .dropdown reset below,
+   pushing the panel off-screen (translateX(-50%) of a 300px-wide element). */
+@media (min-width: 961px) and (hover: hover) {
+  .has-dropdown:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .dropdown a {
