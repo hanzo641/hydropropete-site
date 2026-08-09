@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Nettoyage fin de chantier, intérieur en rénovation">
+  <defs>
+    <linearGradient id="bgF" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#2B4D7F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bgF)"/>
+  <!-- Scaffolding-like structure -->
+  <g stroke="#94A3B8" stroke-width="10" opacity="0.55">
+    <line x1="200" y1="120" x2="200" y2="920"/>
+    <line x1="480" y1="120" x2="480" y2="920"/>
+    <line x1="760" y1="120" x2="760" y2="920"/>
+    <line x1="1040" y1="120" x2="1040" y2="920"/>
+    <line x1="1320" y1="120" x2="1320" y2="920"/>
+    <line x1="120" y1="280" x2="1400" y2="280"/>
+    <line x1="120" y1="540" x2="1400" y2="540"/>
+    <line x1="120" y1="800" x2="1400" y2="800"/>
+    <line x1="200" y1="280" x2="480" y2="540"/>
+    <line x1="760" y1="280" x2="1040" y2="540"/>
+    <line x1="480" y1="540" x2="760" y2="800"/>
+    <line x1="1040" y1="540" x2="1320" y2="800"/>
+  </g>
+  <!-- Caution diagonal stripes bottom -->
+  <g>
+    <rect x="0" y="900" width="1600" height="100" fill="#F8FAFC"/>
+    <g fill="#2B4D7F">
+      <polygon points="0,900 60,900 0,1000"/>
+      <polygon points="120,900 180,900 60,1000 0,1000"/>
+      <polygon points="240,900 300,900 180,1000 120,1000"/>
+      <polygon points="360,900 420,900 300,1000 240,1000"/>
+      <polygon points="480,900 540,900 420,1000 360,1000"/>
+      <polygon points="600,900 660,900 540,1000 480,1000"/>
+      <polygon points="720,900 780,900 660,1000 600,1000"/>
+      <polygon points="840,900 900,900 780,1000 720,1000"/>
+      <polygon points="960,900 1020,900 900,1000 840,1000"/>
+      <polygon points="1080,900 1140,900 1020,1000 960,1000"/>
+      <polygon points="1200,900 1260,900 1140,1000 1080,1000"/>
+      <polygon points="1320,900 1380,900 1260,1000 1200,1000"/>
+      <polygon points="1440,900 1500,900 1380,1000 1320,1000"/>
+      <polygon points="1560,900 1600,900 1500,1000 1440,1000"/>
+    </g>
+  </g>
+  <circle cx="1250" cy="220" r="260" fill="#5A8FD8" opacity="0.18"/>
+</svg>

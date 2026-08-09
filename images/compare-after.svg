@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Vitre impeccable après nettoyage professionnel">
+  <defs>
+    <linearGradient id="clean" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#BFDBFE"/>
+      <stop offset="50%" stop-color="#5A8FD8"/>
+      <stop offset="100%" stop-color="#2B4D7F"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="560" fill="url(#clean)"/>
+  <g stroke="#F8FAFC" stroke-width="6" opacity="0.4">
+    <line x1="0" y1="0" x2="900" y2="0"/>
+    <line x1="450" y1="0" x2="450" y2="560"/>
+    <line x1="0" y1="280" x2="900" y2="280"/>
+  </g>
+  <polygon points="0,0 500,0 200,560 0,560" fill="url(#shine)"/>
+  <text x="30" y="530" font-family="Poppins, sans-serif" font-size="26" fill="#F8FAFC">Après</text>
+</svg>

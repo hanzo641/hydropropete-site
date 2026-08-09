@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Canapé et intérieur salon moderne">
+  <defs>
+    <linearGradient id="wallC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="sofaC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3E6BA8"/>
+      <stop offset="100%" stop-color="#1E3A5F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#wallC)"/>
+  <rect x="0" y="700" width="1600" height="300" fill="#CBD5E1"/>
+  <!-- Window -->
+  <rect x="1180" y="90" width="320" height="480" rx="10" fill="#5A8FD8" opacity="0.5"/>
+  <rect x="1180" y="90" width="320" height="480" rx="10" fill="none" stroke="#0F172A" stroke-opacity="0.15" stroke-width="8"/>
+  <!-- Sofa body -->
+  <rect x="140" y="560" width="980" height="260" rx="40" fill="url(#sofaC)"/>
+  <rect x="140" y="480" width="220" height="200" rx="36" fill="url(#sofaC)"/>
+  <rect x="900" y="480" width="220" height="200" rx="36" fill="url(#sofaC)"/>
+  <rect x="200" y="620" width="260" height="140" rx="24" fill="#2B4D7F"/>
+  <rect x="480" y="620" width="260" height="140" rx="24" fill="#2B4D7F"/>
+  <rect x="760" y="620" width="260" height="140" rx="24" fill="#2B4D7F"/>
+  <circle cx="220" cy="820" r="26" fill="#0F172A" opacity="0.4"/>
+  <circle cx="1040" cy="820" r="26" fill="#0F172A" opacity="0.4"/>
+  <!-- Cushions -->
+  <rect x="260" y="500" width="140" height="120" rx="18" fill="#F8FAFC" opacity="0.9" transform="rotate(-6 330 560)"/>
+  <rect x="820" y="500" width="140" height="120" rx="18" fill="#5A8FD8" opacity="0.85" transform="rotate(5 890 560)"/>
+  <!-- Plant -->
+  <ellipse cx="1420" cy="880" rx="60" ry="24" fill="#0F172A" opacity="0.15"/>
+  <path d="M1420 860 C1400 780 1360 740 1330 700 M1420 860 C1440 770 1470 730 1500 690 M1420 860 C1420 760 1420 700 1420 660" stroke="#2B4D7F" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>

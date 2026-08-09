@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Vitre encrassée avant nettoyage">
+  <defs>
+    <linearGradient id="dirty" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#94A3B8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <filter id="grime">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.12  0 0 0 0 0.15  0 0 0 0.5 0"/>
+    </filter>
+  </defs>
+  <rect width="900" height="560" fill="url(#dirty)"/>
+  <rect width="900" height="560" filter="url(#grime)" opacity="0.55"/>
+  <g stroke="#334155" stroke-width="10" opacity="0.6">
+    <line x1="0" y1="0" x2="900" y2="0"/>
+    <line x1="450" y1="0" x2="450" y2="560"/>
+    <line x1="0" y1="280" x2="900" y2="280"/>
+  </g>
+  <text x="30" y="530" font-family="Poppins, sans-serif" font-size="26" fill="#F8FAFC" opacity="0.85">Avant</text>
+</svg>
