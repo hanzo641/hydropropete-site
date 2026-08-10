@@ -1026,8 +1026,6 @@ html.js .reveal.is-visible {
   align-items: start;
 }
 
-@media (max-width: 900px) { .contact-grid { grid-template-columns: 1fr; } }
-
 .contact-info-card {
   background: var(--color-dark);
   color: var(--color-white);
@@ -1035,6 +1033,14 @@ html.js .reveal.is-visible {
   padding: 40px;
   position: sticky;
   top: 110px;
+}
+
+@media (max-width: 900px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  /* Sticky only makes sense next to a taller scrolling column (desktop
+     2-col layout). Stacked on mobile, it would stay pinned near the top
+     while the form card scrolls up from underneath it, clipping both. */
+  .contact-info-card { position: static; }
 }
 
 .contact-info-card h3 { color: var(--color-white); margin-bottom: 8px; }
