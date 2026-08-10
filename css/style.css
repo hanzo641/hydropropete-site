@@ -1431,12 +1431,6 @@ html.js .reveal.is-visible {
   opacity: 0.88;
 }
 
-.whatsapp-float:hover {
-  opacity: 1;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
-}
-
 .whatsapp-float svg { width: 26px; height: 26px; color: var(--color-white); flex-shrink: 0; }
 
 .whatsapp-float .wa-text {
@@ -1449,8 +1443,19 @@ html.js .reveal.is-visible {
   transition: max-width 0.4s var(--ease), margin 0.4s var(--ease);
 }
 
-.whatsapp-float:hover { padding: 0 18px; width: auto; border-radius: var(--radius-full); }
-.whatsapp-float:hover .wa-text { max-width: 160px; margin-left: 10px; }
+/* Real pointer devices only: on touch screens a tap can leave :hover
+   "stuck" (iOS Safari), and since this button is anchored via right:24px,
+   any hover-triggered width change shifts its left edge — the button
+   visibly slides left/right while scrolling instead of staying put. */
+@media (hover: hover) {
+  .whatsapp-float:hover {
+    opacity: 1;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+  }
+  .whatsapp-float:hover { padding: 0 18px; width: auto; border-radius: var(--radius-full); }
+  .whatsapp-float:hover .wa-text { max-width: 160px; margin-left: 10px; }
+}
 
 /* ---------- 21b. Barre CTA sticky (mobile uniquement) ----------
    Sur mobile, l'appel et le devis sont l'action la plus courte vers la
