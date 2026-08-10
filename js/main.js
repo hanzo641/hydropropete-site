@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCompareSlider();
   initFaq();
   initContactForm();
+  initQuoteWidget();
   initYear();
 });
 
@@ -301,6 +302,47 @@ function initContactForm() {
         submitBtn.disabled = false;
         submitBtn.textContent = originalLabel;
       });
+  });
+}
+
+/* ---------- Devis instantané : sélection service -> tarif -> Calendly ---------- */
+function initQuoteWidget() {
+  const select = document.querySelector('#quote-service');
+  if (!select) return;
+
+  const result = document.querySelector('#quote-result');
+  const nameEl = document.querySelector('#quote-result-name');
+  const priceEl = document.querySelector('#quote-result-price');
+  const cta = document.querySelector('#quote-result-cta');
+
+  select.addEventListener('change', () => {
+    const opt = select.options[select.selectedIndex];
+
+    if (!opt.value) {
+      result.hidden = true;
+      return;
+    }
+
+    const isDevis = opt.dataset.price === 'devis';
+
+    nameEl.textContent = opt.dataset.name;
+    priceEl.textContent = isDevis ? 'Sur devis' : `${opt.dataset.price} €`;
+    priceEl.classList.toggle('is-devis', isDevis);
+
+    if (isDevis) {
+      cta.href = opt.dataset.url;
+      cta.target = '_self';
+      cta.removeAttribute('rel');
+      cta.textContent = 'Demander mon devis gratuit';
+    } else {
+      cta.href = 'https://calendly.com/hydroproprete';
+      cta.target = '_blank';
+      cta.setAttribute('rel', 'noopener');
+      cta.textContent = '📅 Réserver mon créneau sur Calendly';
+    }
+
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 }
 
