@@ -1,26 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Remise en état et nettoyage complet d'un logement">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Logement vide et propre, prêt à être loué ou vendu après remise en état">
   <defs>
-    <radialGradient id="burst" cx="50%" cy="45%" r="75%">
-      <stop offset="0%" stop-color="#5A8FD8"/>
-      <stop offset="55%" stop-color="#2B4D7F"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </radialGradient>
+    <linearGradient id="wallR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="floorR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+    <linearGradient id="lightR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
   </defs>
-  <rect width="1600" height="1000" fill="url(#burst)"/>
-  <g stroke="#F8FAFC" stroke-opacity="0.35" stroke-width="4" fill="none">
-    <circle cx="800" cy="480" r="160"/>
-    <circle cx="800" cy="480" r="260"/>
-    <circle cx="800" cy="480" r="360"/>
+
+  <rect width="1600" height="1000" fill="url(#wallR)"/>
+  <rect y="680" width="1600" height="320" fill="url(#floorR)"/>
+  <!-- Floor plank lines -->
+  <g stroke="#64748B" stroke-opacity="0.25" stroke-width="3">
+    <line x1="0" y1="740" x2="1600" y2="740"/>
+    <line x1="0" y1="800" x2="1600" y2="800"/>
+    <line x1="0" y1="860" x2="1600" y2="860"/>
+    <line x1="0" y1="920" x2="1600" y2="920"/>
   </g>
-  <g fill="#F8FAFC" opacity="0.9">
-    <path d="M800 300 l24 60 64 8 -48 44 14 64 -54 -34 -54 34 14 -64 -48 -44 64 -8 z"/>
+  <!-- Skirting board -->
+  <rect y="676" width="1600" height="10" fill="#94A3B8" opacity="0.6"/>
+
+  <!-- Large bright window, empty room = freshly cleaned / ready to move in -->
+  <rect x="980" y="120" width="480" height="560" rx="8" fill="#5A8FD8" opacity="0.35"/>
+  <rect x="980" y="120" width="480" height="560" rx="8" fill="none" stroke="#0F172A" stroke-opacity="0.15" stroke-width="10"/>
+  <line x1="1220" y1="120" x2="1220" y2="680" stroke="#0F172A" stroke-opacity="0.15" stroke-width="10"/>
+  <line x1="980" y1="400" x2="1460" y2="400" stroke="#0F172A" stroke-opacity="0.15" stroke-width="10"/>
+  <polygon points="1460,120 1600,80 1600,700 1460,680" fill="#0F172A" opacity="0.06"/>
+
+  <!-- Light streaming across the empty floor -->
+  <polygon points="980,120 1460,120 1300,1000 700,1000" fill="url(#lightR)"/>
+
+  <!-- Cleaning supplies left by the door: bucket + mop, a nod to the "just finished" state -->
+  <g transform="translate(230,760)">
+    <ellipse cx="0" cy="130" rx="70" ry="16" fill="#0F172A" opacity="0.12"/>
+    <path d="M-52 40 h104 l-14 90 a10 10 0 0 1-10 8 h-56 a10 10 0 0 1-10-8 z" fill="#2B4D7F"/>
+    <rect x="-52" y="28" width="104" height="18" rx="9" fill="#3E6BA8"/>
+    <path d="M-40 30 q40-36 80 0" stroke="#3E6BA8" stroke-width="8" fill="none" stroke-linecap="round"/>
   </g>
-  <g fill="#FFFFFF" opacity="0.6">
-    <circle cx="420" cy="220" r="8"/>
-    <circle cx="1180" cy="260" r="6"/>
-    <circle cx="1250" cy="700" r="9"/>
-    <circle cx="360" cy="740" r="6"/>
-    <circle cx="1100" cy="820" r="5"/>
-    <circle cx="500" cy="860" r="7"/>
+  <g transform="translate(340,700)">
+    <line x1="0" y1="0" x2="24" y2="220" stroke="#94A3B8" stroke-width="10" stroke-linecap="round"/>
+    <path d="M-6 200 q6 40 12 0 q6 40 12 0 q6 40 12 0" stroke="#F8FAFC" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/>
+  </g>
+
+  <!-- Small potted plant for warmth -->
+  <g transform="translate(1360,860)">
+    <ellipse cx="0" cy="60" rx="50" ry="14" fill="#0F172A" opacity="0.12"/>
+    <path d="M-30 60 l10-80 h40 l10 80 z" fill="#1E3A5F"/>
+    <path d="M0 -20 C-24 -60 -34 -90 -40 -120 M0 -20 C10 -66 30 -96 50 -120 M0 -20 C0 -70 0 -100 0 -130" stroke="#2B4D7F" stroke-width="9" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sparkle accents suggesting a freshly cleaned space -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <path d="M700 260c0 12-10 22-22 22s-22-10-22-22c0-12 22-40 22-40s22 28 22 40z"/>
+    <path d="M560 340c0 8-7 15-15 15s-15-7-15-15c0-8 15-27 15-27s15 19 15 27z"/>
   </g>
 </svg>
