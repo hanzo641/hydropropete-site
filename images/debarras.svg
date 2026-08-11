@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Débarras de logement, cartons et mobilier évacués par HydroPropreté">
+  <defs>
+    <linearGradient id="bgD" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#2B4D7F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bgD)"/>
+
+  <circle cx="1280" cy="240" r="280" fill="#5A8FD8" opacity="0.16"/>
+  <circle cx="260" cy="820" r="220" fill="#5A8FD8" opacity="0.12"/>
+
+  <!-- Stack of moving boxes -->
+  <g>
+    <rect x="520" y="560" width="260" height="220" rx="10" fill="#F8FAFC" opacity="0.92"/>
+    <line x1="520" y1="670" x2="780" y2="670" stroke="#2B4D7F" stroke-width="8" opacity="0.5"/>
+    <line x1="650" y1="560" x2="650" y2="670" stroke="#2B4D7F" stroke-width="8" opacity="0.5"/>
+
+    <rect x="800" y="480" width="240" height="300" rx="10" fill="#F8FAFC"/>
+    <line x1="800" y1="600" x2="1040" y2="600" stroke="#2B4D7F" stroke-width="8" opacity="0.5"/>
+    <line x1="920" y1="480" x2="920" y2="600" stroke="#2B4D7F" stroke-width="8" opacity="0.5"/>
+
+    <rect x="600" y="360" width="200" height="200" rx="10" fill="#5A8FD8" opacity="0.9"/>
+    <line x1="600" y1="460" x2="800" y2="460" stroke="#0F172A" stroke-width="8" opacity="0.4"/>
+    <line x1="700" y1="360" x2="700" y2="460" stroke="#0F172A" stroke-width="8" opacity="0.4"/>
+  </g>
+
+  <!-- Hand truck / dolly silhouette -->
+  <g stroke="#F8FAFC" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.85">
+    <line x1="420" y1="820" x2="420" y2="480"/>
+    <line x1="420" y1="480" x2="500" y2="480"/>
+    <line x1="420" y1="700" x2="500" y2="700"/>
+  </g>
+  <circle cx="420" cy="860" r="34" fill="#F8FAFC" opacity="0.85"/>
+  <circle cx="500" cy="860" r="34" fill="#F8FAFC" opacity="0.85"/>
+
+  <!-- Outward arrow (clearing / moving out) -->
+  <g fill="#F8FAFC" opacity="0.75">
+    <path d="M1120 700 h180 v-40 l120 80 -120 80 v-40 h-180 z"/>
+  </g>
+
+  <g fill="#FFFFFF" opacity="0.6">
+    <circle cx="360" cy="220" r="8"/>
+    <circle cx="1180" cy="820" r="6"/>
+    <circle cx="1300" cy="560" r="9"/>
+    <circle cx="240" cy="500" r="6"/>
+  </g>
+</svg>

@@ -822,6 +822,14 @@ html.js .reveal.is-visible {
   color: var(--color-text-muted);
 }
 
+.price-value .price-prefix {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
 .price-card p { color: var(--color-text-muted); font-size: 0.9rem; }
 
 .price-card .btn { margin-top: auto; }
