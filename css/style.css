@@ -1475,54 +1475,10 @@ html.js .reveal.is-visible {
 .footer-bottom-links { display: flex; gap: 20px; }
 .footer-bottom-links a:hover { color: var(--color-white); }
 
-/* ---------- 21. WhatsApp floating button ---------- */
-.whatsapp-float {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 900;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #25D366;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
-  transition: transform 0.3s var(--ease), width 0.3s var(--ease), border-radius 0.3s var(--ease), box-shadow .3s var(--ease);
-  opacity: 0.88;
-}
-
-.whatsapp-float svg { width: 26px; height: 26px; color: var(--color-white); flex-shrink: 0; }
-
-.whatsapp-float .wa-text {
-  max-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--color-white);
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: max-width 0.4s var(--ease), margin 0.4s var(--ease);
-}
-
-/* Real pointer devices only: on touch screens a tap can leave :hover
-   "stuck" (iOS Safari), and since this button is anchored via right:24px,
-   any hover-triggered width change shifts its left edge — the button
-   visibly slides left/right while scrolling instead of staying put. */
-@media (hover: hover) {
-  .whatsapp-float:hover {
-    opacity: 1;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
-  }
-  .whatsapp-float:hover { padding: 0 18px; width: auto; border-radius: var(--radius-full); }
-  .whatsapp-float:hover .wa-text { max-width: 160px; margin-left: 10px; }
-}
-
 /* ---------- 21a. Devis instantané floating button ---------- */
 .quote-float {
   position: fixed;
-  bottom: 88px;
+  bottom: 24px;
   right: 24px;
   z-index: 900;
   height: 52px;
@@ -1581,8 +1537,7 @@ html.js .reveal.is-visible {
 
   .mobile-cta-bar .btn { flex: 1; padding: 13px 16px; font-size: 0.9rem; }
 
-  .whatsapp-float { bottom: 86px; }
-  .quote-float { bottom: 150px; }
+  .quote-float { bottom: 86px; }
 }
 
 /* ---------- 22. Legal pages ---------- */
