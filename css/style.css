@@ -1525,28 +1525,25 @@ html.js .reveal.is-visible {
   bottom: 88px;
   right: 24px;
   z-index: 900;
-  width: 52px;
   height: 52px;
-  border-radius: 50%;
+  padding: 0 20px;
+  border-radius: var(--radius-full);
   background: var(--gradient-primary);
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 9px;
   box-shadow: 0 8px 24px rgba(43, 77, 127, 0.4);
-  transition: transform 0.3s var(--ease), width 0.3s var(--ease), border-radius 0.3s var(--ease), box-shadow .3s var(--ease);
-  opacity: 0.88;
+  transition: transform 0.3s var(--ease), box-shadow .3s var(--ease);
+  opacity: 0.95;
 }
 
-.quote-float svg { width: 24px; height: 24px; color: var(--color-white); flex-shrink: 0; }
+.quote-float svg { width: 21px; height: 21px; color: var(--color-white); flex-shrink: 0; }
 
 .quote-float .quote-float-text {
-  max-width: 0;
-  overflow: hidden;
   white-space: nowrap;
   color: var(--color-white);
   font-size: 0.85rem;
   font-weight: 600;
-  transition: max-width 0.4s var(--ease), margin 0.4s var(--ease);
 }
 
 @media (hover: hover) {
@@ -1555,8 +1552,6 @@ html.js .reveal.is-visible {
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(43, 77, 127, 0.5);
   }
-  .quote-float:hover { padding: 0 18px; width: auto; border-radius: var(--radius-full); }
-  .quote-float:hover .quote-float-text { max-width: 160px; margin-left: 10px; }
 }
 
 /* ---------- 21b. Barre CTA sticky (mobile uniquement) ----------
