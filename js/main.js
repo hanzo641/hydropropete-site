@@ -333,12 +333,12 @@ function initQuoteWidget() {
       cta.href = opt.dataset.url;
       cta.target = '_self';
       cta.removeAttribute('rel');
-      cta.textContent = 'Demander mon devis gratuit';
+      cta.textContent = 'Demander un devis';
     } else {
       cta.href = 'https://calendly.com/hydroproprete';
       cta.target = '_blank';
       cta.setAttribute('rel', 'noopener');
-      cta.textContent = '📅 Réserver mon créneau sur Calendly';
+      cta.textContent = '📅 Réserver mon créneau';
     }
 
     result.hidden = false;

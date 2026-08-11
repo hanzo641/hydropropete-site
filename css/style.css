@@ -270,7 +270,7 @@ h1, h2, h3, h4 {
   transform: translateY(-3px);
 }
 
-.btn-block { width: 100%; }
+.btn-block { width: 100%; white-space: normal; }
 .btn-sm { padding: 12px 24px; font-size: 0.9rem; }
 
 /* ---------- 5. Header ---------- */
