@@ -1,0 +1,17 @@
+# Redirections 301 depuis l'ancien site www.hydroproprete.fr vers la refonte.
+# À utiliser lors de la bascule du domaine sur Cloudflare Pages, pour
+# préserver le référencement acquis en 2 ans (ne pas supprimer ce fichier
+# avant la mise en ligne définitive).
+
+/nettoyage-de-canape-a-pau        /pages/nettoyage-canape-pau.html      301
+/nettoyage-de-tapis-a-pau         /pages/nettoyage-tapis-pau.html       301
+/nettoyage-de-matelas-a-pau       /pages/nettoyage-canape-pau.html      301
+/nettoyage-de-vitre-a-pau         /pages/nettoyage-vitres-pau.html      301
+/nettoyage-de-voiture-a-domicile-a-pau  /pages/nettoyage-voiture-pau.html  301
+/nettoyage-de-terrasse-a-pau      /pages/nettoyage-terrasse-pau.html    301
+/nettoyage-fin-de-chantier-a-pau  /pages/fin-de-chantier-pau.html       301
+/remise-en-etat-logement          /pages/remise-en-etat-pau.html        301
+/nettoyage-copropriete            /pages/nettoyage-copropriete-pau.html 301
+/devis                            /contact.html                         301
+/mentions-legales                 /mentions-legales.html                301
+/politique-de-confidentialite     /politique-confidentialite.html       301

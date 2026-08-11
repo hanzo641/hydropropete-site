@@ -834,6 +834,33 @@ html.js .reveal.is-visible {
 
 .price-card .btn { margin-top: auto; }
 
+/* ---------- 10b-2. Crédit d'impôt 50% ---------- */
+.tax-credit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(22, 163, 74, 0.12);
+  color: #0E6B34;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.tax-credit-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.tax-credit-box {
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin: 32px 0;
+}
+
+.tax-credit-box h2 { margin-top: 0; color: #0E6B34; }
+.tax-credit-box p:last-child { margin-bottom: 0; }
+
 /* ---------- 10c. Devis instantané (widget interactif) ---------- */
 .quote-widget {
   max-width: 560px;
