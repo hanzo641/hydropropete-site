@@ -272,6 +272,7 @@ h1, h2, h3, h4 {
 
 .btn-block { width: 100%; white-space: normal; }
 .btn-sm { padding: 12px 24px; font-size: 0.9rem; }
+.btn-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* ---------- 5. Header ---------- */
 .header {
