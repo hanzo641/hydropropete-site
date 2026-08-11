@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initQuoteWidget();
   initYear();
   initAnalytics();
+  initCookieConsent();
 });
 
 /* ---------- Header: shrink + blur on scroll ---------- */
@@ -377,5 +378,116 @@ function initAnalytics() {
     } else if (link.classList.contains('quote-float')) {
       trackEvent('quote_widget_open');
     }
+  });
+}
+
+/* ---------- Consentement cookies (RGPD) : Google Analytics chargé
+   uniquement après acceptation, révocable à tout moment ---------- */
+const GA_MEASUREMENT_ID = 'G-MCPEFWEEMG';
+const COOKIE_CONSENT_KEY = 'hp_cookie_consent';
+const COOKIE_CONSENT_DAYS = 182;
+
+function getStoredConsent() {
+  try {
+    const raw = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data.expires || Date.now() > data.expires) return null;
+    return data.value;
+  } catch (e) {
+    return null;
+  }
+}
+
+function storeConsent(value) {
+  try {
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({
+      value,
+      expires: Date.now() + COOKIE_CONSENT_DAYS * 86400000,
+    }));
+  } catch (e) {
+    // Stockage indisponible (navigation privée stricte) : le choix ne sera
+    // simplement pas mémorisé d'une visite à l'autre.
+  }
+}
+
+function deleteGoogleAnalyticsCookies() {
+  document.cookie.split(';').forEach((entry) => {
+    const name = entry.split('=')[0].trim();
+    if (name.indexOf('_ga') === 0) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    }
+  });
+}
+
+function enableGoogleAnalytics() {
+  window[`ga-disable-${GA_MEASUREMENT_ID}`] = false;
+  if (window.gaLoaded) return;
+  window.gaLoaded = true;
+
+  ['https://www.googletagmanager.com', 'https://www.google-analytics.com'].forEach((origin) => {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = origin;
+    document.head.appendChild(link);
+  });
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID);
+}
+
+function disableGoogleAnalytics() {
+  window[`ga-disable-${GA_MEASUREMENT_ID}`] = true;
+  deleteGoogleAnalyticsCookies();
+}
+
+function initCookieConsent() {
+  const banner = document.querySelector('#cookie-banner');
+  const acceptBtn = document.querySelector('#cookie-accept');
+  const refuseBtn = document.querySelector('#cookie-refuse');
+  if (!banner || !acceptBtn || !refuseBtn) return;
+
+  const showBanner = () => {
+    banner.hidden = false;
+    document.body.classList.add('has-cookie-banner');
+  };
+  const hideBanner = () => {
+    banner.hidden = true;
+    document.body.classList.remove('has-cookie-banner');
+  };
+
+  const consent = getStoredConsent();
+  if (consent === 'accepted') {
+    enableGoogleAnalytics();
+  } else if (consent === 'refused') {
+    disableGoogleAnalytics();
+  } else {
+    showBanner();
+  }
+
+  acceptBtn.addEventListener('click', () => {
+    storeConsent('accepted');
+    enableGoogleAnalytics();
+    hideBanner();
+  });
+
+  refuseBtn.addEventListener('click', () => {
+    storeConsent('refused');
+    disableGoogleAnalytics();
+    hideBanner();
+  });
+
+  document.querySelectorAll('[data-cookie-manage]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      showBanner();
+    });
   });
 }

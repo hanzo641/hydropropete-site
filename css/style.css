@@ -1511,6 +1511,45 @@ html.js .reveal.is-visible {
   }
 }
 
+/* ---------- 21c. Bandeau de consentement cookies ---------- */
+.cookie-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cookie-banner[hidden] { display: none; }
+
+.cookie-banner p {
+  flex: 1 1 280px;
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.cookie-banner p a { color: var(--color-primary); font-weight: 600; }
+
+.cookie-banner-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+body.has-cookie-banner .quote-float { display: none; }
+
+@media (max-width: 640px) {
+  .cookie-banner { left: 12px; right: 12px; bottom: 12px; padding: 18px 20px; flex-direction: column; align-items: stretch; }
+  .cookie-banner-actions .btn { flex: 1; }
+}
 
 /* ---------- 22. Legal pages ---------- */
 .legal-content h2 { margin-top: 40px; }
