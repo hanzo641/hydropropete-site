@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initQuoteWidget();
   initYear();
+  initAnalytics();
 });
 
 /* ---------- Header: shrink + blur on scroll ---------- */
@@ -290,6 +291,7 @@ function initContactForm() {
         form.reset();
         form.style.display = 'none';
         if (successBox) successBox.classList.add('is-visible');
+        trackEvent('generate_lead', { method: 'contact_form' });
       })
       .catch(() => {
         // Fallback: even if the AJAX post fails (e.g. static preview without
@@ -343,6 +345,11 @@ function initQuoteWidget() {
 
     result.hidden = false;
     result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    trackEvent('quote_widget_select', {
+      service_name: opt.dataset.name,
+      price: isDevis ? 'devis' : opt.dataset.price,
+    });
   });
 }
 
@@ -350,5 +357,25 @@ function initQuoteWidget() {
 function initYear() {
   document.querySelectorAll('[data-year]').forEach((el) => {
     el.textContent = new Date().getFullYear();
+  });
+}
+
+/* ---------- Analytics : suivi des actions de conversion (GA4) ---------- */
+function trackEvent(name, params) {
+  if (typeof gtag === 'function') gtag('event', name, params || {});
+}
+
+function initAnalytics() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+
+    if (link.href.startsWith('tel:')) {
+      trackEvent('phone_call_click');
+    } else if (link.href.includes('calendly.com')) {
+      trackEvent('generate_lead', { method: 'calendly' });
+    } else if (link.classList.contains('quote-float')) {
+      trackEvent('quote_widget_open');
+    }
   });
 }
