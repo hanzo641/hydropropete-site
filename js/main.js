@@ -229,12 +229,13 @@ function initFaq() {
   });
 }
 
-/* ---------- Contact form: validation + AJAX submit (Netlify Forms) ---------- */
+/* ---------- Contact form: validation + AJAX submit (Web3Forms) ---------- */
 function initContactForm() {
   const form = document.querySelector('#contact-form');
   if (!form) return;
 
   const successBox = document.querySelector('#form-success');
+  const errorBox = document.querySelector('#form-submit-error');
 
   const validators = {
     name: (v) => v.trim().length >= 2,
@@ -280,26 +281,25 @@ function initContactForm() {
     const originalLabel = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Envoi en cours...';
+    if (errorBox) errorBox.classList.remove('is-visible');
 
     const formData = new FormData(form);
 
-    fetch('/', {
+    fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString(),
+      headers: { Accept: 'application/json' },
+      body: formData,
     })
-      .then(() => {
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.success) throw new Error(data.message || 'Web3Forms submission failed');
         form.reset();
         form.style.display = 'none';
         if (successBox) successBox.classList.add('is-visible');
         trackEvent('generate_lead', { method: 'contact_form' });
       })
       .catch(() => {
-        // Fallback: even if the AJAX post fails (e.g. static preview without
-        // Netlify Forms backend), reassure the user their request was captured.
-        form.reset();
-        form.style.display = 'none';
-        if (successBox) successBox.classList.add('is-visible');
+        if (errorBox) errorBox.classList.add('is-visible');
       })
       .finally(() => {
         submitBtn.disabled = false;

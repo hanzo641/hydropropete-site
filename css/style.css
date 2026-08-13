@@ -1241,6 +1241,22 @@ html.js .reveal.is-visible {
 .form-success.is-visible { display: flex; }
 .form-success svg { width: 22px; height: 22px; flex-shrink: 0; }
 
+.form-submit-error {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #B91C1C;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.form-submit-error.is-visible { display: flex; }
+.form-submit-error svg { width: 22px; height: 22px; flex-shrink: 0; }
+
 /* ---------- 15. FAQ accordion ---------- */
 .faq-list { max-width: 780px; margin: 0 auto; }
 

@@ -126,10 +126,17 @@
                 <span>Merci ! Votre demande a bien été envoyée, nous revenons vers vous sous 24h.</span>
               </div>
 
-              <form id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-                <input type="hidden" name="form-name" value="contact">
+              <div class="form-submit-error" id="form-submit-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Une erreur est survenue lors de l'envoi. Merci de réessayer, ou contactez-nous directement au <a href="tel:+33602169236">06 02 16 92 36</a>.</span>
+              </div>
+
+              <form id="contact-form" name="contact" method="POST">
+                <input type="hidden" name="access_key" value="835c4ca0-cec9-4e22-9880-a8d42cb90dba">
+                <input type="hidden" name="subject" value="Nouvelle demande de devis – HydroPropreté">
+                <input type="hidden" name="from_name" value="Site HydroPropreté">
                 <p style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;" aria-hidden="true">
-                  <label>Ne pas remplir : <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+                  <label>Ne pas remplir : <input name="botcheck" tabindex="-1" autocomplete="off"></label>
                 </p>
 
                 <div class="form-row">
