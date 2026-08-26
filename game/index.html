@@ -106,8 +106,9 @@
     <h2>Comment jouer</h2>
     <ul class="how-list">
       <li>Touche deux tuiles <strong>adjacentes</strong> pour les échanger et former une ligne de 3 ou plus</li>
+      <li><strong>Chaque Étage</strong> a un objectif d'or à atteindre avant d'être à court de coups — réussi, tu passes à l'Étage suivant (plus dur) ; raté, tu retentes le même</li>
       <li><strong>💰 Éclats d'Or</strong> rapportent de l'or, <strong>✦ Runes</strong> de l'XP, <strong>🌿 Sève</strong> soigne tes PV</li>
-      <li><strong>🔥 Braises</strong> attaquent le Gardien en Faille (ou rapportent un peu d'or en partie libre)</li>
+      <li><strong>🔥 Braises</strong> attaquent le Gardien en Faille (ou rapportent un peu d'or à l'Étage)</li>
       <li>Aligne des <strong>Ombres</strong> : tous les 5, ton Armée d'Ombres intercepte gratuitement le prochain coup du Gardien</li>
       <li>Une chute qui recrée un alignement déclenche un <strong>combo</strong> : les gains sont multipliés à chaque cascade</li>
       <li>En Faille, le Gardien frappe après un nombre de coups fixe — surveille le compte à rebours affiché au-dessus du plateau</li>
@@ -123,9 +124,10 @@
     <button id="quitBtn" class="btn btn-ghost">Quitter</button>
   </div>
 
-  <!-- Game Over (partie libre) -->
+  <!-- Game Over (Étage raté) -->
   <div id="gameOverScreen" class="screen overlay hidden">
-    <h2>Plus aucun coup disponible</h2>
+    <h2>Objectif manqué</h2>
+    <p id="gameOverMsg" class="subtitle"></p>
     <div class="result-grid">
       <div><span>Combo (partie)</span><strong id="resDistance">×0</strong></div>
       <div><span>Or gagné</span><strong id="resGold">0</strong></div>
@@ -146,6 +148,18 @@
     </div>
     <button id="dungeonRetryBtn" class="btn btn-primary">Retour aux Failles</button>
     <button id="dungeonMenuBtn" class="btn btn-ghost">Menu</button>
+  </div>
+
+  <!-- Étage réussi -->
+  <div id="floorWinScreen" class="screen overlay hidden">
+    <h2>Étage <span id="floorWinNumber">1</span> conquis !</h2>
+    <p class="subtitle">Objectif atteint : <span id="floorWinGoal">50</span> 💰 récoltés.</p>
+    <div class="result-grid">
+      <div><span>Or gagné</span><strong id="floorWinGold">0</strong></div>
+      <div><span>XP gagnée</span><strong id="floorWinXp">0</strong></div>
+    </div>
+    <button id="floorNextBtn" class="btn btn-primary">Étage suivant</button>
+    <button id="floorMenuBtn" class="btn btn-ghost">Menu</button>
   </div>
 </div>
 

@@ -18,7 +18,10 @@
   const TILE_TYPES = ["rune", "gold", "ember", "sap", "shadow", "crystal"];
   const SAVE_KEY = "echoRoyaumeSave_v1";
   const SHADOW_THRESHOLD = 5; // tuiles d'Ombre alignées avant que l'Armée d'Ombres se lève
-  const ENDLESS_BASE_MOVES = 22;
+  const FLOOR_BASE_MOVES = 22;
+
+  function floorGoal(n) { return 50 + (n - 1) * 20; }
+  function floorMoves(n) { return Math.max(14, FLOOR_BASE_MOVES - Math.floor((n - 1) / 3)); }
 
   const SWAP_MS = 180;
   const NUDGE_MS = 200;
@@ -90,6 +93,7 @@
       xp: 0,
       totalGold: 0,
       bestCombo: 0,
+      currentFloor: 1,
       upgrades: { hp: 0, power: 0, moves: 0, revive: 0 },
       stravaLastActivityId: null,
       realDistanceKm: 0,
@@ -255,10 +259,12 @@
   }
 
   function newRun(dungeonTier) {
-    const movesTotal = (dungeonTier ? dungeonTier.moves : ENDLESS_BASE_MOVES) + save.upgrades.moves * 2;
+    const movesTotal = (dungeonTier ? dungeonTier.moves : floorMoves(save.currentFloor)) + save.upgrades.moves * 2;
     return {
-      mode: dungeonTier ? "dungeon" : "endless",
+      mode: dungeonTier ? "dungeon" : "floor",
       tier: dungeonTier || null,
+      floor: dungeonTier ? null : save.currentFloor,
+      goalGold: dungeonTier ? null : floorGoal(save.currentFloor),
       maxHp: maxHpFromSave(),
       hp: maxHpFromSave(),
       gold: 0,
@@ -636,9 +642,14 @@
       if (run.hp <= 0) { finishDungeon(false); return; }
     }
 
+    if (run.mode === "floor" && run.goalGold != null && run.gold >= run.goalGold) {
+      finishFloor(true);
+      return;
+    }
+
     if (run.movesLeft <= 0) {
       if (run.mode === "dungeon") finishDungeon(false);
-      else endRun();
+      else finishFloor(false);
       return;
     }
 
@@ -1053,9 +1064,11 @@
     if (!run) return;
     hpFill.style.width = `${Math.max(0, (run.hp / run.maxHp) * 100)}%`;
     xpFill.style.width = `${Math.min(100, (save.xp / xpToNext(save.level)) * 100)}%`;
-    hudLevel.textContent = `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
+    hudLevel.textContent = run.mode === "floor"
+      ? `Étage ${run.floor} · Rang ${rankForLevel(save.level)}`
+      : `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
     hudMoves.textContent = `🎯 ${run.movesLeft}/${run.movesTotal}`;
-    hudGold.textContent = `💰 ${run.gold}`;
+    hudGold.textContent = run.goalGold != null ? `💰 ${run.gold}/${run.goalGold}` : `💰 ${run.gold}`;
 
     const bossBarEl = document.getElementById("bossBar");
     if (run.mode === "dungeon" && run.boss) {
@@ -1093,6 +1106,7 @@
     pause: document.getElementById("pauseScreen"),
     gameover: document.getElementById("gameOverScreen"),
     dungeonresult: document.getElementById("dungeonResultScreen"),
+    floorwin: document.getElementById("floorWinScreen"),
   };
   const hud = document.getElementById("hud");
 
@@ -1108,6 +1122,7 @@
     document.getElementById("menuBest").textContent = `×${save.bestCombo}`;
     document.getElementById("menuGold").textContent = `💰 ${save.totalGold}`;
     document.getElementById("menuKeys").textContent = `🔑 ${save.dungeonKeys}`;
+    document.getElementById("playBtn").textContent = `Jouer — Étage ${save.currentFloor}`;
 
     const q = save.dailyQuest;
     document.getElementById("questDesc").textContent = q.completed
@@ -1292,22 +1307,33 @@
     }
   }
 
-  function endRun() {
+  function finishFloor(victory) {
     if (gameState !== "playing") return;
     gameState = "gameover";
     save.totalGold += run.gold;
     save.bestCombo = Math.max(save.bestCombo, run.bestCombo);
+    if (victory) save.currentFloor += 1;
     persist();
     window.GameAudio && window.GameAudio.stopAmbient();
-    sfx("defeat");
+    sfx(victory ? "victory" : "defeat");
 
-    document.getElementById("resDistance").textContent = `×${run.bestCombo}`;
-    document.getElementById("resGold").textContent = `${run.gold}`;
-    document.getElementById("resXp").textContent = `${run.xpGained}`;
-    document.getElementById("resBest").textContent = `×${save.bestCombo}`;
-
-    hud.classList.add("hidden");
-    showScreen("gameover");
+    if (victory) {
+      document.getElementById("floorWinNumber").textContent = `${run.floor}`;
+      document.getElementById("floorWinGoal").textContent = `${run.goalGold}`;
+      document.getElementById("floorWinGold").textContent = `${run.gold}`;
+      document.getElementById("floorWinXp").textContent = `${run.xpGained}`;
+      hud.classList.add("hidden");
+      showScreen("floorwin");
+    } else {
+      document.getElementById("resDistance").textContent = `×${run.bestCombo}`;
+      document.getElementById("resGold").textContent = `${run.gold}`;
+      document.getElementById("resXp").textContent = `${run.xpGained}`;
+      document.getElementById("resBest").textContent = `×${save.bestCombo}`;
+      document.getElementById("gameOverMsg").textContent =
+        `Objectif : ${run.goalGold} 💰 — tu en as récolté ${run.gold}. Retente ta chance !`;
+      hud.classList.add("hidden");
+      showScreen("gameover");
+    }
   }
 
   function finishDungeon(victory) {
@@ -1454,6 +1480,8 @@
   document.getElementById("menuBtn").addEventListener("click", goMenu);
   document.getElementById("dungeonRetryBtn").addEventListener("click", () => { renderDungeonScreen(); showScreen("dungeon"); });
   document.getElementById("dungeonMenuBtn").addEventListener("click", goMenu);
+  document.getElementById("floorNextBtn").addEventListener("click", () => startRun());
+  document.getElementById("floorMenuBtn").addEventListener("click", goMenu);
 
   document.getElementById("stravaConnectBtn").addEventListener("click", () => window.StravaSync && window.StravaSync.connect());
   document.getElementById("stravaSyncBtn").addEventListener("click", handleStravaSync);
