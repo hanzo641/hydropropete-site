@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0d1224">
 <title>Le Système — Ascension du Chasseur</title>
-<meta name="description" content="Mini-jeu mobile : un Système t'éveille en Chasseur. Cours, combats, monte en rang et affronte des Failles jouables directement dans le navigateur.">
+<meta name="description" content="Mini-jeu mobile : un Système t'éveille en Chasseur. Aligne les éclats de la Faille, monte en rang et affronte des Gardiens jouables directement dans le navigateur.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../css/game.css">
@@ -33,36 +33,26 @@
     </div>
     <div class="hud-stats">
       <span id="hudLevel">Rang E · Nv 1</span>
-      <span id="hudDistance">0 m</span>
+      <span id="hudMoves">🎯 0/0</span>
       <span id="hudGold">💰 0</span>
-    </div>
-    <div id="dungeonProgress" class="hud-dungeon hidden">
-      <div class="bar"><div id="dungeonFill" class="bar-fill dungeon"></div></div>
     </div>
   </div>
 
   <div id="bossBar" class="boss-bar hidden">
     <span id="bossName">Gardien de la Faille</span>
     <div class="bar"><div id="bossFill" class="bar-fill boss"></div></div>
+    <span id="bossStrikeInfo" class="boss-strike-info">Prochain coup dans 4 coup(s)</span>
   </div>
 
   <div id="toast" class="toast hidden"></div>
 
-  <!-- Contrôles tactiles -->
-  <div id="controls" class="hidden">
-    <button id="btnLeft" class="ctrl-btn" aria-label="Voie de gauche">◀</button>
-    <button id="btnJump" class="ctrl-btn ctrl-jump" aria-label="Sauter">▲</button>
-    <button id="btnAttack" class="ctrl-btn ctrl-attack" aria-label="Attaquer">⚔</button>
-    <button id="btnRight" class="ctrl-btn" aria-label="Voie de droite">▶</button>
-  </div>
-
   <!-- Menu principal -->
   <div id="menuScreen" class="screen">
     <h1>LE SYSTÈME</h1>
-    <p class="subtitle">Une Faille s'est ouverte en toi. Deviens Chasseur.</p>
+    <p class="subtitle">Aligne les éclats de la Faille. Deviens Chasseur.</p>
     <div class="menu-stats">
       <div><strong id="menuLevel">Rang E · Nv 1</strong><span>Chasseur</span></div>
-      <div><strong id="menuBest">0 m</strong><span>Meilleure distance</span></div>
+      <div><strong id="menuBest">×0</strong><span>Meilleur combo</span></div>
       <div><strong id="menuGold">💰 0</strong><span>Or</span></div>
       <div><strong id="menuKeys">🔑 0</strong><span>Clés de Faille</span></div>
     </div>
@@ -115,14 +105,13 @@
   <div id="howScreen" class="screen hidden">
     <h2>Comment jouer</h2>
     <ul class="how-list">
-      <li><strong>Glisser gauche / droite</strong> (ou ◀ ▶) : changer de voie</li>
-      <li><strong>Glisser haut</strong> (ou ▲) : sauter par-dessus rochers et monstres</li>
-      <li><strong>Glisser bas</strong> (ou ⚔) : attaquer un monstre dans votre voie pour gagner XP + or</li>
-      <li>Ramassez <strong>pièces</strong> et <strong>gemmes</strong>, évitez les rochers</li>
-      <li>Tous les <strong>5 monstres vaincus</strong>, ton Armée d'Ombres se lève et détruit automatiquement le prochain danger</li>
-      <li>Ton <strong>Rang de Chasseur</strong> (E → S) monte avec ton niveau</li>
-      <li>La <strong>Quête du Système</strong> se remplit avec tes vraies courses Strava et rapporte des Clés de Faille</li>
-      <li>Utilise ces clés pour affronter une <strong>Faille</strong> : plus le rang est élevé, plus le Gardien final est dangereux — et plus le butin est gros</li>
+      <li>Touche deux tuiles <strong>adjacentes</strong> pour les échanger et former une ligne de 3 ou plus</li>
+      <li><strong>💰 Éclats d'Or</strong> rapportent de l'or, <strong>✦ Runes</strong> de l'XP, <strong>🌿 Sève</strong> soigne tes PV</li>
+      <li><strong>🔥 Braises</strong> attaquent le Gardien en Faille (ou rapportent un peu d'or en partie libre)</li>
+      <li>Aligne des <strong>Ombres</strong> : tous les 5, ton Armée d'Ombres intercepte gratuitement le prochain coup du Gardien</li>
+      <li>Une chute qui recrée un alignement déclenche un <strong>combo</strong> : les gains sont multipliés à chaque cascade</li>
+      <li>En Faille, le Gardien frappe après un nombre de coups fixe — surveille le compte à rebours affiché au-dessus du plateau</li>
+      <li>Ton <strong>Rang de Chasseur</strong> (E → S) monte avec ton niveau ; la Quête du Système (liée à Strava) rapporte des Clés de Faille</li>
     </ul>
     <button id="howBackBtn" class="btn btn-ghost">Retour</button>
   </div>
@@ -134,14 +123,14 @@
     <button id="quitBtn" class="btn btn-ghost">Quitter</button>
   </div>
 
-  <!-- Game Over (mode libre) -->
+  <!-- Game Over (partie libre) -->
   <div id="gameOverScreen" class="screen overlay hidden">
-    <h2>Vous êtes tombé au combat</h2>
+    <h2>Plus aucun coup disponible</h2>
     <div class="result-grid">
-      <div><span>Distance</span><strong id="resDistance">0 m</strong></div>
+      <div><span>Combo (partie)</span><strong id="resDistance">×0</strong></div>
       <div><span>Or gagné</span><strong id="resGold">0</strong></div>
       <div><span>XP gagnée</span><strong id="resXp">0</strong></div>
-      <div><span>Meilleure distance</span><strong id="resBest">0 m</strong></div>
+      <div><span>Meilleur combo</span><strong id="resBest">×0</strong></div>
     </div>
     <button id="retryBtn" class="btn btn-primary">Rejouer</button>
     <button id="menuBtn" class="btn btn-ghost">Menu</button>

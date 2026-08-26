@@ -86,6 +86,10 @@
       tone({ freq: 130, glideTo: 70, type: "sawtooth", duration: 0.22, gain: 0.18 });
     },
     coin: () => tone({ freq: 880, glideTo: 1320, type: "square", duration: 0.09, gain: 0.13 }),
+    rune: () => {
+      tone({ freq: 740, type: "triangle", duration: 0.1, gain: 0.14 });
+      tone({ freq: 988, type: "triangle", duration: 0.12, gain: 0.11, delay: 0.04 });
+    },
     gem: () => {
       tone({ freq: 1046, type: "triangle", duration: 0.12, gain: 0.15 });
       tone({ freq: 1568, type: "triangle", duration: 0.14, gain: 0.11, delay: 0.05 });
