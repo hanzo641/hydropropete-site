@@ -106,12 +106,12 @@
     <h2>Comment jouer</h2>
     <ul class="how-list">
       <li><strong>Glisse une tuile</strong> vers une case adjacente pour l'échanger (ou touche-la puis touche sa voisine) et former une ligne de 3 ou plus</li>
-      <li><strong>Chaque Étage</strong> a un objectif d'or à atteindre avant d'être à court de coups — réussi, tu passes à l'Étage suivant (plus dur) ; raté, tu retentes le même</li>
+      <li><strong>Chaque Étage</strong> oppose un monstre à vaincre avant d'être à court de coups — réussi, tu passes à l'Étage suivant (plus fort) ; raté, tu retentes le même</li>
       <li><strong>💰 Éclats d'Or</strong> rapportent de l'or, <strong>✦ Runes</strong> de l'XP, <strong>🌿 Sève</strong> soigne tes PV</li>
-      <li><strong>🔥 Braises</strong> attaquent le Gardien en Faille (ou rapportent un peu d'or à l'Étage)</li>
-      <li>Aligne des <strong>Ombres</strong> : tous les 5, ton Armée d'Ombres intercepte gratuitement le prochain coup du Gardien</li>
+      <li><strong>🔥 Braises</strong> attaquent le monstre en face (Étage ou Faille)</li>
+      <li>Aligne des <strong>Ombres</strong> : tous les 5, ton Armée d'Ombres intercepte gratuitement le prochain coup de l'adversaire</li>
       <li>Une chute qui recrée un alignement déclenche un <strong>combo</strong> : les gains sont multipliés à chaque cascade</li>
-      <li>En Faille, le Gardien frappe après un nombre de coups fixe — surveille le compte à rebours affiché au-dessus du plateau</li>
+      <li>Le monstre ou Gardien frappe après un nombre de coups fixe — surveille le compte à rebours affiché au-dessus du plateau</li>
       <li>Ton <strong>Rang de Chasseur</strong> (E → S) monte avec ton niveau ; la Quête du Système (liée à Strava) rapporte des Clés de Faille</li>
     </ul>
     <button id="howBackBtn" class="btn btn-ghost">Retour</button>
@@ -126,7 +126,7 @@
 
   <!-- Game Over (Étage raté) -->
   <div id="gameOverScreen" class="screen overlay hidden">
-    <h2>Objectif manqué</h2>
+    <h2>Étage raté</h2>
     <p id="gameOverMsg" class="subtitle"></p>
     <div class="result-grid">
       <div><span>Combo (partie)</span><strong id="resDistance">×0</strong></div>
@@ -153,7 +153,7 @@
   <!-- Étage réussi -->
   <div id="floorWinScreen" class="screen overlay hidden">
     <h2>Étage <span id="floorWinNumber">1</span> conquis !</h2>
-    <p class="subtitle">Objectif atteint : <span id="floorWinGoal">50</span> 💰 récoltés.</p>
+    <p class="subtitle">Le monstre de l'Étage est vaincu.</p>
     <div class="result-grid">
       <div><span>Or gagné</span><strong id="floorWinGold">0</strong></div>
       <div><span>XP gagnée</span><strong id="floorWinXp">0</strong></div>

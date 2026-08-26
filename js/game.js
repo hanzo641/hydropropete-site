@@ -20,8 +20,19 @@
   const SHADOW_THRESHOLD = 5; // tuiles d'Ombre alignées avant que l'Armée d'Ombres se lève
   const FLOOR_BASE_MOVES = 22;
 
-  function floorGoal(n) { return 50 + (n - 1) * 20; }
   function floorMoves(n) { return Math.max(14, FLOOR_BASE_MOVES - Math.floor((n - 1) / 3)); }
+
+  function floorMonster(n) {
+    const hp = 8 + (n - 1) * 4;
+    return {
+      hp,
+      maxHp: hp,
+      damage: 6 + Math.floor((n - 1) / 2) * 2,
+      strikeEvery: 4,
+      movesSinceStrike: 0,
+      hitFlash: 0,
+    };
+  }
 
   const SWAP_MS = 180;
   const NUDGE_MS = 200;
@@ -264,7 +275,6 @@
       mode: dungeonTier ? "dungeon" : "floor",
       tier: dungeonTier || null,
       floor: dungeonTier ? null : save.currentFloor,
-      goalGold: dungeonTier ? null : floorGoal(save.currentFloor),
       maxHp: maxHpFromSave(),
       hp: maxHpFromSave(),
       gold: 0,
@@ -282,7 +292,7 @@
         strikeEvery: dungeonTier.strikeEvery,
         movesSinceStrike: 0,
         hitFlash: 0,
-      } : null,
+      } : floorMonster(save.currentFloor),
     };
   }
 
@@ -497,7 +507,7 @@
         spawnSparksAt(cx, cy, "#8b7cff", 4 + n);
         maybeChargeShadow();
       } else if (type === "ember") {
-        if (run.mode === "dungeon" && run.boss) {
+        if (run.boss) {
           const dmg = Math.max(1, Math.round(n * emberDmgPerTile * mult));
           run.boss.hp -= dmg;
           run.boss.hitFlash = 0.15;
@@ -544,7 +554,7 @@
     const matched = findMatches(grid);
     if (matched.total > 0) {
       run.movesLeft -= 1;
-      if (run.mode === "dungeon" && run.boss) run.boss.movesSinceStrike += 1;
+      if (run.boss) run.boss.movesSinceStrike += 1;
       beginPhase("swap", {
         floaters: [
           { type: typeA, from: a, to: b },
@@ -617,13 +627,18 @@
     }
   }
 
+  function endEncounter(victory) {
+    if (run.mode === "dungeon") finishDungeon(victory);
+    else finishFloor(victory);
+  }
+
   function settleTurn() {
     busy = false;
     phase = "idle";
     cascadeLevel = 1;
 
-    if (run.mode === "dungeon" && run.boss) {
-      if (run.boss.hp <= 0) { finishDungeon(true); return; }
+    if (run.boss) {
+      if (run.boss.hp <= 0) { endEncounter(true); return; }
 
       if (run.boss.movesSinceStrike >= run.boss.strikeEvery) {
         run.boss.movesSinceStrike = 0;
@@ -639,17 +654,11 @@
           damagePlayer(run.boss.damage);
         }
       }
-      if (run.hp <= 0) { finishDungeon(false); return; }
-    }
-
-    if (run.mode === "floor" && run.goalGold != null && run.gold >= run.goalGold) {
-      finishFloor(true);
-      return;
+      if (run.hp <= 0) { endEncounter(false); return; }
     }
 
     if (run.movesLeft <= 0) {
-      if (run.mode === "dungeon") finishDungeon(false);
-      else finishFloor(false);
+      endEncounter(false);
       return;
     }
 
@@ -701,7 +710,7 @@
       ctx.translate((Math.random() - 0.5) * shakeMag, (Math.random() - 0.5) * shakeMag);
     }
     drawBackground();
-    if (run && run.mode === "dungeon" && run.boss) drawBoss();
+    if (run && run.boss) drawBoss();
     drawBoard();
     drawParticles();
     ctx.restore();
@@ -1068,11 +1077,12 @@
       ? `Étage ${run.floor} · Rang ${rankForLevel(save.level)}`
       : `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
     hudMoves.textContent = `🎯 ${run.movesLeft}/${run.movesTotal}`;
-    hudGold.textContent = run.goalGold != null ? `💰 ${run.gold}/${run.goalGold}` : `💰 ${run.gold}`;
+    hudGold.textContent = `💰 ${run.gold}`;
 
     const bossBarEl = document.getElementById("bossBar");
-    if (run.mode === "dungeon" && run.boss) {
+    if (run.boss) {
       bossBarEl.classList.remove("hidden");
+      document.getElementById("bossName").textContent = run.mode === "dungeon" ? "Gardien de la Faille" : "Monstre de l'Étage";
       document.getElementById("bossFill").style.width = `${Math.max(0, (run.boss.hp / run.boss.maxHp) * 100)}%`;
       const left = Math.max(0, run.boss.strikeEvery - run.boss.movesSinceStrike);
       document.getElementById("bossStrikeInfo").textContent = `Prochain coup dans ${left} coup(s)`;
@@ -1319,7 +1329,6 @@
 
     if (victory) {
       document.getElementById("floorWinNumber").textContent = `${run.floor}`;
-      document.getElementById("floorWinGoal").textContent = `${run.goalGold}`;
       document.getElementById("floorWinGold").textContent = `${run.gold}`;
       document.getElementById("floorWinXp").textContent = `${run.xpGained}`;
       hud.classList.add("hidden");
@@ -1329,8 +1338,9 @@
       document.getElementById("resGold").textContent = `${run.gold}`;
       document.getElementById("resXp").textContent = `${run.xpGained}`;
       document.getElementById("resBest").textContent = `×${save.bestCombo}`;
-      document.getElementById("gameOverMsg").textContent =
-        `Objectif : ${run.goalGold} 💰 — tu en as récolté ${run.gold}. Retente ta chance !`;
+      document.getElementById("gameOverMsg").textContent = run.hp <= 0
+        ? `Le monstre de l'Étage t'a terrassé (${run.boss.hp}/${run.boss.maxHp} PV restants). Retente ta chance !`
+        : `À court de coups — le monstre avait encore ${run.boss.hp}/${run.boss.maxHp} PV. Retente ta chance !`;
       hud.classList.add("hidden");
       showScreen("gameover");
     }
