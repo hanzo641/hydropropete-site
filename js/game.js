@@ -1436,13 +1436,47 @@
   /* Entrées : tactile / souris / clavier                                 */
   /* ------------------------------------------------------------------ */
 
+  const SWIPE_THRESHOLD = 18; // px avant qu'un geste soit considéré comme un glissement
+  let dragStartCell = null;
+  let dragStartPoint = null;
+  let dragHandled = false;
+
   canvas.addEventListener("pointerdown", (e) => {
     if (gameState !== "playing" || busy) return;
     const rect = canvas.getBoundingClientRect();
-    const cell = pixelToCell(e.clientX - rect.left, e.clientY - rect.top);
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const cell = pixelToCell(x, y);
     if (!cell) return;
     usingKeyboard = false;
-    handleCellTap(cell);
+    dragStartCell = cell;
+    dragStartPoint = { x, y };
+    dragHandled = false;
+    canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", (e) => {
+    if (gameState !== "playing" || busy || !dragStartCell || dragHandled) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const dx = x - dragStartPoint.x;
+    const dy = y - dragStartPoint.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) return;
+
+    const target = Math.abs(dx) > Math.abs(dy)
+      ? { r: dragStartCell.r, c: dragStartCell.c + (dx > 0 ? 1 : -1) }
+      : { r: dragStartCell.r + (dy > 0 ? 1 : -1), c: dragStartCell.c };
+
+    if (target.r >= 0 && target.r < ROWS && target.c >= 0 && target.c < COLS) {
+      dragHandled = true;
+      selected = null;
+      trySwap(dragStartCell, target);
+    }
+  });
+
+  canvas.addEventListener("pointerup", () => {
+    if (dragStartCell && !dragHandled) handleCellTap(dragStartCell);
+    dragStartCell = null;
+    dragStartPoint = null;
   });
 
   window.addEventListener("keydown", (e) => {
