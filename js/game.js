@@ -5,6 +5,10 @@
 (() => {
   "use strict";
 
+  function sfx(name) {
+    if (window.GameAudio) window.GameAudio.play(name);
+  }
+
   /* ------------------------------------------------------------------ */
   /* Constantes de jeu                                                   */
   /* ------------------------------------------------------------------ */
@@ -133,7 +137,9 @@
     }
     if (leveledUp) {
       const newRank = rankForLevel(save.level);
-      showToast(newRank !== prevRank ? `RANG ${newRank} ATTEINT !` : `Niveau ${save.level} !`);
+      const rankChanged = newRank !== prevRank;
+      showToast(rankChanged ? `RANG ${newRank} ATTEINT !` : `Niveau ${save.level} !`);
+      sfx(rankChanged ? "rankUp" : "levelUp");
     }
     return leveledUp;
   }
@@ -343,12 +349,14 @@
     run.laneAnimFrom = run.x;
     run.lane = next;
     run.laneAnimT = 0;
+    sfx("lane");
   }
 
   function doJump() {
     if (gameState !== "playing" || run.isJumping) return;
     run.isJumping = true;
     run.jumpT = 0;
+    sfx("jump");
   }
 
   function doAttack() {
@@ -357,6 +365,7 @@
     run.attackT = 0;
     run.attackCooldown = ATTACK_COOLDOWN;
     run.attackResolvedThisSwing = false;
+    sfx("attack");
   }
 
   let touchStartX = 0, touchStartY = 0, touchActive = false;
@@ -451,8 +460,14 @@
       boss.strikeTimer -= dt;
       if (boss.hitFlash > 0) boss.hitFlash = Math.max(0, boss.hitFlash - dt);
 
+      if (!boss.warnPlayed && boss.strikeTimer < 0.6) {
+        boss.warnPlayed = true;
+        sfx("bossWarn");
+      }
+
       if (boss.strikeTimer <= 0) {
         boss.strikeTimer = boss.strikeInterval;
+        boss.warnPlayed = false;
         if (boss.lane === run.lane) damagePlayer(run.tier.bossDamage);
       }
 
@@ -463,6 +478,7 @@
         popParticle(boss.lane, "-1", "#ff6b81");
         spawnSparks(boss.lane, "#ff4d6d", 9, true);
         triggerShake(4, 0.1);
+        sfx("bossHit");
         if (boss.hp <= 0) finishDungeon(true);
       }
 
@@ -522,8 +538,10 @@
       strikeInterval: 1.6,
       timeLeft: 14,
       hitFlash: 0,
+      warnPlayed: false,
     };
     showToast("Un Gardien de Faille apparaît !");
+    sfx("bossAppear");
   }
 
   function finishDungeon(victory) {
@@ -539,6 +557,8 @@
     save.totalGold += run.gold + (victory ? tier.rewardGold : 0);
     if (victory) grantXp(tier.rewardXp);
     persist();
+    window.GameAudio && window.GameAudio.stopAmbient();
+    sfx(victory ? "victory" : "defeat");
 
     document.getElementById("dungeonResultTitle").textContent = victory
       ? `Faille de Rang ${tier.rank} conquise !`
@@ -577,6 +597,7 @@
         grantXp(xpGain);
         popParticle(e.lane, `+${goldGain}💰`, "#f4c542");
         spawnSparks(e.lane, "#ff6b81", 7);
+        sfx("hitEnemy");
       } else if (run.shadowChargeReady) {
         consumeShadowCharge(e);
         e.dead = true;
@@ -593,12 +614,15 @@
       if (e.type === "coin") {
         run.gold += 2;
         popParticle(e.lane, "+2💰", "#f4c542");
+        sfx("coin");
       } else if (e.type === "gem") {
         run.gold += 12;
         popParticle(e.lane, "+12💰", "#b39bff");
+        sfx("gem");
       } else if (e.type === "potion") {
         run.hp = Math.min(run.maxHp, run.hp + run.maxHp * 0.3);
         popParticle(e.lane, "+PV", "#4ade80");
+        sfx("potion");
       }
     }
   }
@@ -613,6 +637,9 @@
       run.hp = run.maxHp * 0.5;
       run.invulnT = 1200;
       showToast("Résurrection !");
+      sfx("revive");
+    } else {
+      sfx("hitPlayer");
     }
   }
 
@@ -620,6 +647,7 @@
     if (run.shadowArmy > 0 && run.shadowArmy % SHADOW_THRESHOLD === 0 && !run.shadowChargeReady) {
       run.shadowChargeReady = true;
       showToast("Ombres, debout !");
+      sfx("shadowCharge");
     }
   }
 
@@ -627,6 +655,7 @@
     run.shadowChargeReady = false;
     popParticle(e.lane, "🖤 Ombre", "#8b7cff");
     spawnSparks(e.lane, "#8b7cff", 10);
+    sfx("shadowConsume");
   }
 
   function popParticle(lane, text, color) {
@@ -1316,6 +1345,7 @@
     gameState = "menu";
     hud.classList.add("hidden");
     controls.classList.add("hidden");
+    window.GameAudio && window.GameAudio.stopAmbient();
     refreshMenu();
     showScreen("menu");
   }
@@ -1332,17 +1362,20 @@
     controls.classList.remove("hidden");
     showScreen(null);
     animRAF = requestAnimationFrame(loop);
+    window.GameAudio && window.GameAudio.startAmbient();
   }
 
   function togglePause() {
     if (gameState === "playing") {
       gameState = "paused";
       showScreen("pause");
+      window.GameAudio && window.GameAudio.stopAmbient();
     } else if (gameState === "paused") {
       gameState = "playing";
       showScreen(null);
       lastFrame = 0;
       animRAF = requestAnimationFrame(loop);
+      window.GameAudio && window.GameAudio.startAmbient();
     }
   }
 
@@ -1352,6 +1385,8 @@
     save.totalGold += run.gold;
     save.bestDistance = Math.max(save.bestDistance, run.distance);
     persist();
+    window.GameAudio && window.GameAudio.stopAmbient();
+    sfx("defeat");
 
     document.getElementById("resDistance").textContent = `${Math.floor(run.distance)} m`;
     document.getElementById("resGold").textContent = `${run.gold}`;
@@ -1460,6 +1495,36 @@
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && gameState === "playing") togglePause();
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Audio : déverrouillage, mute, clics de menu                         */
+  /* ------------------------------------------------------------------ */
+
+  document.addEventListener("pointerdown", () => window.GameAudio && window.GameAudio.unlock(), { once: true });
+
+  function updateMuteButtons() {
+    const m = !!(window.GameAudio && window.GameAudio.isMuted());
+    const icon = m ? "🔇" : "🔊";
+    document.getElementById("muteBtn").textContent = icon;
+    document.getElementById("muteBtnHud").textContent = icon;
+  }
+
+  function toggleMute() {
+    if (!window.GameAudio) return;
+    window.GameAudio.setMuted(!window.GameAudio.isMuted());
+    updateMuteButtons();
+    if (!window.GameAudio.isMuted() && gameState === "playing") window.GameAudio.startAmbient();
+  }
+
+  document.getElementById("muteBtn").addEventListener("click", toggleMute);
+  document.getElementById("muteBtnHud").addEventListener("click", toggleMute);
+  updateMuteButtons();
+
+  document.getElementById("app").addEventListener("click", (e) => {
+    if (!e.target.closest("button")) return;
+    if (e.target.closest("#controls, #hud, #muteBtn")) return;
+    sfx("click");
   });
 
   goMenu();

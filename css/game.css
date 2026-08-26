@@ -118,6 +118,18 @@ html, body {
   justify-content: center;
 }
 
+.mute-btn {
+  position: absolute;
+  top: calc(var(--safe-top) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  z-index: 20;
+  font-size: 15px;
+}
+
+#app:has(#hud:not(.hidden)) .mute-btn {
+  display: none;
+}
+
 .hud-stats {
   margin-top: 6px;
   display: flex;
