@@ -64,6 +64,8 @@
       totalGold: 0,
       bestDistance: 0,
       upgrades: { hp: 0, magnet: 0, speed: 0, revive: 0 },
+      stravaLastActivityId: null,
+      realDistanceKm: 0,
     };
   }
 
@@ -99,7 +101,7 @@
       save.xp -= xpToNext(save.level);
       save.level += 1;
       leveledUp = true;
-      run.hp = Math.min(run.maxHp, run.hp + run.maxHp * 0.25);
+      if (run) run.hp = Math.min(run.maxHp, run.hp + run.maxHp * 0.25);
       showToast(`Niveau ${save.level} !`);
     }
     return leveledUp;
@@ -704,6 +706,74 @@
     document.getElementById("menuLevel").textContent = `Nv. ${save.level}`;
     document.getElementById("menuBest").textContent = `${Math.floor(save.bestDistance)} m`;
     document.getElementById("menuGold").textContent = `💰 ${save.totalGold}`;
+    document.getElementById("menuRealDistance").textContent = `${save.realDistanceKm.toFixed(1)} km`;
+
+    const connected = !!(window.StravaSync && window.StravaSync.isConnected());
+    document.getElementById("stravaDisconnected").classList.toggle("hidden", connected);
+    document.getElementById("stravaConnected").classList.toggle("hidden", !connected);
+
+    const athleteEl = document.getElementById("stravaAthleteName");
+    const athlete = connected && window.StravaSync.currentAthlete();
+    if (athlete && athlete.firstname) {
+      athleteEl.textContent = `Connecté : ${athlete.firstname}`;
+      athleteEl.classList.remove("hidden");
+    } else {
+      athleteEl.classList.add("hidden");
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Synchronisation Strava                                              */
+  /* ------------------------------------------------------------------ */
+
+  function showStravaMsg(text) {
+    const msg = document.getElementById("stravaMsg");
+    msg.textContent = text;
+    msg.classList.remove("hidden");
+  }
+
+  async function handleStravaSync() {
+    if (!window.StravaSync) return;
+    const btn = document.getElementById("stravaSyncBtn");
+    const prevLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Récupération…";
+    document.getElementById("stravaMsg").classList.add("hidden");
+
+    try {
+      const activity = await window.StravaSync.fetchLatestRun();
+      if (!activity) {
+        showStravaMsg("Aucune course récente trouvée sur ton compte Strava.");
+        return;
+      }
+      if (save.stravaLastActivityId === activity.id) {
+        showStravaMsg("Cette course a déjà été comptabilisée.");
+        return;
+      }
+
+      const distanceKm = activity.distance / 1000;
+      const paceMinPerKm = distanceKm > 0 ? (activity.moving_time / 60) / distanceKm : Infinity;
+      const fastBonus = paceMinPerKm < 6 ? 1.3 : 1;
+      const xpGain = Math.max(1, Math.round(distanceKm * 15 * fastBonus));
+      const goldGain = Math.max(1, Math.round(distanceKm * 6 * fastBonus));
+
+      save.stravaLastActivityId = activity.id;
+      save.realDistanceKm += distanceKm;
+      save.totalGold += goldGain;
+      grantXp(xpGain);
+      persist();
+      refreshMenu();
+
+      showStravaMsg(
+        `« ${activity.name || "Course"} » (${distanceKm.toFixed(1)} km) : +${xpGain} XP, +${goldGain} 💰` +
+        (fastBonus > 1 ? " — bonus vitesse !" : "")
+      );
+    } catch (e) {
+      showStravaMsg(e.message || "Erreur lors de la synchronisation Strava.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = prevLabel;
+    }
   }
 
   function goMenu() {
@@ -814,6 +884,14 @@
   document.getElementById("quitBtn").addEventListener("click", () => { gameState = "menu"; goMenu(); });
   document.getElementById("retryBtn").addEventListener("click", startRun);
   document.getElementById("menuBtn").addEventListener("click", goMenu);
+
+  document.getElementById("stravaConnectBtn").addEventListener("click", () => window.StravaSync && window.StravaSync.connect());
+  document.getElementById("stravaSyncBtn").addEventListener("click", handleStravaSync);
+  document.getElementById("stravaDisconnectBtn").addEventListener("click", () => {
+    if (window.StravaSync) window.StravaSync.disconnect();
+    document.getElementById("stravaMsg").classList.add("hidden");
+    refreshMenu();
+  });
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && gameState === "playing") togglePause();

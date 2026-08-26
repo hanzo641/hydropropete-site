@@ -33,8 +33,9 @@
       <span id="hudDistance">0 m</span>
       <span id="hudGold">💰 0</span>
     </div>
-    <div id="toast" class="toast hidden"></div>
   </div>
+
+  <div id="toast" class="toast hidden"></div>
 
   <!-- Contrôles tactiles -->
   <div id="controls" class="hidden">
@@ -52,10 +53,24 @@
       <div><strong id="menuLevel">Nv. 1</strong><span>Niveau</span></div>
       <div><strong id="menuBest">0 m</strong><span>Meilleure distance</span></div>
       <div><strong id="menuGold">💰 0</strong><span>Or</span></div>
+      <div><strong id="menuRealDistance">0 km</strong><span>Courses réelles</span></div>
     </div>
     <button id="playBtn" class="btn btn-primary">Jouer</button>
     <button id="shopBtn" class="btn">Boutique</button>
     <button id="howBtn" class="btn btn-ghost">Comment jouer</button>
+
+    <div id="stravaPanel" class="strava-panel">
+      <p class="strava-title">Entraînement réel</p>
+      <div id="stravaDisconnected">
+        <button id="stravaConnectBtn" class="btn btn-strava">Connecter Strava</button>
+      </div>
+      <div id="stravaConnected" class="hidden">
+        <span id="stravaAthleteName" class="strava-athlete hidden"></span>
+        <button id="stravaSyncBtn" class="btn btn-strava">🏃 Récupérer ma dernière course</button>
+        <button id="stravaDisconnectBtn" class="btn btn-ghost btn-small">Déconnecter Strava</button>
+      </div>
+      <p id="stravaMsg" class="strava-msg hidden"></p>
+    </div>
   </div>
 
   <!-- Boutique -->
@@ -101,6 +116,7 @@
   </div>
 </div>
 
+<script src="../js/strava.js"></script>
 <script src="../js/game.js"></script>
 </body>
 </html>

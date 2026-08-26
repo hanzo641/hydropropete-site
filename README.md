@@ -76,6 +76,38 @@ correspondante dans `style.css`.
    remplacez l'action du formulaire dans `contact.html` par un service tiers
    (Cloudflare Pages Functions, Formspree, etc.) avant mise en production.
 
+## Mini-jeu « Écho du Royaume » (`/game/`)
+
+Runner RPG mobile autonome (Canvas 2D / JS vanilla), indépendant du site
+vitrine — voir `game/index.html`, `css/game.css`, `js/game.js`.
+
+### Synchro Strava (optionnelle)
+
+Le bouton « Récupérer ma dernière course » convertit la dernière sortie
+Strava du joueur (distance + allure) en XP et en or pour son personnage.
+Comme le site est 100 % statique, l'échange OAuth passe par deux fonctions
+serveur (`netlify/functions/strava-token.js` et `strava-activity.js`) qui
+gardent le secret Strava côté serveur — cette partie ne fonctionne donc que
+sur un déploiement Netlify (build déjà configuré avec `functions =
+"netlify/functions"` dans `netlify.toml`).
+
+Pour l'activer :
+
+1. Créez une application sur https://www.strava.com/settings/api. Dans
+   « Authorization Callback Domain », indiquez le domaine du site déployé
+   (sans `https://` ni chemin, ex. `hydropropete-pau.fr` ou
+   `mon-site.netlify.app`).
+2. Récupérez le **Client ID** et le **Client Secret** de l'application.
+3. Dans `js/strava.js`, remplacez `REMPLACER_PAR_VOTRE_STRAVA_CLIENT_ID` par
+   votre Client ID (il n'est pas secret, il peut rester dans le code).
+4. Dans les paramètres du site Netlify (Site configuration → Environment
+   variables), ajoutez `STRAVA_CLIENT_ID` et `STRAVA_CLIENT_SECRET` (le
+   secret ne doit jamais être commité dans le dépôt).
+5. Redéployez le site.
+
+Sans cette configuration, le bouton « Connecter Strava » reste visible mais
+la connexion échouera proprement (message d'erreur, pas de plantage).
+
 ## Scores Lighthouse (audit local, 11 pages)
 
 | Page | Performance | Accessibilité | Bonnes pratiques | SEO |

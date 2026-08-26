@@ -226,9 +226,12 @@ html, body {
 }
 
 .menu-stats {
-  display: flex;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 10px;
   margin-bottom: 20px;
+  width: 100%;
+  max-width: 340px;
 }
 
 .menu-stats div {
@@ -239,8 +242,9 @@ html, body {
 }
 
 .menu-stats strong {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-light);
+  white-space: nowrap;
 }
 
 .menu-stats span {
@@ -378,7 +382,61 @@ html, body {
   color: var(--accent-gold);
 }
 
+/* ---------- Strava ---------- */
+
+.strava-panel {
+  width: 100%;
+  max-width: 280px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.strava-title {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-dim);
+}
+
+#stravaConnected {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.strava-athlete {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.btn-strava {
+  background: linear-gradient(180deg, #fc6432, #e34402);
+  color: #fff;
+  border: none;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 13px;
+  max-width: 220px;
+}
+
+.strava-msg {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 280px;
+  margin: 4px 0 0;
+}
+
 @media (min-width: 520px) {
   .screen { justify-content: center; }
-  .btn, .shop-list { max-width: 320px; }
+  .btn, .shop-list, .strava-panel { max-width: 320px; }
 }
