@@ -21,6 +21,31 @@
   const LANE_SWITCH_MS = 160;
   const CONTACT_ZONE = [0.82, 1.0]; // progression (0=spawn,1=joueur) où la collision se résout
   const SAVE_KEY = "echoRoyaumeSave_v1";
+  const SHADOW_THRESHOLD = 5; // monstres vaincus avant que l'Armée d'Ombres se lève
+
+  const RANKS = [
+    { code: "E", min: 1 },
+    { code: "D", min: 10 },
+    { code: "C", min: 20 },
+    { code: "B", min: 30 },
+    { code: "A", min: 40 },
+    { code: "S", min: 50 },
+  ];
+
+  function rankForLevel(level) {
+    let current = RANKS[0].code;
+    for (const r of RANKS) if (level >= r.min) current = r.code;
+    return current;
+  }
+
+  const DUNGEON_TIERS = [
+    { rank: "E", label: "Faille de Rang E", minLevel: 1,  lengthM: 500,  hazardMult: 1.0, spawnMult: 1.0, bossHp: 3,  bossDamage: 12, keyCost: 1, rewardGold: 40,  rewardXp: 60 },
+    { rank: "D", label: "Faille de Rang D", minLevel: 10, lengthM: 750,  hazardMult: 1.3, spawnMult: 1.15, bossHp: 4,  bossDamage: 16, keyCost: 1, rewardGold: 90,  rewardXp: 120 },
+    { rank: "C", label: "Faille de Rang C", minLevel: 20, lengthM: 1000, hazardMult: 1.6, spawnMult: 1.3, bossHp: 5,  bossDamage: 20, keyCost: 1, rewardGold: 160, rewardXp: 200 },
+    { rank: "B", label: "Faille de Rang B", minLevel: 30, lengthM: 1300, hazardMult: 2.0, spawnMult: 1.45, bossHp: 6,  bossDamage: 26, keyCost: 2, rewardGold: 280, rewardXp: 320 },
+    { rank: "A", label: "Faille de Rang A", minLevel: 40, lengthM: 1600, hazardMult: 2.4, spawnMult: 1.6, bossHp: 8,  bossDamage: 32, keyCost: 2, rewardGold: 450, rewardXp: 500 },
+    { rank: "S", label: "Faille de Rang S", minLevel: 50, lengthM: 2000, hazardMult: 3.0, spawnMult: 1.8, bossHp: 10, bossDamage: 40, keyCost: 3, rewardGold: 750, rewardXp: 820 },
+  ];
 
   const UPGRADES = {
     hp: {
@@ -66,6 +91,8 @@
       upgrades: { hp: 0, magnet: 0, speed: 0, revive: 0 },
       stravaLastActivityId: null,
       realDistanceKm: 0,
+      dungeonKeys: 0,
+      dailyQuest: null,
     };
   }
 
@@ -95,6 +122,7 @@
   }
 
   function grantXp(amount) {
+    const prevRank = rankForLevel(save.level);
     save.xp += amount;
     let leveledUp = false;
     while (save.xp >= xpToNext(save.level)) {
@@ -102,9 +130,29 @@
       save.level += 1;
       leveledUp = true;
       if (run) run.hp = Math.min(run.maxHp, run.hp + run.maxHp * 0.25);
-      showToast(`Niveau ${save.level} !`);
+    }
+    if (leveledUp) {
+      const newRank = rankForLevel(save.level);
+      showToast(newRank !== prevRank ? `RANG ${newRank} ATTEINT !` : `Niveau ${save.level} !`);
     }
     return leveledUp;
+  }
+
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  function questTargetForLevel(level) {
+    return Math.min(10, 3 + Math.floor(level / 3));
+  }
+
+  function ensureDailyQuest() {
+    const today = todayStr();
+    if (!save.dailyQuest || save.dailyQuest.date !== today) {
+      save.dailyQuest = { date: today, targetKm: questTargetForLevel(save.level), progressKm: 0, completed: false };
+      persist();
+    }
   }
 
   function upgradeCost(key) {
@@ -161,7 +209,7 @@
   let gameState = "menu"; // menu | playing | paused | gameover
   let animRAF = null;
 
-  function newRun() {
+  function newRun(dungeonTier) {
     const speedBonus = 1 + save.upgrades.speed * 0.08;
     return {
       lane: 1,
@@ -181,11 +229,23 @@
       isAttacking: false,
       attackT: 0,
       attackCooldown: 0,
+      attackResolvedThisSwing: false,
       revivesLeft: save.upgrades.revive,
       invulnT: 0,
       runTimeSec: 0,
       combo: 0,
+      shadowArmy: 0,
+      shadowChargeReady: false,
+      mode: dungeonTier ? "dungeon" : "endless",
+      tier: dungeonTier || null,
+      bossPhase: false,
+      bossResolved: false,
+      boss: null,
     };
+  }
+
+  function hazardMultiplier() {
+    return run && run.mode === "dungeon" && run.tier ? run.tier.hazardMult : 1;
   }
 
   /* ------------------------------------------------------------------ */
@@ -201,7 +261,8 @@
   };
 
   function spawnWave() {
-    const difficulty = Math.min(1, run.distance / 1400);
+    if (run.mode === "dungeon" && run.bossPhase) return;
+    const difficulty = Math.min(1, run.distance / (run.mode === "dungeon" ? run.tier.lengthM * 0.8 : 1400));
     const lanes = [0, 1, 2];
     const pattern = Math.random();
 
@@ -261,6 +322,7 @@
     run.isAttacking = true;
     run.attackT = 0;
     run.attackCooldown = ATTACK_COOLDOWN;
+    run.attackResolvedThisSwing = false;
   }
 
   let touchStartX = 0, touchStartY = 0, touchActive = false;
@@ -334,12 +396,41 @@
     if (run.attackCooldown > 0) run.attackCooldown = Math.max(0, run.attackCooldown - dt * 1000);
     if (run.invulnT > 0) run.invulnT = Math.max(0, run.invulnT - dt * 1000);
 
+    // Progression vers le Gardien de Faille (mode donjon)
+    if (run.mode === "dungeon" && !run.bossPhase && !run.bossResolved && run.distance >= run.tier.lengthM) {
+      startBossPhase();
+    }
+
     // Spawn
     spawnTimer -= dt;
-    if (spawnTimer <= 0) {
+    if (spawnTimer <= 0 && !(run.mode === "dungeon" && run.bossPhase)) {
       spawnWave();
-      const difficulty = Math.min(1, run.distance / 1400);
-      spawnTimer = 1.05 - difficulty * 0.55 + Math.random() * 0.25;
+      const difficulty = Math.min(1, run.distance / (run.mode === "dungeon" ? run.tier.lengthM * 0.8 : 1400));
+      const spawnMult = run.mode === "dungeon" ? run.tier.spawnMult : 1;
+      spawnTimer = (1.05 - difficulty * 0.55 + Math.random() * 0.25) / spawnMult;
+    }
+
+    // Combat de Gardien de Faille
+    if (run.mode === "dungeon" && run.bossPhase && run.boss) {
+      const boss = run.boss;
+      boss.timeLeft -= dt;
+      boss.strikeTimer -= dt;
+      if (boss.hitFlash > 0) boss.hitFlash = Math.max(0, boss.hitFlash - dt);
+
+      if (boss.strikeTimer <= 0) {
+        boss.strikeTimer = boss.strikeInterval;
+        if (boss.lane === run.lane) damagePlayer(run.tier.bossDamage);
+      }
+
+      if (run.isAttacking && !run.attackResolvedThisSwing && boss.lane === run.lane) {
+        run.attackResolvedThisSwing = true;
+        boss.hp -= 1;
+        boss.hitFlash = 0.15;
+        popParticle(boss.lane, "-1", "#ff6b81");
+        if (boss.hp <= 0) finishDungeon(true);
+      }
+
+      if (run.bossPhase && boss.timeLeft <= 0) finishDungeon(false);
     }
 
     // Progress des entités + collisions
@@ -364,28 +455,84 @@
     particles = particles.filter((p) => p.t < p.life);
 
     if (run.hp <= 0) {
-      endRun();
+      if (run.mode === "dungeon") {
+        finishDungeon(false);
+      } else {
+        endRun();
+      }
     }
+  }
+
+  function startBossPhase() {
+    run.bossPhase = true;
+    entities = [];
+    run.boss = {
+      lane: run.lane,
+      hp: run.tier.bossHp,
+      maxHp: run.tier.bossHp,
+      strikeTimer: 1.6,
+      strikeInterval: 1.6,
+      timeLeft: 14,
+      hitFlash: 0,
+    };
+    showToast("Un Gardien de Faille apparaît !");
+  }
+
+  function finishDungeon(victory) {
+    if (gameState !== "playing") return;
+    gameState = "gameover";
+    run.bossPhase = false;
+    run.bossResolved = true;
+
+    const tier = run.tier;
+    const goldTotal = run.gold + (victory ? tier.rewardGold : 0);
+    const xpTotal = run.xpGained + (victory ? tier.rewardXp : 0);
+
+    save.totalGold += run.gold + (victory ? tier.rewardGold : 0);
+    if (victory) grantXp(tier.rewardXp);
+    persist();
+
+    document.getElementById("dungeonResultTitle").textContent = victory
+      ? `Faille de Rang ${tier.rank} conquise !`
+      : "La Faille se referme...";
+    document.getElementById("dungeonResultMsg").textContent = victory
+      ? "Le Gardien est vaincu. Ton butin est sécurisé."
+      : "Tu n'as pas tenu assez longtemps. Reviens plus fort.";
+    document.getElementById("dungeonResGold").textContent = `${goldTotal}`;
+    document.getElementById("dungeonResXp").textContent = `${xpTotal}`;
+
+    hud.classList.add("hidden");
+    controls.classList.add("hidden");
+    showScreen("dungeonresult");
   }
 
   function resolveContact(e) {
     const def = TYPES[e.type];
     if (def.kind === "hazard") {
-      if (!run.isJumping) damagePlayer(18);
+      if (run.shadowChargeReady) {
+        consumeShadowCharge(e);
+      } else if (!run.isJumping) {
+        damagePlayer(18 * hazardMultiplier());
+      }
       e.dead = true;
     } else if (def.kind === "enemy") {
       if (run.isAttacking) {
         e.dead = true;
         e.collected = true;
         run.combo += 1;
+        run.shadowArmy += 1;
+        maybeChargeShadow();
         const goldGain = 4 + Math.min(run.combo, 10);
         const xpGain = 6;
         run.gold += goldGain;
         run.xpGained += xpGain;
         grantXp(xpGain);
         popParticle(e.lane, `+${goldGain}💰`, "#f4c542");
+      } else if (run.shadowChargeReady) {
+        consumeShadowCharge(e);
+        e.dead = true;
       } else if (!run.isJumping) {
-        damagePlayer(14);
+        damagePlayer(14 * hazardMultiplier());
         run.combo = 0;
         e.dead = true;
       } else {
@@ -419,6 +566,18 @@
     }
   }
 
+  function maybeChargeShadow() {
+    if (run.shadowArmy > 0 && run.shadowArmy % SHADOW_THRESHOLD === 0 && !run.shadowChargeReady) {
+      run.shadowChargeReady = true;
+      showToast("Ombres, debout !");
+    }
+  }
+
+  function consumeShadowCharge(e) {
+    run.shadowChargeReady = false;
+    popParticle(e.lane, "🖤 Ombre", "#8b7cff");
+  }
+
   function popParticle(lane, text, color) {
     particles.push({
       x: laneX(lane), y: H * PLAYER_Y_FRAC - 30,
@@ -435,9 +594,41 @@
   function draw() {
     ctx.clearRect(0, 0, W, H);
     drawBackground();
-    drawEntities();
+    if (run && run.mode === "dungeon" && run.bossPhase && run.boss) {
+      drawBoss();
+    } else {
+      drawEntities();
+    }
     drawPlayer();
     drawParticles();
+  }
+
+  function drawBoss() {
+    const boss = run.boss;
+    const x = laneX(boss.lane);
+    const y = H * PLAYER_Y_FRAC - 130;
+    const warning = boss.strikeTimer < 0.4;
+
+    ctx.save();
+    ctx.translate(x, y);
+    if (warning) {
+      ctx.fillStyle = "rgba(232, 83, 107, 0.18)";
+      ctx.beginPath();
+      ctx.ellipse(0, 30, 60, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = boss.hitFlash > 0 ? "#ffb0bd" : "#4a1030";
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 30, 38, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2c0a1e";
+    ctx.fillRect(-24, 20, 48, 30);
+    ctx.fillStyle = "#ff4d6d";
+    ctx.beginPath();
+    ctx.arc(-11, -16, 5, 0, Math.PI * 2);
+    ctx.arc(11, -16, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   let bgScroll = 0;
@@ -665,9 +856,25 @@
   function updateHud() {
     hpFill.style.width = `${Math.max(0, (run.hp / run.maxHp) * 100)}%`;
     xpFill.style.width = `${Math.min(100, (save.xp / xpToNext(save.level)) * 100)}%`;
-    hudLevel.textContent = `Nv. ${save.level}`;
-    hudDistance.textContent = `${Math.floor(run.distance)} m`;
+    hudLevel.textContent = `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
+    hudDistance.textContent = run.mode === "dungeon" ? `${Math.floor(run.distance)} / ${run.tier.lengthM} m` : `${Math.floor(run.distance)} m`;
     hudGold.textContent = `💰 ${run.gold}`;
+
+    const dungeonProgress = document.getElementById("dungeonProgress");
+    if (run.mode === "dungeon" && !run.bossPhase) {
+      dungeonProgress.classList.remove("hidden");
+      document.getElementById("dungeonFill").style.width = `${Math.min(100, (run.distance / run.tier.lengthM) * 100)}%`;
+    } else {
+      dungeonProgress.classList.add("hidden");
+    }
+
+    const bossBarEl = document.getElementById("bossBar");
+    if (run.mode === "dungeon" && run.bossPhase && run.boss) {
+      bossBarEl.classList.remove("hidden");
+      document.getElementById("bossFill").style.width = `${Math.max(0, (run.boss.hp / run.boss.maxHp) * 100)}%`;
+    } else {
+      bossBarEl.classList.add("hidden");
+    }
   }
 
   let toastTimer = null;
@@ -690,9 +897,11 @@
   const screens = {
     menu: document.getElementById("menuScreen"),
     shop: document.getElementById("shopScreen"),
+    dungeon: document.getElementById("dungeonScreen"),
     how: document.getElementById("howScreen"),
     pause: document.getElementById("pauseScreen"),
     gameover: document.getElementById("gameOverScreen"),
+    dungeonresult: document.getElementById("dungeonResultScreen"),
   };
   const hud = document.getElementById("hud");
   const controls = document.getElementById("controls");
@@ -703,14 +912,24 @@
   }
 
   function refreshMenu() {
-    document.getElementById("menuLevel").textContent = `Nv. ${save.level}`;
+    ensureDailyQuest();
+
+    document.getElementById("menuLevel").textContent = `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
     document.getElementById("menuBest").textContent = `${Math.floor(save.bestDistance)} m`;
     document.getElementById("menuGold").textContent = `💰 ${save.totalGold}`;
-    document.getElementById("menuRealDistance").textContent = `${save.realDistanceKm.toFixed(1)} km`;
+    document.getElementById("menuKeys").textContent = `🔑 ${save.dungeonKeys}`;
+
+    const q = save.dailyQuest;
+    document.getElementById("questDesc").textContent = q.completed
+      ? "Quête complétée aujourd'hui !"
+      : `Cours ${q.targetKm} km aujourd'hui`;
+    document.getElementById("questFill").style.width = `${Math.min(100, (q.progressKm / q.targetKm) * 100)}%`;
+    document.getElementById("questStatus").textContent = `${q.progressKm.toFixed(1)} / ${q.targetKm} km${q.completed ? " ✓" : ""}`;
 
     const connected = !!(window.StravaSync && window.StravaSync.isConnected());
     document.getElementById("stravaDisconnected").classList.toggle("hidden", connected);
     document.getElementById("stravaConnected").classList.toggle("hidden", !connected);
+    document.getElementById("stravaRealDistance").textContent = `Distance réelle parcourue : ${save.realDistanceKm.toFixed(1)} km`;
 
     const athleteEl = document.getElementById("stravaAthleteName");
     const athlete = connected && window.StravaSync.currentAthlete();
@@ -720,6 +939,55 @@
     } else {
       athleteEl.classList.add("hidden");
     }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Failles (donjons)                                                    */
+  /* ------------------------------------------------------------------ */
+
+  function renderDungeonScreen() {
+    document.getElementById("dungeonKeysCount").textContent = save.dungeonKeys;
+    const list = document.getElementById("dungeonList");
+    list.innerHTML = "";
+    DUNGEON_TIERS.forEach((tier) => {
+      const unlocked = save.level >= tier.minLevel;
+      const hasKey = save.dungeonKeys >= tier.keyCost;
+
+      const card = document.createElement("div");
+      card.className = `dungeon-card rank-${tier.rank}`;
+
+      const info = document.createElement("div");
+      info.className = "dungeon-info";
+      info.innerHTML = `
+        <strong>${tier.label}</strong>
+        <small>${unlocked ? `${tier.lengthM} m · Coût : ${tier.keyCost} 🔑` : `Débloquée au Rang ${tier.rank} (Nv ${tier.minLevel})`}</small>
+        <small class="dungeon-reward">Récompense : +${tier.rewardGold} 💰 · +${tier.rewardXp} XP</small>
+      `;
+
+      const btn = document.createElement("button");
+      btn.className = "shop-buy";
+      if (!unlocked) {
+        btn.textContent = "Verrouillée";
+        btn.disabled = true;
+      } else if (!hasKey) {
+        btn.textContent = "Pas de clé";
+        btn.disabled = true;
+      } else {
+        btn.textContent = "Entrer";
+        btn.addEventListener("click", () => enterDungeon(tier));
+      }
+
+      card.appendChild(info);
+      card.appendChild(btn);
+      list.appendChild(card);
+    });
+  }
+
+  function enterDungeon(tier) {
+    if (save.dungeonKeys < tier.keyCost || save.level < tier.minLevel) return;
+    save.dungeonKeys -= tier.keyCost;
+    persist();
+    startRun(tier);
   }
 
   /* ------------------------------------------------------------------ */
@@ -761,12 +1029,24 @@
       save.realDistanceKm += distanceKm;
       save.totalGold += goldGain;
       grantXp(xpGain);
+
+      ensureDailyQuest();
+      let questMsg = "";
+      if (!save.dailyQuest.completed) {
+        save.dailyQuest.progressKm += distanceKm;
+        if (save.dailyQuest.progressKm >= save.dailyQuest.targetKm) {
+          save.dailyQuest.completed = true;
+          save.dungeonKeys += 1;
+          questMsg = " Quête du Système complétée : +1 🔑 Clé de Faille !";
+        }
+      }
+
       persist();
       refreshMenu();
 
       showStravaMsg(
         `« ${activity.name || "Course"} » (${distanceKm.toFixed(1)} km) : +${xpGain} XP, +${goldGain} 💰` +
-        (fastBonus > 1 ? " — bonus vitesse !" : "")
+        (fastBonus > 1 ? " — bonus vitesse !" : "") + questMsg
       );
     } catch (e) {
       showStravaMsg(e.message || "Erreur lors de la synchronisation Strava.");
@@ -784,8 +1064,8 @@
     showScreen("menu");
   }
 
-  function startRun() {
-    run = newRun();
+  function startRun(dungeonTier) {
+    run = newRun(dungeonTier);
     entities = [];
     particles = [];
     spawnTimer = 0.4;
@@ -831,10 +1111,35 @@
   /* Boutique                                                             */
   /* ------------------------------------------------------------------ */
 
+  const DUNGEON_KEY_COST = 70;
+
   function renderShop() {
     document.getElementById("shopGold").textContent = save.totalGold;
     const list = document.getElementById("shopList");
     list.innerHTML = "";
+
+    const keyItem = document.createElement("div");
+    keyItem.className = "shop-item";
+    keyItem.innerHTML = `
+      <div class="shop-item-info">
+        <strong>Clé de Faille</strong>
+        <small>Ouvre l'accès à une Faille (tu en as ${save.dungeonKeys})</small>
+      </div>
+    `;
+    const keyBtn = document.createElement("button");
+    keyBtn.className = "shop-buy";
+    keyBtn.textContent = `${DUNGEON_KEY_COST} 💰`;
+    keyBtn.disabled = save.totalGold < DUNGEON_KEY_COST;
+    keyBtn.addEventListener("click", () => {
+      if (save.totalGold < DUNGEON_KEY_COST) return;
+      save.totalGold -= DUNGEON_KEY_COST;
+      save.dungeonKeys += 1;
+      persist();
+      renderShop();
+    });
+    keyItem.appendChild(keyBtn);
+    list.appendChild(keyItem);
+
     Object.keys(UPGRADES).forEach((key) => {
       const u = UPGRADES[key];
       const lvl = save.upgrades[key];
@@ -874,16 +1179,20 @@
   /* Câblage des boutons                                                  */
   /* ------------------------------------------------------------------ */
 
-  document.getElementById("playBtn").addEventListener("click", startRun);
+  document.getElementById("playBtn").addEventListener("click", () => startRun());
   document.getElementById("shopBtn").addEventListener("click", () => { renderShop(); showScreen("shop"); });
   document.getElementById("shopBackBtn").addEventListener("click", goMenu);
+  document.getElementById("dungeonBtn").addEventListener("click", () => { renderDungeonScreen(); showScreen("dungeon"); });
+  document.getElementById("dungeonBackBtn").addEventListener("click", goMenu);
   document.getElementById("howBtn").addEventListener("click", () => showScreen("how"));
   document.getElementById("howBackBtn").addEventListener("click", goMenu);
   document.getElementById("pauseBtn").addEventListener("click", togglePause);
   document.getElementById("resumeBtn").addEventListener("click", togglePause);
   document.getElementById("quitBtn").addEventListener("click", () => { gameState = "menu"; goMenu(); });
-  document.getElementById("retryBtn").addEventListener("click", startRun);
+  document.getElementById("retryBtn").addEventListener("click", () => startRun());
   document.getElementById("menuBtn").addEventListener("click", goMenu);
+  document.getElementById("dungeonRetryBtn").addEventListener("click", () => { renderDungeonScreen(); showScreen("dungeon"); });
+  document.getElementById("dungeonMenuBtn").addEventListener("click", goMenu);
 
   document.getElementById("stravaConnectBtn").addEventListener("click", () => window.StravaSync && window.StravaSync.connect());
   document.getElementById("stravaSyncBtn").addEventListener("click", handleStravaSync);

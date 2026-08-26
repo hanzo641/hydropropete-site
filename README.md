@@ -76,16 +76,21 @@ correspondante dans `style.css`.
    remplacez l'action du formulaire dans `contact.html` par un service tiers
    (Cloudflare Pages Functions, Formspree, etc.) avant mise en production.
 
-## Mini-jeu « Écho du Royaume » (`/game/`)
+## Mini-jeu « Le Système » (`/game/`)
 
 Runner RPG mobile autonome (Canvas 2D / JS vanilla), indépendant du site
-vitrine — voir `game/index.html`, `css/game.css`, `js/game.js`.
+vitrine — voir `game/index.html`, `css/game.css`, `js/game.js`. Le joueur
+incarne un Chasseur (Rang E → S selon son niveau), affronte des monstres en
+courant, et peut franchir des **Failles** (donjons à 6 paliers de
+difficulté avec un Gardien à vaincre) contre des clés obtenues via la
+boutique ou la Quête du Système.
 
 ### Synchro Strava (optionnelle)
 
 Le bouton « Récupérer ma dernière course » convertit la dernière sortie
-Strava du joueur (distance + allure) en XP et en or pour son personnage.
-Comme le site est 100 % statique, l'échange OAuth passe par deux fonctions
+Strava du joueur (distance + allure) en XP et en or pour son personnage, et
+fait progresser la Quête du Système quotidienne (récompense : une clé de
+Faille). Comme le site est 100 % statique, l'échange OAuth passe par deux fonctions
 serveur (`netlify/functions/strava-token.js` et `strava-activity.js`) qui
 gardent le secret Strava côté serveur — cette partie ne fonctionne donc que
 sur un déploiement Netlify (build déjà configuré avec `functions =
