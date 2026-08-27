@@ -23,12 +23,12 @@
   function floorMoves(n) { return Math.max(14, FLOOR_BASE_MOVES - Math.floor((n - 1) / 3)); }
 
   function floorMonster(n) {
-    const hp = 8 + (n - 1) * 4;
+    const hp = 18 + (n - 1) * 7;
     return {
       hp,
       maxHp: hp,
       damage: 6 + Math.floor((n - 1) / 2) * 2,
-      strikeEvery: 4,
+      strikeEvery: 3,
       movesSinceStrike: 0,
       hitFlash: 0,
     };
