@@ -436,13 +436,33 @@
     particles.push({ x, y, vx: 0, vy: 42, t: 0, life: 0.7, text, color });
   }
 
+  function spawnFireball(fromX, fromY, toX, toY, onArrive) {
+    const dist = Math.hypot(toX - fromX, toY - fromY);
+    const life = Math.min(0.55, Math.max(0.22, dist / 900));
+    particles.push({
+      kind: "fireball", x: fromX, y: fromY,
+      fromX, fromY, toX, toY,
+      t: 0, life, onArrive, arrived: false,
+    });
+  }
+
   function updateParticles(dt) {
     for (const p of particles) {
       p.t += dt;
       if (p.kind === "spark") {
         p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 240 * dt;
+      } else if (p.kind === "fireball") {
+        const e = Math.min(1, p.t / p.life);
+        p.x = p.fromX + (p.toX - p.fromX) * e;
+        p.y = p.fromY + (p.toY - p.fromY) * e;
       } else {
         p.y -= p.vy * dt; p.x += p.vx * dt;
+      }
+    }
+    for (const p of particles) {
+      if (p.kind === "fireball" && p.t >= p.life && !p.arrived) {
+        p.arrived = true;
+        if (p.onArrive) p.onArrive();
       }
     }
     particles = particles.filter((p) => p.t < p.life);
@@ -512,19 +532,27 @@
       } else if (type === "ember") {
         if (run.boss) {
           const dmg = Math.max(1, Math.round(n * emberDmgPerTile * mult));
-          run.boss.hp -= dmg;
-          run.boss.hitFlash = 0.15;
           const bp = bossPos();
-          popTextAt(bp.x, bp.y, `-${dmg}`, "#ff6b81");
-          spawnSparksAt(bp.x, bp.y, "#ff4d6d", 6 + n);
-          triggerShake(3, 0.08);
+          spawnFireball(cx, cy, bp.x, bp.y, () => {
+            if (!run || !run.boss) return;
+            run.boss.hp -= dmg;
+            run.boss.hitFlash = 0.15;
+            popTextAt(bp.x, bp.y, `-${dmg}`, "#ff6b81");
+            spawnSparksAt(bp.x, bp.y, "#ff4d6d", 6 + n);
+            triggerShake(3, 0.08);
+            sfx("bossHit");
+            if (run.boss.hp <= 0 && gameState === "playing" && phase === "idle") {
+              endEncounter(true);
+            }
+          });
+          sfx("attack");
         } else {
           const g = Math.max(1, Math.round(n * 1.5 * mult));
           run.gold += g;
           popTextAt(cx, cy, `+${g}💰`, "#ff6a3d");
           spawnSparksAt(cx, cy, "#ff6a3d", 4 + n);
+          sfx("attack");
         }
-        sfx("attack");
       } else if (type === "crystal") {
         const g = Math.max(1, Math.round(n * mult));
         const xp = Math.max(1, Math.round(n * mult));
@@ -1023,17 +1051,36 @@
 
   function drawParticles() {
     for (const p of particles) {
-      const a = 1 - p.t / p.life;
       ctx.save();
-      ctx.globalAlpha = Math.max(0, a);
       if (p.kind === "spark") {
+        const a = 1 - p.t / p.life;
+        ctx.globalAlpha = Math.max(0, a);
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
         ctx.shadowBlur = 6;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * (0.4 + a * 0.6), 0, Math.PI * 2);
         ctx.fill();
+      } else if (p.kind === "fireball") {
+        const angle = Math.atan2(p.toY - p.fromY, p.toX - p.fromX);
+        for (let i = 3; i >= 1; i--) {
+          const back = i * 7;
+          ctx.globalAlpha = 0.5 - i * 0.12;
+          ctx.fillStyle = "#ff6a3d";
+          ctx.beginPath();
+          ctx.arc(p.x - Math.cos(angle) * back, p.y - Math.sin(angle) * back, 6 - i, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.shadowColor = "#ff4d1f";
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = "#ffd23d";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+        ctx.fill();
       } else {
+        const a = 1 - p.t / p.life;
+        ctx.globalAlpha = Math.max(0, a);
         ctx.fillStyle = p.color;
         ctx.font = "bold 14px sans-serif";
         ctx.textAlign = "center";

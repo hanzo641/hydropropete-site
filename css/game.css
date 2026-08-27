@@ -159,12 +159,8 @@ html, body {
 }
 
 .boss-bar {
-  position: absolute;
-  top: calc(var(--safe-top) + 10px);
-  left: 50%;
-  transform: translateX(-50%);
   width: min(320px, 80vw);
-  z-index: 6;
+  margin: 10px auto 0;
   text-align: center;
 }
 
