@@ -34,13 +34,17 @@
     <div class="hud-stats">
       <span id="hudLevel">Rang E · Nv 1</span>
       <span id="hudMoves">🎯 0/0</span>
+      <span id="hudTimer" class="hud-timer">⏱ 1:00</span>
       <span id="hudGold">💰 0</span>
     </div>
   </div>
 
   <div id="bossBar" class="boss-bar hidden">
     <span id="bossName">Gardien de la Faille</span>
-    <div class="bar"><div id="bossFill" class="bar-fill boss"></div></div>
+    <div class="bar boss-hp-bar">
+      <div id="bossFill" class="bar-fill boss"></div>
+      <span id="bossHpText" class="boss-hp-text">0/0 PV</span>
+    </div>
     <span id="bossStrikeInfo" class="boss-strike-info">Prochain coup dans 4 coup(s)</span>
   </div>
 
@@ -112,6 +116,7 @@
       <li>Aligne des <strong>Ombres</strong> : tous les 5, ton Armée d'Ombres intercepte gratuitement le prochain coup de l'adversaire</li>
       <li>Une chute qui recrée un alignement déclenche un <strong>combo</strong> : les gains sont multipliés à chaque cascade</li>
       <li>Le monstre ou Gardien frappe après un nombre de coups fixe — surveille le compte à rebours affiché au-dessus du plateau</li>
+      <li>Un <strong>chronomètre</strong> tourne aussi : à 0, le combat est perdu même s'il te restait des coups — ne traîne pas !</li>
       <li>Ton <strong>Rang de Chasseur</strong> (E → S) monte avec ton niveau ; la Quête du Système (liée à Strava) rapporte des Clés de Faille</li>
     </ul>
     <button id="howBackBtn" class="btn btn-ghost">Retour</button>

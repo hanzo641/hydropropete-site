@@ -271,6 +271,7 @@
 
   function newRun(dungeonTier) {
     const movesTotal = (dungeonTier ? dungeonTier.moves : floorMoves(save.currentFloor)) + save.upgrades.moves * 2;
+    const timeLimit = Math.round(movesTotal * (dungeonTier ? 3.6 : 3.0));
     return {
       mode: dungeonTier ? "dungeon" : "floor",
       tier: dungeonTier || null,
@@ -281,6 +282,8 @@
       xpGained: 0,
       movesLeft: movesTotal,
       movesTotal,
+      timeLeft: timeLimit,
+      timeTotal: timeLimit,
       bestCombo: 0,
       shadowArmy: 0,
       shadowChargeReady: false,
@@ -1052,6 +1055,10 @@
     dt = Math.min(dt, 0.05);
 
     runTimer += dt;
+    if (run) {
+      run.timeLeft = Math.max(0, run.timeLeft - dt);
+      if (run.timeLeft <= 0) endEncounter(false);
+    }
     update(dt);
     draw();
     updateHud();
@@ -1068,6 +1075,14 @@
   const hudLevel = document.getElementById("hudLevel");
   const hudMoves = document.getElementById("hudMoves");
   const hudGold = document.getElementById("hudGold");
+  const hudTimer = document.getElementById("hudTimer");
+
+  function formatTime(seconds) {
+    const t = Math.ceil(seconds);
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return `⏱ ${m}:${String(s).padStart(2, "0")}`;
+  }
 
   function updateHud() {
     if (!run) return;
@@ -1078,12 +1093,15 @@
       : `Rang ${rankForLevel(save.level)} · Nv ${save.level}`;
     hudMoves.textContent = `🎯 ${run.movesLeft}/${run.movesTotal}`;
     hudGold.textContent = `💰 ${run.gold}`;
+    hudTimer.textContent = formatTime(run.timeLeft);
+    hudTimer.classList.toggle("low", run.timeLeft <= 10);
 
     const bossBarEl = document.getElementById("bossBar");
     if (run.boss) {
       bossBarEl.classList.remove("hidden");
       document.getElementById("bossName").textContent = run.mode === "dungeon" ? "Gardien de la Faille" : "Monstre de l'Étage";
       document.getElementById("bossFill").style.width = `${Math.max(0, (run.boss.hp / run.boss.maxHp) * 100)}%`;
+      document.getElementById("bossHpText").textContent = `${Math.max(0, run.boss.hp)}/${run.boss.maxHp} PV`;
       const left = Math.max(0, run.boss.strikeEvery - run.boss.movesSinceStrike);
       document.getElementById("bossStrikeInfo").textContent = `Prochain coup dans ${left} coup(s)`;
     } else {
@@ -1340,7 +1358,9 @@
       document.getElementById("resBest").textContent = `×${save.bestCombo}`;
       document.getElementById("gameOverMsg").textContent = run.hp <= 0
         ? `Le monstre de l'Étage t'a terrassé (${run.boss.hp}/${run.boss.maxHp} PV restants). Retente ta chance !`
-        : `À court de coups — le monstre avait encore ${run.boss.hp}/${run.boss.maxHp} PV. Retente ta chance !`;
+        : run.timeLeft <= 0
+          ? `Le temps est écoulé — le monstre avait encore ${run.boss.hp}/${run.boss.maxHp} PV. Retente ta chance !`
+          : `À court de coups — le monstre avait encore ${run.boss.hp}/${run.boss.maxHp} PV. Retente ta chance !`;
       hud.classList.add("hidden");
       showScreen("gameover");
     }

@@ -185,7 +185,46 @@ html, body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.7);
 }
 
-.bar-fill.boss { background: linear-gradient(90deg, #7a0f22, var(--accent-red)); }
+.boss-hp-bar {
+  position: relative;
+  height: 16px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,120,140,0.45);
+  box-shadow: 0 0 10px rgba(255,60,90,0.3);
+}
+
+.bar-fill.boss {
+  background: linear-gradient(90deg, #ff2e55, #ff9a4d);
+  box-shadow: 0 0 8px rgba(255,60,90,0.65);
+}
+
+.boss-hp-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9);
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+.hud-timer {
+  transition: color 0.2s ease;
+}
+
+.hud-timer.low {
+  color: #ff4d6d;
+  animation: timerPulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes timerPulse {
+  from { opacity: 1; }
+  to { opacity: 0.45; }
+}
 
 @keyframes toastPop {
   0% { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
