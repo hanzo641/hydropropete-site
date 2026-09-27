@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Toutes les lectures/écritures passent par le serveur Next.js (Firebase Admin SDK),
+// après vérification du cookie de session et du statut d'abonnement.
+// Aucun accès direct depuis le navigateur : surface d'attaque minimale.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

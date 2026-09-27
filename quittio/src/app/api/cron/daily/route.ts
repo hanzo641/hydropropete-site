@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
-import { runDailyAutomation } from "@/lib/automation";
+import { purgeExpiredAccounts, runDailyAutomation } from "@/lib/automation";
 
 export const maxDuration = 300;
 
@@ -17,5 +17,11 @@ function authorized(req: NextRequest): boolean {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const report = await runDailyAutomation();
-  return NextResponse.json(report, { status: report.errors.length ? 207 : 200 });
+  let purged = 0;
+  try {
+    purged = await purgeExpiredAccounts();
+  } catch (e) {
+    report.errors.push(`purge: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  return NextResponse.json({ ...report, purged }, { status: report.errors.length ? 207 : 200 });
 }

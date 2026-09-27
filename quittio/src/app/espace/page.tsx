@@ -12,7 +12,7 @@ import { ActionButton } from "@/components/app/action-button";
 import { PlanPicker } from "@/components/app/plan-picker";
 import { StatusBadge } from "@/components/app/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function DashboardPage({ searchParams }: PageProps<"/espace">) {
   const sp = await searchParams;

@@ -1,7 +1,9 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
+import { BlogCta } from "@/components/marketing/blog-cta";
 
 const components: MDXComponents = {
+  Cta: BlogCta,
   a: ({ href = "", children, ...props }) =>
     href.startsWith("/") ? (
       <Link href={href} {...props}>

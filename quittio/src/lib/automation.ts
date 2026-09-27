@@ -1,5 +1,5 @@
 import "server-only";
-import { adminDb } from "./firebase/admin";
+import { adminAuth, adminDb } from "./firebase/admin";
 import { col, type UserDoc } from "./db";
 import { ACTIVE_STATUSES, getPlan } from "./plans";
 import { addMonths, automationActions, diffDays, formatPeriod, nextAnniversary, periodOf, todayParis } from "./rent";
@@ -63,26 +63,35 @@ async function processLease(uid: string, user: UserDoc, lease: Lease, automation
     }
   }
 
-  // Rappel de révision IRL au bailleur, 30 jours avant la date anniversaire (toutes formules).
-  const anniversary = nextAnniversary(lease.startDate, today);
-  const days = diffDays(anniversary, today);
-  if (days <= 30 && lease.revisionReminderFor !== anniversary && user.email) {
+  // Rappel de révision IRL au bailleur (toutes formules) : dans les 30 jours précédant
+  // la date anniversaire, ou jusqu'à 90 jours après si l'indice est publié tardivement.
+  const next = nextAnniversary(lease.startDate, today);
+  const prev = `${Number(next.slice(0, 4)) - 1}${next.slice(4)}`;
+  const candidates = [
+    { date: next, ok: diffDays(next, today) <= 30 },
+    { date: prev, ok: prev > lease.startDate && diffDays(today, prev) <= 90 && !(lease.lastRevisionDate && lease.lastRevisionDate >= prev) },
+  ];
+  const target = candidates.find((c) => c.ok && lease.revisionReminderFor !== c.date);
+  if (target && user.email) {
     const r = computeRevision({ rentCents: lease.rentCents, referenceQuarter: lease.irlReferenceQuarter, dpeClass: lease.dpeClass });
     if (r.ok && r.increaseCents > 0) {
       await sendEmail({
         to: user.email,
         ...templates.ownerAlert({
-          title: `Révision de loyer possible le ${formatDateFr(anniversary)} — ${lease.propertyLabel}`,
+          title: `Révision de loyer possible — ${lease.propertyLabel}`,
           lines: [
-            `La date anniversaire du bail de ${lease.tenantName} approche. Avec le nouvel IRL, le loyer hors charges peut passer de ${formatEuros(lease.rentCents)} à ${formatEuros(r.newRentCents)} (+${String(r.percent).replace(".", ",")} %).`,
-            "La révision n'est pas rétroactive : pensez à envoyer la lettre à votre locataire. Elle est prête à télécharger.",
+            `Date anniversaire du bail de ${lease.tenantName} : ${formatDateFr(target.date)}. Avec le nouvel IRL, le loyer hors charges peut passer de ${formatEuros(lease.rentCents)} à ${formatEuros(r.newRentCents)} (+${String(r.percent).replace(".", ",")} %).`,
+            "La révision n'est pas rétroactive : envoyez la lettre à votre locataire sans tarder. Elle est prête à télécharger.",
           ],
           cta: { label: "Préparer la révision", href: absoluteUrl(`/espace/logements/${lease.id}#revision`) },
         }),
       });
       bump("revision_reminder");
+      await leasesCol(uid).doc(lease.id).update({ revisionReminderFor: target.date });
+    } else if (!r.ok && r.reason !== "no_new_index") {
+      // Logement gelé (DPE F/G) ou référence inconnue : inutile de revérifier chaque jour.
+      await leasesCol(uid).doc(lease.id).update({ revisionReminderFor: target.date });
     }
-    await leasesCol(uid).doc(lease.id).update({ revisionReminderFor: anniversary });
   }
 }
 
@@ -109,4 +118,18 @@ export async function runDailyAutomation(now = new Date()): Promise<RunReport> {
     }
   }
   return report;
+}
+
+/** Purge des comptes dont l'abonnement est terminé depuis plus de 12 mois (durée de conservation annoncée dans la politique de confidentialité). */
+export async function purgeExpiredAccounts(now = Date.now()): Promise<number> {
+  const cutoff = now - 365 * 24 * 60 * 60 * 1000;
+  const db = adminDb();
+  const snap = await db.collection(col.users).where("subscription.status", "==", "canceled").where("subscription.updatedAt", "<", cutoff).limit(50).get();
+  for (const doc of snap.docs) {
+    const user = doc.data() as UserDoc;
+    await db.recursiveDelete(doc.ref);
+    if (user.referralCode) await db.collection(col.referralCodes).doc(user.referralCode).delete().catch(() => {});
+    await adminAuth().deleteUser(doc.id).catch(() => {});
+  }
+  return snap.size;
 }
