@@ -5,7 +5,6 @@ export const metadata: Metadata = {
   title: "Connexion",
   description: "Connectez-vous à votre espace propriétaire Quittio.",
   alternates: { canonical: "/connexion" },
-  robots: { index: false, follow: true },
 };
 
 export default function LoginPage({ searchParams }: PageProps<"/connexion">) {

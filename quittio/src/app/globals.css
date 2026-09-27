@@ -25,7 +25,7 @@
   --accent-foreground: oklch(0.3 0.12 272);
   --destructive: oklch(0.53 0.21 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.52 0.13 155);
+  --success: oklch(0.47 0.12 155);
   --warning: oklch(0.6 0.14 70);
   --border: oklch(0.915 0.008 270);
   --input: oklch(0.88 0.01 270);
@@ -98,6 +98,11 @@
     from { height: var(--radix-accordion-content-height); }
     to { height: 0; }
   }
+}
+
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: none; }
 }
 
 @layer base {

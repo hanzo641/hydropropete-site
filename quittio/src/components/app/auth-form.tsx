@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import {
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  updateProfile,
-  type User,
-} from "firebase/auth";
-import { clientAuth, firebaseConfigured } from "@/lib/firebase/client";
+import type { User } from "firebase/auth";
+import { firebaseConfigured } from "@/lib/firebase/config";
+
+/** Le SDK Firebase (~100 Ko) n'est chargé qu'au moment où l'utilisateur agit, pour garder la page légère. */
+let sdkPromise: Promise<typeof import("firebase/auth") & { auth: import("firebase/auth").Auth }> | undefined;
+function sdk() {
+  sdkPromise ??= Promise.all([import("firebase/auth"), import("@/lib/firebase/client")]).then(([mod, client]) => ({ ...mod, auth: client.clientAuth() }));
+  return sdkPromise;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,11 +39,18 @@ export function AuthForm({ mode, next, plan, interval }: { mode: "login" | "sign
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
+  // Préchargement du SDK une fois la page affichée : la fenêtre Google s'ouvre ensuite sans délai (bloqueurs de pop-up).
+  useEffect(() => {
+    if (!firebaseConfigured) return;
+    const t = setTimeout(() => void sdk().catch(() => {}), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
   async function finish(user: User) {
     const idToken = await user.getIdToken(true);
     const res = await fetch("/api/auth/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ idToken }) });
     if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? "Connexion impossible");
-    await clientAuth().signOut(); // la session serveur (cookie httpOnly) prend le relais
+    await (await sdk()).auth.signOut(); // la session serveur (cookie httpOnly) prend le relais
     if (plan && interval) {
       const checkout = await fetch("/api/stripe/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ plan, interval }) });
       const data = await checkout.json().catch(() => ({}));
@@ -62,7 +68,8 @@ export function AuthForm({ mode, next, plan, interval }: { mode: "login" | "sign
     setError(null);
     setLoading("google");
     try {
-      const cred = await signInWithPopup(clientAuth(), new GoogleAuthProvider());
+      const { auth, signInWithPopup, GoogleAuthProvider } = await sdk();
+      const cred = await signInWithPopup(auth, new GoogleAuthProvider());
       await finish(cred.user);
     } catch (e) {
       setError(message(e));
@@ -76,14 +83,15 @@ export function AuthForm({ mode, next, plan, interval }: { mode: "login" | "sign
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
     try {
+      const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } = await sdk();
       if (mode === "signup") {
         if (password.length < 8) throw Object.assign(new Error(), { code: "auth/weak-password" });
-        const cred = await createUserWithEmailAndPassword(clientAuth(), email, password);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
         const name = String(form.get("name") ?? "").trim();
         if (name) await updateProfile(cred.user, { displayName: name });
         await finish(cred.user);
       } else {
-        const cred = await signInWithEmailAndPassword(clientAuth(), email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
         await finish(cred.user);
       }
     } catch (e) {
@@ -101,7 +109,8 @@ export function AuthForm({ mode, next, plan, interval }: { mode: "login" | "sign
       return;
     }
     try {
-      await sendPasswordResetEmail(clientAuth(), email);
+      const { auth, sendPasswordResetEmail } = await sdk();
+      await sendPasswordResetEmail(auth, email);
       setInfo("Si un compte existe, un e-mail de réinitialisation vient d'être envoyé.");
     } catch (e) {
       setError(message(e));

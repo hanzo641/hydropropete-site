@@ -1,12 +1,18 @@
 "use client";
 
-import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
+import { LazyMotion, m, useReducedMotion } from "framer-motion";
 
-/** Apparition discrète au défilement. Désactivée si l'utilisateur préfère réduire les animations. */
+const loadFeatures = () => import("@/lib/motion-features").then((mod) => mod.default);
+
+/**
+ * Apparition discrète au défilement (Framer Motion). Les fonctionnalités
+ * d'animation sont chargées de façon asynchrone pour ne pas pénaliser le
+ * chargement initial ; désactivée si l'utilisateur préfère réduire les animations.
+ */
 export function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
   const reduce = useReducedMotion();
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={loadFeatures} strict>
       <m.div
         className={className}
         initial={reduce ? false : { opacity: 0, y: 16 }}

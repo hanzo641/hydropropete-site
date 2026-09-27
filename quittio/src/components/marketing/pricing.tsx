@@ -56,8 +56,8 @@ export function Pricing({ headingLevel = "h3" }: { headingLevel?: "h2" | "h3" })
                 {interval === "year" ? `soit ${formatEuros(price)} facturés par an` : "sans engagement"}
               </p>
               <Button asChild className="mt-6 w-full" variant={plan.highlighted ? "default" : "outline"} size="lg">
-                <Link href={`/inscription?plan=${plan.id}&interval=${interval}`} aria-label={`Essayer la formule ${plan.name} gratuitement pendant ${TRIAL_DAYS} jours`}>
-                  Essayer {TRIAL_DAYS} jours gratuits
+                <Link href={`/inscription?plan=${plan.id}&interval=${interval}`}>
+                  Essayer {TRIAL_DAYS} jours gratuits<span className="sr-only"> avec la formule {plan.name}</span>
                 </Link>
               </Button>
               <ul className="mt-8 space-y-3 text-sm">

@@ -47,7 +47,7 @@ export function ProductMock() {
           <p className="text-xs text-muted-foreground">PDF · septembre 2026</p>
         </div>
       </div>
-      <div className="absolute -right-3 -top-5 hidden items-center gap-3 rounded-xl border bg-popover p-3 shadow-xl sm:flex" aria-hidden>
+      <div className="absolute -right-4 -top-16 hidden items-center gap-3 rounded-xl border bg-popover p-3 shadow-xl sm:flex" aria-hidden>
         <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
           <Bell className="size-5" />
         </span>

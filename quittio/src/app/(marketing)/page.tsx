@@ -108,9 +108,9 @@ export default function HomePage() {
               <li className="flex items-center gap-2"><ShieldCheck className="size-4 text-success" aria-hidden /> Dès 4,90 €/mois</li>
             </ul>
           </div>
-          <Reveal delay={0.1}>
+          <div className="animate-[hero-in_0.7s_ease-out_0.1s_both] motion-reduce:animate-none">
             <ProductMock />
-          </Reveal>
+          </div>
         </div>
       </section>
 
