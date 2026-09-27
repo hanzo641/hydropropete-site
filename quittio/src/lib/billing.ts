@@ -42,7 +42,10 @@ export async function syncSubscription(subscriptionId: string): Promise<{ uid: s
   const uid = sub.metadata.uid || (await uidForCustomer(customerId));
   if (!uid) return null;
   const ref = adminDb().collection(col.users).doc(uid);
-  const before = ((await ref.get()).data() as UserDoc | undefined)?.subscription;
+  const snap = await ref.get();
+  // Compte supprimé entre-temps : on ne recrée pas de document fantôme.
+  if (!snap.exists) return null;
+  const before = (snap.data() as UserDoc).subscription;
   // Un client qui a plusieurs abonnements (ex. résiliation puis ré-abonnement) :
   // on ne remplace pas un abonnement actif par un ancien abonnement terminé.
   if (before && before.id !== sub.id && ["active", "trialing", "past_due"].includes(before.status) && ["canceled", "incomplete_expired"].includes(sub.status)) {

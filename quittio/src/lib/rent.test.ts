@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addMonths, automationActions, dueDateFor, nextAnniversary, paymentStatus, todayParis } from "./rent";
+import { addMonths, automationActions, dueDateFor, nextAnniversary, paymentStatus, revisionEffectiveDate, todayParis } from "./rent";
 
 describe("échéances", () => {
   it("borne le jour d'échéance à la fin du mois", () => {
@@ -54,5 +54,17 @@ describe("automatisations", () => {
 
   it("ne fait rien si le loyer est payé", () => {
     expect(automationActions({ ...base, today: "2026-09-20", status: "paid" })).toEqual([]);
+  });
+});
+
+describe("date d'effet de la révision", () => {
+  it("applique à la date anniversaire à venir la première année", () => {
+    expect(revisionEffectiveDate("2026-03-01", null, "2026-09-27")).toBe("2027-03-01");
+  });
+  it("applique à compter de la demande si l'anniversaire est passé sans révision", () => {
+    expect(revisionEffectiveDate("2023-03-01", null, "2026-09-27")).toBe("2026-09-27");
+  });
+  it("attend l'anniversaire suivant si déjà révisé cette année", () => {
+    expect(revisionEffectiveDate("2023-03-01", "2026-03-02", "2026-09-27")).toBe("2027-03-01");
   });
 });

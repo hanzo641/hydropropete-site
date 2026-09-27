@@ -99,3 +99,17 @@ export function automationActions(i: AutomationInput): AutomationAction[] {
   }
   return actions;
 }
+
+/**
+ * Date d'effet d'une révision demandée aujourd'hui. Depuis la loi ALUR, la
+ * révision n'est pas rétroactive : si la date anniversaire est passée sans
+ * révision, le nouveau loyer s'applique à compter de la demande.
+ */
+export function revisionEffectiveDate(startDate: string, lastRevisionDate: string | null | undefined, today: string): string {
+  const next = nextAnniversary(startDate, today);
+  const prev = `${Number(next.slice(0, 4)) - 1}${next.slice(4)}`;
+  const firstYear = prev <= startDate;
+  const alreadyRevised = !!lastRevisionDate && lastRevisionDate >= prev;
+  if (firstYear || alreadyRevised || next === today) return next;
+  return today;
+}

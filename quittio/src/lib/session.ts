@@ -34,7 +34,7 @@ export const getAccount = cache(async (): Promise<Account | null> => {
   const session = await getSessionUser();
   if (!session) return null;
   const snap = await adminDb().collection(col.users).doc(session.uid).get();
-  const user = (snap.data() as UserDoc | undefined) ?? (await ensureUserDoc(session.uid, session.email));
+  const user = (snap.data() as UserDoc | undefined) ?? (await ensureUserDoc(session.uid, session.email)).user;
   const status = user.subscription?.status;
   return {
     uid: session.uid,
@@ -65,12 +65,12 @@ function newReferralCode(): string {
 }
 
 /** Crée le document utilisateur au premier login (idempotent). */
-export async function ensureUserDoc(uid: string, email: string, displayName?: string, referralCode?: string): Promise<UserDoc> {
+export async function ensureUserDoc(uid: string, email: string, displayName?: string, referralCode?: string): Promise<{ user: UserDoc; created: boolean }> {
   const db = adminDb();
   const ref = db.collection(col.users).doc(uid);
   return db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    if (snap.exists) return snap.data() as UserDoc;
+    if (snap.exists) return { user: snap.data() as UserDoc, created: false };
     let referredBy: string | undefined;
     if (referralCode) {
       const codeSnap = await tx.get(db.collection(col.referralCodes).doc(referralCode.toUpperCase()));
@@ -88,6 +88,6 @@ export async function ensureUserDoc(uid: string, email: string, displayName?: st
     };
     tx.set(ref, doc);
     tx.set(db.collection(col.referralCodes).doc(code), { uid });
-    return doc;
+    return { user: doc, created: true };
   });
 }
