@@ -14,10 +14,11 @@ export async function AuthCard({ mode, searchParams }: { mode: "login" | "signup
   const interval = isInterval(sp.interval) ? sp.interval : plan ? "month" : undefined;
   const session = await getSessionUser();
 
-  if (session && !plan) redirect(sp.next?.startsWith("/") ? sp.next : "/espace");
+  const safeNext = sp.next && /^\/(?![/\\])/.test(sp.next) ? sp.next : undefined;
+  if (session && !plan) redirect(safeNext ?? "/espace");
 
   const selected = plan ? getPlan(plan) : undefined;
-  const qs = new URLSearchParams(Object.entries({ plan, interval, next: sp.next }).filter(([, v]) => v) as [string, string][]).toString();
+  const qs = new URLSearchParams(Object.entries({ plan, interval, next: safeNext }).filter(([, v]) => v) as [string, string][]).toString();
 
   return (
     <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl sm:p-8">
@@ -43,7 +44,7 @@ export async function AuthCard({ mode, searchParams }: { mode: "login" | "signup
             </Button>
           </form>
         ) : (
-          <AuthForm mode={mode} next={sp.next} plan={plan} interval={interval} />
+          <AuthForm mode={mode} next={safeNext} plan={plan} interval={interval} />
         )}
       </div>
       <p className="mt-6 text-center text-sm text-muted-foreground">

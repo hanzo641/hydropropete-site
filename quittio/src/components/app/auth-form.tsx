@@ -60,7 +60,7 @@ export function AuthForm({ mode, next, plan, interval }: { mode: "login" | "sign
       }
       throw new Error(data.error ?? "Paiement indisponible");
     }
-    router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : "/espace");
+    router.replace(next && /^\/(?![/\\])/.test(next) ? next : "/espace");
     router.refresh();
   }
 
