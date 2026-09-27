@@ -48,7 +48,7 @@ Grille de notation (chaque critère sur 10, total sur 60) :
 - **#7 facturation électronique** : le sujet le plus « chaud » de 2026, mais
   impose de passer par une Plateforme Agréée (PA) → pas de produit jour 1.
 - **#14 ménage à domicile** : récurrent et rentable mais non automatisable
-  (c'est un métier de terrain, déjà exercé par HydroPropreté — voir DECISIONS.md).
+  (c'est un métier de terrain, limité à une zone géographique).
 
 ---
 
@@ -228,13 +228,3 @@ Scénario optimiste (1 article viral / partenariat) : 600+ abonnés à M+12.
 | Vendredi | Veille juridique locative (Service-public.fr, ANIL, Légifrance) + vérifier la publication trimestrielle de l'IRL (mi-janvier, mi-avril, mi-juillet, mi-octobre) et mettre à jour `src/lib/irl.ts` | 20 min |
 | Vendredi | Vérifier les logs Vercel (cron quotidien OK, erreurs webhooks) et les rebonds Resend | 15 min |
 
----
-
-## 3. Pourquoi pas une activité liée à HydroPropreté ?
-
-Ce dépôt héberge aussi le site vitrine d'HydroPropreté (nettoyage à Pau).
-L'idée « abonnement d'entretien ménager » (#14) a été évaluée : elle est
-rentable localement mais ne passe pas le critère d'automatisation et reste
-limitée géographiquement. Quittio est donc un business indépendant, construit
-dans le sous-dossier `quittio/` pour ne pas perturber le site existant (voir
-`DECISIONS.md`).

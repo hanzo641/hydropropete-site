@@ -24,8 +24,6 @@ Voir `SEO.md` pour les mots-clés et le plan éditorial. Actions concrètes :
 
 Un profil d'établissement Google exige une adresse où recevoir des clients ou une zone de service physique ; un logiciel 100 % en ligne n'y est pas éligible selon les consignes Google, et un profil fictif risque la suspension. **On ne le crée pas.** À la place : fiche **Trustpilot** / **Google avis via le site** plus tard, et présence sur les annuaires SaaS.
 
-> Exception utile : **HydroPropreté** (Pau) a un profil Google et une clientèle de propriétaires (remise en état, fin de chantier). Voir partenariats.
-
 ## 3. Communautés où se trouve le persona
 
 Règle d'or : **apporter de la valeur d'abord** (réponse complète, sourcée), mentionner l'outil gratuit seulement s'il répond à la question, jamais de lien commercial brut. Se présenter comme fondateur quand on parle du produit.
@@ -48,7 +46,7 @@ Règle d'or : **apporter de la valeur d'abord** (réponse complète, sourcée), 
 | **Diagnostiqueurs immobiliers** | Contact avec chaque bailleur avant mise en location | Flyer + code | 5 diagnostiqueurs pilotes |
 | **Assureurs PNO / GLI, Visale** | Moins d'impayés si relances rapides | Contenu commun sur la prévention des impayés | Partenariat de contenu |
 | **Agences « mise en location seule »** | Elles ne gèrent pas, leurs clients cherchent un outil | Commission 20 % la 1re année (via parrainage manuel) | Contrat simple |
-| **HydroPropreté (Pau)** | Ses clients propriétaires ont besoin de remise en état entre deux locataires | Carte « Quittio » remise après chaque prestation fin de bail ; article « préparer un logement entre deux locataires » avec lien HydroPropreté | Immédiat, coût nul |
+| **Entreprises de nettoyage / remise en état locales** | Leurs clients propriétaires ont besoin de remise en état entre deux locataires | Carte « Quittio » remise après chaque prestation de fin de bail ; article croisé « préparer un logement entre deux locataires » | Coût nul |
 
 ## 5. Parrainage intégré au produit (déjà développé)
 

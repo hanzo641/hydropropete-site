@@ -38,7 +38,6 @@ Légende : ⏱ temps actif · ⌛ délai d'attente · 💶 coût
 | 18 | **Fiches annuaires** : Capterra/GetApp, Appvizer, Product Hunt (jour de lancement). | 1 h | — | 0 € |
 | 19 | **Bêta privée** : inviter 10 propriétaires de votre entourage (formule offerte 3 mois via un code promo Stripe), recueillir **5 avis réels** et l'autorisation de les publier → ajouter une section témoignages (jamais de faux avis). | 2 h | 2–4 sem. | 0 € |
 | 20 | **Lancement communautés** : premiers posts de `GROWTH.md` (§6), 2 réponses/semaine dans les groupes de bailleurs. | 1 h | — | 0 € |
-| 21 | **Partenariat HydroPropreté** : carte/QR code Quittio remis aux clients propriétaires après les prestations de fin de bail. | 30 min | — | ~30 € d'impression |
 
 ## Phase D — Récurrent (voir BUSINESS.md, ~4 h/semaine)
 
@@ -48,8 +47,6 @@ Légende : ⏱ temps actif · ⌛ délai d'attente · 💶 coût
 - **Surveillance du seuil de franchise de TVA** : au dépassement, activer Stripe Tax et mettre à jour la mention TVA dans `src/lib/site.ts`.
 
 ## Points techniques à connaître
-
-- Le site HydroPropreté est publié depuis la racine du dépôt : une règle `/quittio/*` → 404 a été ajoutée dans `netlify.toml`. **Si HydroPropreté est servi par Cloudflare Pages**, cette règle ne s'applique pas : extraire Quittio dans son propre dépôt (`git subtree split -P quittio -b quittio-only`, puis pousser cette branche vers un nouveau dépôt) — 15 min, recommandé à terme dans tous les cas.
 
 - `npm audit` signale 2 vulnérabilités modérées dans une dépendance transitive de `firebase-admin` (`uuid` via `gaxios`), sans impact sur l'usage fait ici ; se résoudra avec une mise à jour de `firebase-admin`. Relancer `npm audit` chaque mois.
 - Les tests automatisés couvrent la logique métier (IRL, échéances, relances, PDF). Les parcours Firebase/Stripe se valident avec la procédure du README §3 (nécessite vos comptes).

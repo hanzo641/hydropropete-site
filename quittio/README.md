@@ -10,8 +10,6 @@
 | [DECISIONS.md](./DECISIONS.md) | Les choix techniques et business, et pourquoi |
 | [TODO.md](./TODO.md) | Actions humaines restantes, dans l'ordre, avec temps estimé |
 
-> Ce dossier est un projet autonome, placé dans le dépôt du site HydroPropreté sans y toucher. Sur Vercel, il se déploie avec **Root Directory = `quittio`**.
-
 ---
 
 ## Stack
@@ -27,7 +25,7 @@
 ## Arborescence
 
 ```
-quittio/
+./
 ├── src/
 │   ├── app/
 │   │   ├── (marketing)/        accueil, tarifs, outils gratuits, blog, contact, légal, résiliation
@@ -133,8 +131,8 @@ curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/dail
 ## Déploiement sur Vercel (pas à pas, ≈ 20 min)
 
 1. Poussez le dépôt sur GitHub (c'est déjà le cas).
-2. [vercel.com/new](https://vercel.com/new) → importez le dépôt `hydropropete-site`.
-3. **Root Directory : `quittio`** (bouton *Edit*). Framework : Next.js (détecté). Build/Output : par défaut.
+2. [vercel.com/new](https://vercel.com/new) → importez le dépôt `quittio`.
+3. Framework : Next.js (détecté). Root Directory, Build et Output : par défaut.
 4. **Environment Variables** : collez le contenu de votre `.env.local` en adaptant :
    - `NEXT_PUBLIC_SITE_URL=https://www.quittio.fr` ;
    - clés Stripe **live** (`sk_live_…`, prix live) pour *Production*, clés **test** pour *Preview* ;

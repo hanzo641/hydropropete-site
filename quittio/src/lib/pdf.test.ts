@@ -8,9 +8,9 @@ describe("PDF", () => {
 
   it("génère une quittance valide", async () => {
     const bytes = await quittancePdf({
-      owner: { name: "Sophie Martin", address: "12 rue des Lilas, 64000 Pau" },
+      owner: { name: "Sophie Martin", address: "12 rue des Lilas, 33000 Bordeaux" },
       tenantName: "Léa Dupont",
-      propertyAddress: "3 place Clemenceau, 64000 Pau",
+      propertyAddress: "3 place Clemenceau, 33000 Bordeaux",
       period: "2026-09",
       rentCents: 62000,
       chargesCents: 4500,
