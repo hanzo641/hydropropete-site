@@ -30,13 +30,6 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Le dossier quittio/ est un projet Next.js distinct (déployé sur Vercel) : ne pas le servir ici.
-[[redirects]]
-  from = "/quittio/*"
-  to = "/404.html"
-  status = 404
-  force = true
-
 [[redirects]]
   from = "/*"
   to = "/404.html"

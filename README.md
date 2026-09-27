@@ -1,5 +1,3 @@
-> **Nouveau — Quittio** : le dossier [`quittio/`](./quittio) contient un produit SaaS indépendant (gestion locative par abonnement, Next.js), sans lien technique avec ce site. Voir [`quittio/README.md`](./quittio/README.md). Le site HydroPropreté ci-dessous n'est pas modifié.
-
 # HydroPropreté — Site vitrine premium
 
 Site statique (HTML5 / CSS moderne / Vanilla JS, sans framework ni dépendance)
