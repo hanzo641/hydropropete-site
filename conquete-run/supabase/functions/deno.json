@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "h3-js": "npm:h3-js@4.5.0",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  }
+}

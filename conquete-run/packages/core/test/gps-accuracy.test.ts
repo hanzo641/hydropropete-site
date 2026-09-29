@@ -24,6 +24,7 @@ function noisyDem(name: string, seed: number): DemProvider {
   const [p1, p2, l1, l2] = [r() * 6.28, r() * 6.28, 200 + r() * 200, 200 + r() * 200];
   return {
     name: 'grid+field',
+    resolution: 'fine',
     covers: (p) => grid.covers(p),
     elevations: async (pts) =>
       (await grid.elevations(pts)).map((e, i) => {

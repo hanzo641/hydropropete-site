@@ -235,8 +235,8 @@ describe('fournisseurs de MNT', () => {
     expect(calls).toBe(3);
   });
   it('chaîne : repli sur le fournisseur suivant en cas de panne', async () => {
-    const broken: DemProvider = { name: 'a', covers: () => true, elevations: async () => { throw new Error('down'); } };
-    const ok: DemProvider = { name: 'b', covers: () => true, elevations: async (p) => p.map((_, i) => 100 + i * 10) };
+    const broken: DemProvider = { name: 'a', resolution: 'fine', covers: () => true, elevations: async () => { throw new Error('down'); } };
+    const ok: DemProvider = { name: 'b', resolution: 'coarse', covers: () => true, elevations: async (p) => p.map((_, i) => 100 + i * 10) };
     const chain = new ChainDemProvider([broken, ok]);
     const track = Array.from({ length: 20 }, (_, i) => ({ lat: 43 + i * 20 * M, lng: 0 }));
     const r = await computeDemClimb(track, chain);
