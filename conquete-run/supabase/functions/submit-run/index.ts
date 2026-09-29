@@ -63,6 +63,16 @@ Deno.serve(
 
     const { data: profile } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
     if (!profile?.faction_id) throw new HttpError(403, 'onboarding_required');
+    const { data: consent } = await db.from('private_settings').select('gps_consent_at').eq('user_id', user.id).maybeSingle();
+    if (!consent?.gps_consent_at) throw new HttpError(403, 'gps_consent_required');
+
+    // Limitation de débit : au plus 12 envois par heure et par joueur.
+    const { count: recent } = await db
+      .from('runs')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', new Date(Date.now() - 3_600_000).toISOString());
+    if ((recent ?? 0) >= 12) throw new HttpError(429, 'rate_limited');
 
     // Idempotence : un renvoi (réseau coupé) renvoie le résultat déjà calculé.
     const { data: existing } = await db

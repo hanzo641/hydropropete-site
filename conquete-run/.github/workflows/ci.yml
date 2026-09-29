@@ -1,0 +1,28 @@
+# CI de Conquête Run. NB : GitHub n'exécute que les workflows à la racine d'un dépôt ;
+# ce fichier devient actif une fois conquete-run/ extrait dans son propre dépôt (TODO.md).
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Postgres + PostGIS + pgTAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-16-postgis-3 postgresql-16-pgtap libtap-parser-sourcehandler-pgtap-perl
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run check:edge
+      - run: npm run test:sql
+      - name: Bundle Metro (Android + iOS)
+        working-directory: apps/mobile
+        run: npx expo export --platform android --platform ios --output-dir .tmp/export

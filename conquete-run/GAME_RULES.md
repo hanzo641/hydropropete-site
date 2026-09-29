@@ -102,7 +102,9 @@ découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la car
 * Si `A ≥ 1,2 × G` : **le territoire tombe**. Il passe à l'équipe de l'attaquant avec une
   garnison égale au surplus `A − 1,2 × G`, **au minimum 1** (un territoire vient d'être pris
   par au moins un coureur : il ne peut pas être vide).
-* Sinon : la garnison est réduite de `A / 1,2`. Les troupes attaquantes sont perdues.
+* Sinon : la garnison est réduite de `A / 1,2`. Les troupes attaquantes sont perdues. Si la
+  garnison d'un territoire ennemi tombe sous 1, il devient une **ruine neutre** (sans
+  propriétaire, facile à prendre) puis redevient sauvage lors du traitement quotidien.
 * Exemple : garnison ennemie de 10. J'envoie 8 troupes → 10 − 8/1,2 = 3,33 restant.
   Un coéquipier envoie ensuite 5 troupes ≥ 1,2 × 3,33 = 4 → pris avec 1 de garnison.
   **La coordination d'équipe paie.**
@@ -158,7 +160,10 @@ Le serveur ne fait **jamais** confiance au client. Il reçoit la trace brute et 
    3 minutes** (véhicule) ; retire les sauts isolés impossibles ; signale les accélérations
    impossibles (> 6 m/s²) ;
 5. recalcule distance, D+ (modèle de terrain), territoires traversés, troupes et XP ;
-6. applique les plafonds journaliers.
+6. applique les plafonds journaliers, une limite de 12 envois par heure, et refuse toute
+   trace déjà validée (même envoyée par un autre compte) ;
+7. signale pour modération (sans rejet automatique) les traces « trop parfaites »,
+   les accélérations impossibles répétées et les longues coupures de signal.
 
 Chaque course rejetée apparaît dans le **journal des courses** du joueur avec la raison
 (ex. « Vitesse de véhicule détectée entre 12:04 et 12:09 »).

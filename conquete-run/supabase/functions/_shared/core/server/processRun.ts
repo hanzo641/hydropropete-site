@@ -17,6 +17,7 @@ import {
   countImpossibleAccelerations,
   detectTeleport,
   detectVehicle,
+  looksSynthetic,
   type Rejection,
   type RunSource,
   traceFingerprint,
@@ -153,6 +154,7 @@ export async function processRun(input: ProcessRunInput): Promise<ProcessRunResu
   const accelerations = countImpossibleAccelerations(points, ac);
   if (accelerations > ac.maxAccelerationEvents) flags.push(`accelerations:${accelerations}`);
   if (acc.gapBridgedM > distanceM * 0.2) flags.push(`gaps:${Math.round(acc.gapBridgedM)}m`);
+  if (input.source !== 'simulation' && looksSynthetic(raw)) flags.push('synthetic');
 
   // D+ par modèle numérique de terrain (jamais l'altitude GPS brute)
   let dplusM: number;

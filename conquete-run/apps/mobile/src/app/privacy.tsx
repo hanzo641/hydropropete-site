@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text } from 'react-native';
 import { wipeLocalData } from '@/features/run/storage';
 import { t } from '@/i18n';
-import { getPrivacySettings, invokeFunction, setPrivacyZone } from '@/lib/api';
+import { getGpsConsent, getPrivacySettings, invokeFunction, setGpsConsent, setPrivacyZone } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { Button, Card, ErrorText, Row, Screen } from '@/ui/components';
 import { colors, font, space } from '@/ui/theme';
@@ -27,8 +27,10 @@ export default function Privacy() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [consent, setConsent] = useState<boolean | null>(null);
 
   useEffect(() => {
+    void getGpsConsent().then(setConsent).catch(() => undefined);
     void getPrivacySettings()
       .then((s) => {
         if (!s) return;
@@ -122,6 +124,23 @@ export default function Privacy() {
             />
           )}
           {msg && <Text style={{ color: colors.success }}>{msg}</Text>}
+        </Card>
+        <Card>
+          <Text style={font.h3}>{t('privacy.consentTitle')}</Text>
+          <Text style={font.small}>{t('privacy.consentHelp')}</Text>
+          {consent != null && (
+            <Button
+              title={consent ? t('privacy.revokeConsent') : t('privacy.grantConsent')}
+              variant={consent ? 'ghost' : 'primary'}
+              loading={busy === 'consent'}
+              onPress={() =>
+                void wrap('consent', async () => {
+                  await setGpsConsent(!consent);
+                  setConsent(!consent);
+                })
+              }
+            />
+          )}
         </Card>
         <Card>
           <Text style={font.h3}>{t('privacy.export')}</Text>

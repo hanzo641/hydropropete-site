@@ -17,6 +17,7 @@ import {
   countImpossibleAccelerations,
   detectTeleport,
   detectVehicle,
+  looksSynthetic,
   traceFingerprint,
   validateRawTrace,
 } from '../src/gps/validation.ts';
@@ -200,6 +201,10 @@ describe('anti-triche', () => {
     expect(detectVehicle(points).detected).toBe(false);
     expect(countImpossibleAccelerations(points)).toBeLessThan(20);
     expect(detectTeleport(points).detected).toBe(false);
+  });
+  it('signale une trace trop parfaite, pas une trace réelle bruitée', () => {
+    expect(looksSynthetic(straightLine(300, 3))).toBe(true);
+    expect(looksSynthetic(simulateGps(loadReference('ville-pau'), PROFILES.ville, 1))).toBe(false);
   });
   it('empreinte stable', () => {
     const a = straightLine(100, 3);

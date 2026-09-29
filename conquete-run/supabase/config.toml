@@ -57,3 +57,9 @@ deno_version = 2
 
 [functions.submit-run]
 verify_jwt = true
+
+[functions.export-data]
+verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true

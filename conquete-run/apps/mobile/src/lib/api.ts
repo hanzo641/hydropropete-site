@@ -237,3 +237,11 @@ export async function invokeFunction<T>(name: string, body: unknown): Promise<T>
   }
   return data as T;
 }
+
+export async function getGpsConsent(): Promise<boolean> {
+  return Boolean(unwrap(await supabase.rpc('my_gps_consent')));
+}
+
+export async function setGpsConsent(granted: boolean): Promise<void> {
+  unwrap(await supabase.rpc(granted ? 'grant_gps_consent' : 'revoke_gps_consent'));
+}

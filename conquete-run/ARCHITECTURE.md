@@ -33,7 +33,7 @@ conquete-run/
 2. **Le serveur ne fait jamais confiance au client** : l'app envoie la trace brute, le
    serveur recalcule tout.
 3. **Seuls les territoires ayant un état sont stockés** (`hex_state`). Les sauvages sont
-   calculés à la volée ; l'altitude de leurs centres est mise en cache (`cell_elevation`).
+   calculés à la volée ; l'altitude de leurs centres est mise en cache (`cells`) et leur garnison de saison dans `wild_cells`.
 4. **Paramétrable sans redéploiement** : `game_config` (JSON) fusionné avec les valeurs par
    défaut du core ; lu par l'app au démarrage, par les Edge Functions et par le SQL
    (`cfg_num('combat.defenseMultiplier')`).
@@ -93,9 +93,9 @@ expo-location startLocationUpdatesAsync  (premier plan ET arrière-plan : une se
 7. Plafonds journaliers → troupes, XP, trophées.
 8. Écriture atomique (`runs`, `run_traces`, `profiles`) ; réponse = résumé.
 
-`deploy-troops` : vérifie que chaque case ∈ cases traversées de la course, que le total ≤
-troupes restantes et que le délai n'est pas dépassé, puis appelle la fonction SQL
-`apply_deployment` (verrous de ligne `FOR UPDATE`, combat, bonus de région, contrôle de
+Déploiement : la fonction SQL `deploy_troops` vérifie que chaque case ∈ cases traversées de
+la course, que le total ≤ troupes restantes et que le délai n'est pas dépassé, puis résout
+tout (appelée directement par l'app en RPC ; verrou consultatif par territoire : combat, bonus de région, contrôle de
 région, événements du fil, statistiques de saison) dans **une seule transaction**.
 
 ## 4. Données (Postgres + PostGIS)
@@ -105,12 +105,12 @@ région, événements du fil, statistiques de saison) dans **une seule transacti
 | `game_config` | JSON des paramètres | tous | service |
 | `factions` | 4 factions | tous | service |
 | `seasons` | dates, statut, graine des garnisons sauvages | tous | service |
-| `profiles` | pseudo, faction, zone, XP, niveau | tous (colonnes publiques via vue `public_profiles`) | soi (pseudo, langue) / service |
+| `profiles` | pseudo, faction, zone, XP, niveau | joueurs connectés (la table ne contient que des données publiques ; l'âge et la zone de confidentialité sont dans `private_settings`) | soi (pseudo, langue) / service |
 | `private_settings` | centre + rayon de la zone de confidentialité (PostGIS), consentements | soi | soi |
 | `runs` | résumé, statut, raison de rejet, cases traversées, troupes | soi | service |
 | `run_traces` | trace brute (JSONB) — purgée après 90 jours | soi | service |
-| `hex_state` | (saison, h3) → faction, garnison, date | tous | service (via `apply_deployment`) |
-| `cell_elevation` | cache d'altitude des centres de cases | tous | service |
+| `hex_state` | (saison, h3) → faction, garnison, date | tous | service (via `deploy_troops`) |
+| `cells` / `wild_cells` | cases connues (centre PostGIS, région, zone, altitude) / garnisons sauvages de la saison | joueurs connectés | service |
 | `region_control` | (saison, région) → faction | tous | service |
 | `deployments` | historique des déploiements | soi | service |
 | `events` | fil d'actualité (anonymisé en zone de confidentialité) | authentifiés | service |
@@ -140,7 +140,7 @@ région, événements du fil, statistiques de saison) dans **une seule transacti
   clé). URL configurable (`EXPO_PUBLIC_MAP_STYLE_URL`).
 * Chargement **par zone visible** : à chaque déplacement de caméra (debounce 400 ms), l'app
   calcule les cases H3 de la boîte visible (`polygonToCells`, limité à 2 500 cases, sinon
-  affichage agrégé par région), récupère les états stockés via la RPC `hexes_in_bbox`,
+  message « zoomez »), récupère les états stockés via la RPC `hexes_in_bbox`,
   complète avec les sauvages calculés localement, et génère un GeoJSON (une seule source,
   couches `fill` + `line` + `symbol` pour les garnisons).
 * Couleurs par faction, opacité selon la garnison, contour pointillé pour les cases
@@ -173,3 +173,38 @@ traversés). Strava n'est **pas** utilisé (conditions d'API depuis nov. 2024).
 | `maxDurationH` / `maxUploadDelayDays` | 12 / 7 |
 | `allowSimulatedRuns` | false |
 | `rawTraceRetentionDays` | 90 |
+
+## 9. Surface serveur
+
+| Migration | Contenu |
+| --- | --- |
+| `…001_schema` | tables, RLS, privilèges par colonne, publication Realtime, `game_defaults()` / `cfg()` |
+| `…002_runs_and_players` | `complete_onboarding`, `locked_factions`, `set_privacy_zone`, `record_run`, `hexes_in_bbox`, `eroded`, `level_from_xp` |
+| `…003_strategy` | `apply_attack`, `deploy_targets`, `deploy_troops`, `recompute_region`, `daily_tick`, `close_season`, `create_season`, classements, `team_overview`, `my_weekly_progress` |
+| `…004_schedule` | `pg_cron` : `daily_tick()` à 04:00 UTC |
+| `…005_admin` | `admin_deploy_troops`, `admin_reject_run` (service_role) |
+| `…006_privacy` | export des réglages privés, consentement GPS révocable |
+
+| Edge Function | Rôle |
+| --- | --- |
+| `submit-run` | trace brute → validation complète (`processRun`), D+ MNT, troupes, XP, trophées, `record_run` |
+| `export-data` | export RGPD complet (JSON ; l'app y ajoute les GPX) |
+| `delete-account` | suppression du compte (cascade) et anonymisation du fil |
+
+Appels directs de l'app (RPC, `security definer`, contrôlés par `auth.uid()`) :
+`complete_onboarding`, `zone_faction_counts`, `hexes_in_bbox`, `deploy_targets`,
+`deploy_troops`, `zone_leaderboard`, `faction_scores`, `team_overview`,
+`my_weekly_progress`, `set_privacy_zone`, `my_privacy_settings`, `my_gps_consent`,
+`grant_gps_consent`, `revoke_gps_consent`.
+
+## 10. Tests
+
+| Couche | Outil | Contenu |
+| --- | --- | --- |
+| GPS | Vitest | 3 traces réelles × 5 graines de bruit : distance < 3 % (serveur et live), D+ MNT < 10 % ; arrêt, sauts, réancrage, téléportation, rejeu déterministe |
+| Règles | Vitest | troupes, sauvages, combat, érosion, régions, factions, progression, saison, déploiement, H3, confidentialité |
+| Serveur | Vitest | `processRun` : validation, véhicule, simulation, plafonds, repli MNT |
+| Parité | Vitest + pgTAP | 88 vecteurs TS ↔ SQL (combat, érosion, régions, niveaux) |
+| Base | pgTAP | RLS, inscription, `record_run`, déploiement, anonymisation, régions, érosion, saisons, lectures |
+| Démo | script + Postgres | la saison de démo s'applique et produit une carte jouée |
+| App | tsc, ESLint, expo-doctor, `expo export` | types stricts, bundles Android/iOS |

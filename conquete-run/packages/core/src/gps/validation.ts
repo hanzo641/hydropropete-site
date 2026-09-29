@@ -168,3 +168,17 @@ export function traceFingerprint(raw: readonly RawPoint[]): string {
   }
   return `${raw.length}-${h.toString(16).padStart(8, '0')}`;
 }
+
+/**
+ * Trace « trop parfaite » (générée par un logiciel) : précision constante et intervalles
+ * rigoureusement identiques. Simple signalement pour la modération, jamais un rejet
+ * automatique (certaines montres produisent des données très régulières).
+ */
+export function looksSynthetic(raw: readonly RawPoint[]): boolean {
+  if (raw.length < 120) return false;
+  const accs = new Set(raw.map((p) => p.acc));
+  let regular = 0;
+  for (let i = 1; i < raw.length; i++) if (raw[i]!.t - raw[i - 1]!.t === 1000) regular++;
+  const noAltNoise = raw.every((p) => p.alt == null) || new Set(raw.map((p) => p.alt)).size < raw.length * 0.05;
+  return accs.size <= 2 && regular / (raw.length - 1) > 0.995 && noAltNoise;
+}

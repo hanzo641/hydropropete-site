@@ -15,8 +15,10 @@
     "test:sql": "bash scripts/test-sql.sh",
     "check:edge": "bash scripts/check-edge.sh",
     "gen:traces": "node scripts/build-reference-traces.mjs",
-    "demo:season": "node --experimental-strip-types scripts/demo-season.ts",
-    "check": "npm run lint && npm run typecheck && npm test && npm run test:sql"
+    "demo:season": "node --experimental-strip-types --no-warnings scripts/demo-season.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run check:edge && npm run test:sql",
+    "legal:export": "node --experimental-strip-types --no-warnings scripts/export-legal.ts",
+    "gen:sim-traces": "node --experimental-strip-types --no-warnings scripts/build-sim-traces.ts"
   },
   "engines": {
     "node": ">=22"
