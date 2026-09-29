@@ -24,8 +24,40 @@ front du jour et rival rendent chaque course décisive.
    « Pendant ton absence ». Pour essayer sans courir : Profil → *Mode simulation*.
 
 Tout reste sur le téléphone ; seule l'altitude du parcours est demandée à l'IGN (France) ou
-à Open Topo Data (ailleurs). **iOS** : impossible d'installer sans compte Apple Developer
-(99 €/an) → TestFlight via EAS (voir §4).
+à Open Topo Data (ailleurs).
+
+## ⚡ Tester sur iPhone (TestFlight, compte Apple Developer requis)
+
+Le build iOS se fait sur les Mac d'Expo (EAS) : **pas besoin de Mac**. Deux façons :
+
+**A. Depuis un ordinateur (Mac, Windows ou Linux), 15 min + attente du build**
+```bash
+git clone -b claude/conquete-run https://github.com/hanzo641/hydropropete-site.git
+cd hydropropete-site/conquete-run && npm install
+cd apps/mobile
+npx eas-cli@latest login                     # compte Expo gratuit
+npx eas-cli@latest init                      # crée le projet EAS (écrit projectId dans app.json)
+npx eas-cli@latest build -p ios --profile production --auto-submit
+```
+EAS demande la connexion Apple (identifiant + code 2FA), crée certificats et profil, construit
+l'app (20 à 40 min selon la file d'attente), puis l'envoie sur TestFlight (10 à 15 min de
+traitement chez Apple). Installez l'app **TestFlight** sur l'iPhone : le build y apparaît.
+
+**B. Sans ordinateur : Claude lance le build depuis sa session cloud**
+1. developer.apple.com → Identifiers → **+** → App ID `app.conqueterun.mobile`
+   (cocher Push Notifications et Sign In with Apple).
+2. App Store Connect → Apps → **+** → Nouvelle app iOS avec ce bundle ID ; notez son
+   « Apple ID » numérique (Informations sur l'app).
+3. App Store Connect → Utilisateurs et accès → Intégrations → **Clé API** (rôle Admin) :
+   notez l'ID de clé et l'ID d'émetteur, téléchargez le fichier `.p8`.
+4. expo.dev → Account settings → Access tokens → créez un jeton.
+5. Ajoutez dans les réglages de l'environnement cloud (jamais dans la conversation ni le dépôt) :
+   `EXPO_TOKEN`, `EXPO_ASC_KEY_ID`, `EXPO_ASC_ISSUER_ID`, `EXPO_ASC_API_KEY_P8` (contenu du .p8),
+   `EXPO_APPLE_TEAM_ID`, `EXPO_APPLE_TEAM_TYPE` (`INDIVIDUAL` ou `COMPANY_OR_ORGANIZATION`),
+   `ASC_APP_ID`. Puis `bash scripts/ios-testflight.sh`.
+
+Premier lancement sur iPhone : autorisez la position « Lorsque l'app est active », puis
+« Toujours » quand iOS le propose, pour que la course continue écran verrouillé.
 
 ### Construire l'APK localement
 

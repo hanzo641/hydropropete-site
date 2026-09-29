@@ -17,8 +17,9 @@
       "extends": "base",
       "distribution": "internal",
       "environment": "preview",
-      "channel": "preview",
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "extends": "base",
@@ -28,9 +29,7 @@
   },
   "submit": {
     "production": {
-      "ios": {
-        "ascAppId": "REMPLACER_PAR_L_ID_APP_STORE_CONNECT"
-      },
+      "ios": {},
       "android": {
         "track": "internal",
         "releaseStatus": "draft"
