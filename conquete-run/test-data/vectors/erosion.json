@@ -1,0 +1,32 @@
+[
+ {
+  "garrison": 10,
+  "days": 1,
+  "eroded": 9.5
+ },
+ {
+  "garrison": 10,
+  "days": 2.5,
+  "eroded": 8.7965
+ },
+ {
+  "garrison": 37.1234,
+  "days": 0.25,
+  "eroded": 36.6504
+ },
+ {
+  "garrison": 3,
+  "days": 21,
+  "eroded": 1.0217
+ },
+ {
+  "garrison": 60,
+  "days": 44.9,
+  "eroded": 5.9971
+ },
+ {
+  "garrison": 1.2,
+  "days": 0.1,
+  "eroded": 1.1939
+ }
+]

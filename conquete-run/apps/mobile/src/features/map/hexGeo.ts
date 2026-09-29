@@ -34,7 +34,8 @@ export function visibleHexes(
   if (!cells) return null;
   return cells.map((cell) => {
     const r = rows.get(cell);
-    if (r && r.owner_faction != null && r.garrison != null) {
+    // état stocké : territoire tenu, ou ruine neutre après une attaque
+    if (r && r.garrison != null) {
       return { cell, region: r.region, owner: r.owner_faction, garrison: Number(r.garrison), estimated: false, contested: r.contested };
     }
     if (r && r.wild_garrison != null) {

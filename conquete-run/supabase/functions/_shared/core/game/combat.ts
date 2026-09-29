@@ -28,13 +28,16 @@ export function effectiveTroops(troops: number, controlsRegion: boolean, cfg: Ga
 /**
  * Résout l'envoi de troupes sur un territoire.
  * - allié : renfort (plafonné) ;
- * - ennemi / sauvage : A ≥ 1,2 G ⇒ pris avec max(A − 1,2 G, 1) ; sinon G − A / 1,2.
+ * - ennemi / sauvage : A ≥ 1,2 G ⇒ pris avec max(A − 1,2 G, 1) ; sinon G − A / 1,2
+ *   (si la garnison ennemie tombe sous le seuil d'abandon, le territoire devient neutre).
  */
 export function resolveAttack(
   hex: HexSnapshot,
   attacker: FactionId,
   troops: number,
   cfg: GameConfig['combat'],
+  /** sous ce seuil, un territoire affaibli n'appartient plus à personne (ruine neutre) */
+  abandonThreshold = 1,
 ): AttackResult {
   const before = { owner: hex.owner, garrison: round4(hex.garrison) };
   if (troops <= 0) return { outcome: hex.owner === attacker ? 'reinforced' : 'damaged', before, after: before, effectiveTroops: 0 };
@@ -59,10 +62,11 @@ export function resolveAttack(
       effectiveTroops: troops,
     };
   }
+  const left = round4(Math.max(0, before.garrison - troops / cfg.defenseMultiplier));
   return {
     outcome: 'damaged',
     before,
-    after: { owner: hex.owner, garrison: round4(Math.max(0, before.garrison - troops / cfg.defenseMultiplier)) },
+    after: { owner: left < abandonThreshold ? null : hex.owner, garrison: left },
     effectiveTroops: troops,
   };
 }

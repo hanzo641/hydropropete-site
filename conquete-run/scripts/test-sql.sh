@@ -21,6 +21,7 @@ for f in "$ROOT"/supabase/migrations/*.sql; do
   psql -q -v ON_ERROR_STOP=1 -f "$f" >/dev/null || { echo "échec migration $f"; exit 1; }
 done
 psql -q -v ON_ERROR_STOP=1 -f "$ROOT/supabase/seed.sql" >/dev/null
+node "$ROOT/scripts/gen-sql-vectors.mjs" --check
 if command -v pg_prove >/dev/null; then
   pg_prove --ext .sql -r "$ROOT/supabase/tests/database"
 else
@@ -29,5 +30,27 @@ else
     out=$(psql -X -q -t -A -f "$t" 2>&1) || fail=1
     echo "$out" | grep -q "^not ok" && { echo "$out"; fail=1; }
   done
-  exit $fail
+  [ $fail = 0 ] || exit 1
 fi
+
+# Saison de démo : le SQL généré doit s'appliquer sans erreur et produire une carte jouée.
+echo "— saison de démo (Pau, 30 joueurs)"
+psql -q -v ON_ERROR_STOP=1 -c "create database demo" postgres
+export PGDATABASE=demo
+psql -q -v ON_ERROR_STOP=1 -f "$ROOT/supabase/tests/local/bootstrap.sql" >/dev/null 2>&1 || true
+psql -q -v ON_ERROR_STOP=1 -c "alter database demo set search_path = public, extensions" >/dev/null
+for f in "$ROOT"/supabase/migrations/*.sql; do psql -q -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+node --experimental-strip-types --no-warnings "$ROOT/scripts/demo-season.ts" --city pau --out "$WORK/demo.sql" >/dev/null
+psql -q -v ON_ERROR_STOP=1 -f "$WORK/demo.sql" >/dev/null
+psql -X -q -t -A -v ON_ERROR_STOP=1 <<'SQL'
+do $$
+declare h int; e int; l int;
+begin
+  select count(*) into h from public.hex_state where owner_faction is not null;
+  select count(*) into e from public.events;
+  select count(*) into l from public.zone_leaderboard((select home_zone from public.profiles limit 1), 30);
+  raise warning 'démo : % territoires tenus, % événements, % joueurs classés', h, e, l;
+  if h < 50 or e < 10 or l < 20 then raise exception 'saison de démo incomplète'; end if;
+end $$;
+SQL
+echo "saison de démo OK"

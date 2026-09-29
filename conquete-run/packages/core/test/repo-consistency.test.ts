@@ -23,6 +23,10 @@ describe('cohérence du dépôt', () => {
     }
   });
 
+  it('le test SQL de parité est généré à partir des vecteurs actuels', () => {
+    expect(() => execFileSync('node', [join(ROOT, 'scripts/gen-sql-vectors.mjs'), '--check'])).not.toThrow();
+  });
+
   it('la copie du core pour les Edge Functions est à jour', () => {
     expect(() => execFileSync('node', [join(ROOT, 'scripts/sync-core-to-edge.mjs'), '--check'])).not.toThrow();
   });

@@ -48,7 +48,7 @@ export function previewDeployment(
     const t = targets.get(a.cell);
     if (!t) continue;
     const troops = effectiveTroops(a.troops, t.regionController === faction, cfg.region);
-    out.set(a.cell, resolveAttack(t.state, faction, troops, cfg.combat));
+    out.set(a.cell, resolveAttack(t.state, faction, troops, cfg.combat, cfg.erosion.abandonThreshold));
   }
   return out;
 }
