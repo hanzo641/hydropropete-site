@@ -12,6 +12,7 @@
 import { writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import {
+  AVATARS,
   autoDistribute,
   cellCenter,
   crossedCells,
@@ -76,6 +77,7 @@ const uuid = (): string =>
   });
 const q = (v: string | null): string => (v == null ? 'null' : `'${v.replace(/'/g, "''")}'`);
 
+const FREE_AVATARS = AVATARS.filter((a) => a.unlockLevel === 1).map((a) => a.id);
 const NAMES = ['Foulée', 'Sentier', 'Dénivelé', 'Chamois', 'Gazelle', 'Traileur', 'Bitume', 'Crête', 'Isard', 'Col', 'Vallon', 'Garrigue', 'Bruyère', 'Torrent', 'Brume', 'Aube', 'Lièvre', 'Faucon', 'Lynx', 'Marmotte'];
 
 /** Boucle aléatoire plausible (≈ km donnés) autour d'un point de départ. */
@@ -122,7 +124,7 @@ const zone = zoneOf(crossedCells([city, { lat: city.lat + 0.001, lng: city.lng }
 for (const p of players) {
   sql.push(`insert into auth.users (id, email) values ('${p.id}', ${q(`${p.username.toLowerCase()}@demo.invalid`)});`);
   sql.push(
-    `insert into public.profiles (id, username, faction_id, home_zone) values ('${p.id}', ${q(p.username)}, ${p.faction}, ${q(zone)});`,
+    `insert into public.profiles (id, username, faction_id, home_zone, avatar_id) values ('${p.id}', ${q(p.username)}, ${p.faction}, ${q(zone)}, '${FREE_AVATARS[Math.floor(rand() * FREE_AVATARS.length)]}');`,
   );
   sql.push(`insert into public.private_settings (user_id, birth_year, gps_consent_at, terms_accepted_at, terms_version) values ('${p.id}', 1990, now(), now(), 'demo');`);
 }

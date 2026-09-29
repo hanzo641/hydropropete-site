@@ -194,6 +194,7 @@ export const fr = {
       wild_captures: 'Prends {n} territoires sauvages',
       new_cells: 'Explore {n} nouveaux territoires',
     },
+    avatar: 'Changer d’avatar',
     history: 'Historique et journal des rejets',
     privacy: 'Confidentialité',
     simulation: 'Mode simulation (tests)',
@@ -233,6 +234,13 @@ export const fr = {
     import: 'Importer un fichier GPX…',
     start: 'Lancer la simulation',
     traces: { 'ville-pau': 'Ville — Pau (5 km)', 'foret-bastard': 'Forêt — Bastard (5,2 km)', 'montagne-ayous': 'Montagne — Ayous (12 km, 830 m D+)' },
+  },
+  avatar: {
+    title: 'Choisis ton avatar',
+    help: 'Huit avatars sont libres ; les autres se débloquent en montant de rang.',
+    locked: 'Niveau {n}',
+    save: 'Valider',
+    saved: 'Avatar mis à jour',
   },
   legal: {
     title: 'Mentions légales',

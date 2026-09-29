@@ -112,15 +112,18 @@ export function ListItem({
   icon,
   onPress,
   right,
+  leading,
 }: {
   title: string;
   subtitle?: string;
+  leading?: ReactNode;
   icon?: ComponentProps<typeof Ionicons>['name'];
   onPress?: () => void;
   right?: ReactNode;
 }) {
   return (
     <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [styles.listItem, pressed && { opacity: 0.7 }]}>
+      {leading}
       {icon && <Ionicons name={icon} size={22} color={colors.textDim} />}
       <View style={{ flex: 1 }}>
         <Text style={font.body}>{title}</Text>

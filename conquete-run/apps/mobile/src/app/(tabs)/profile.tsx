@@ -1,7 +1,7 @@
 import { isoWeek, levelFromXp, TROPHIES, weeklyChallenges } from '@conquete/core';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { wipeLocalData } from '@/features/run/storage';
 import { formatNumber, getLocale, setLocale, t, type TKey, useLocale } from '@/i18n';
 import { myTrophies, weeklyProgress } from '@/lib/api';
@@ -39,7 +39,9 @@ export default function ProfileScreen() {
     <Screen>
       <ScrollView contentContainerStyle={{ gap: space.lg, paddingVertical: space.lg }}>
         <Row>
-          <RankBadge level={profile.level} />
+          <Pressable accessibilityRole="button" accessibilityLabel={t('profile.avatar')} onPress={() => router.push('/avatar')}>
+            <RankBadge level={profile.level} avatarId={profile.avatar_id} />
+          </Pressable>
           <View style={{ flex: 1, gap: space.xs }}>
             <Text style={font.h1}>{profile.username}</Text>
             <FactionBadge factionId={profile.faction_id} />
@@ -98,6 +100,7 @@ export default function ProfileScreen() {
         </Card>
 
         <Card>
+          <ListItem icon="happy-outline" title={t('profile.avatar')} onPress={() => router.push('/avatar')} />
           <ListItem icon="time-outline" title={t('profile.history')} onPress={() => router.push('/runs')} />
           <ListItem icon="shield-checkmark-outline" title={t('profile.privacy')} onPress={() => router.push('/privacy')} />
           <ListItem icon="play-circle-outline" title={t('profile.simulation')} onPress={() => router.push('/simulation')} />

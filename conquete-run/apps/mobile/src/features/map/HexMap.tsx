@@ -1,9 +1,10 @@
 import { type BBox, type LatLng } from '@conquete/core';
-import { Camera, type CameraRef, GeoJSONSource, Layer, Map, type ViewStateChangeEvent } from '@maplibre/maplibre-react-native';
+import { Camera, type CameraRef, GeoJSONSource, Layer, Map, UserLocation, type ViewStateChangeEvent } from '@maplibre/maplibre-react-native';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type NativeSyntheticEvent, StyleSheet, Text, View } from 'react-native';
 import { t } from '@/i18n';
 import { hexesInBBox, type HexRow } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { loadGameConfig, currentConfig } from '@/lib/gameConfig';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, space } from '@/ui/theme';
@@ -36,6 +37,7 @@ export function HexMap({
   overlay?: ReactNode;
 }) {
   const camera = useRef<CameraRef>(null);
+  const { profile } = useAuth();
   const [bbox, setBbox] = useState<BBox | null>(null);
   const [rows, setRows] = useState<ReadonlyMap<string, HexRow>>(new globalThis.Map());
   const [seed, setSeed] = useState('');
@@ -106,9 +108,9 @@ export function HexMap({
   const cfg = currentConfig();
   const litSet = useMemo(() => new Set(lit ?? []), [lit]);
   const hexes = useMemo(() => (bbox ? visibleHexes(bbox, rows, cfg, seed) : []), [bbox, rows, cfg, seed]);
-  const hexGeo = useMemo(() => hexFeatures(hexes ?? [], litSet), [hexes, litSet]);
+  const hexGeo = useMemo(() => hexFeatures(hexes ?? [], litSet, profile?.faction_id ?? null), [hexes, litSet, profile?.faction_id]);
   const labels = useMemo(() => labelFeatures(hexes ?? []), [hexes]);
-  const regions = useMemo(() => regionFeatures(new Set((hexes ?? []).map((h) => h.region)), cfg), [hexes, cfg]);
+  const regions = useMemo(() => regionFeatures(hexes ?? [], cfg), [hexes, cfg]);
   const line = useMemo(() => lineFeature(track ?? []), [track]);
 
   return (
@@ -121,7 +123,22 @@ export function HexMap({
           minZoom={3}
         />
         <GeoJSONSource id="regions" data={regions}>
-          <Layer id="region-line" type="line" paint={{ 'line-color': '#FFFFFF', 'line-width': 2.5, 'line-opacity': 0.55 }} />
+          {/* région contrôlée : légère teinte de la faction + contour épais à sa couleur */}
+          <Layer
+            id="region-tint"
+            type="fill"
+            filter={['==', ['get', 'controlled'], true]}
+            paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.12 }}
+          />
+          <Layer
+            id="region-line"
+            type="line"
+            paint={{
+              'line-color': ['get', 'color'],
+              'line-width': ['case', ['get', 'controlled'], 4, 2.5],
+              'line-opacity': ['case', ['get', 'controlled'], 0.9, 0.55],
+            }}
+          />
         </GeoJSONSource>
         <GeoJSONSource id="hexes" data={hexGeo}>
           <Layer
@@ -137,6 +154,13 @@ export function HexMap({
             type="line"
             paint={{ 'line-color': ['get', 'color'], 'line-width': 1, 'line-opacity': 0.7 }}
           />
+          {/* mes territoires : liseré clair */}
+          <Layer
+            id="hex-mine"
+            type="line"
+            filter={['==', ['get', 'mine'], true]}
+            paint={{ 'line-color': '#FFFFFF', 'line-width': 1.6, 'line-opacity': 0.8 }}
+          />
           <Layer
             id="hex-contested"
             type="line"
@@ -151,6 +175,19 @@ export function HexMap({
           />
         </GeoJSONSource>
         <GeoJSONSource id="labels" data={labels}>
+          {/* jeton de garnison : pastille à la couleur du propriétaire, plus grosse si la garnison est forte */}
+          <Layer
+            id="hex-token"
+            type="circle"
+            minzoom={12.5}
+            paint={{
+              'circle-color': ['get', 'color'],
+              'circle-radius': ['get', 'radius'],
+              'circle-opacity': 0.95,
+              'circle-stroke-color': ['case', ['get', 'fort'], colors.accent, '#0E1116'],
+              'circle-stroke-width': ['case', ['get', 'fort'], 2.5, 1],
+            }}
+          />
           <Layer
             id="hex-labels"
             type="symbol"
@@ -166,6 +203,7 @@ export function HexMap({
         <GeoJSONSource id="track" data={line}>
           <Layer id="track-line" type="line" paint={{ 'line-color': colors.accent, 'line-width': 4 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
         </GeoJSONSource>
+        <UserLocation heading accuracy animated />
       </Map>
       {hexes === null && (
         <View style={styles.banner} pointerEvents="none">

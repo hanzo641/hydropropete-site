@@ -4,7 +4,8 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { getLocale, t, type TKey } from '@/i18n';
-import { completeOnboarding, zoneFactionCounts } from '@/lib/api';
+import { completeOnboarding, setAvatar, zoneFactionCounts } from '@/lib/api';
+import { AvatarPicker } from '@/features/avatar/AvatarPicker';
 import { useAuth } from '@/lib/auth';
 import { currentConfig, loadGameConfig } from '@/lib/gameConfig';
 import { TERMS_VERSION } from '@/legal/texts';
@@ -18,6 +19,7 @@ export default function OnboardingProfile() {
   const [zone, setZone] = useState<string | null>(null);
   const [counts, setCounts] = useState<Map<number, number>>(new Map());
   const [faction, setFaction] = useState<number | null>(null);
+  const [avatar, setAvatarId] = useState('renard');
   const [gps, setGps] = useState(false);
   const [terms, setTerms] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -65,6 +67,7 @@ export default function OnboardingProfile() {
         gpsConsent: gps,
         termsVersion: TERMS_VERSION,
       });
+      await setAvatar(avatar);
       await refreshProfile();
       router.replace('/(tabs)');
     } catch (e) {
@@ -90,6 +93,9 @@ export default function OnboardingProfile() {
           placeholder="1990"
         />
         {tooYoung && <ErrorText>{t('onboarding.tooYoung')}</ErrorText>}
+
+        <Text style={font.h2}>{t('avatar.title')}</Text>
+        <AvatarPicker value={avatar} level={1} onChange={setAvatarId} />
 
         <Text style={font.h2}>{t('onboarding.zoneTitle')}</Text>
         <Text style={font.small}>{t('onboarding.zoneHelp')}</Text>

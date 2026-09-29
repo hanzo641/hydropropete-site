@@ -218,3 +218,16 @@ describe('confidentialité', () => {
     expect(coarsen({ lat: 43.29514, lng: -0.37081 })).toEqual({ lat: 43.295, lng: -0.371 });
   });
 });
+
+describe('avatars', () => {
+  it('13 avatars, 8 libres, identifiants uniques, déblocage par niveau', async () => {
+    const { AVATARS, isAvatarUnlocked, avatarById, avatarSvg } = await import('../src/game/avatars.ts');
+    expect(AVATARS).toHaveLength(13);
+    expect(new Set(AVATARS.map((a) => a.id)).size).toBe(13);
+    expect(AVATARS.filter((a) => a.unlockLevel === 1)).toHaveLength(8);
+    expect(isAvatarUnlocked('dragon', 45)).toBe(false);
+    expect(isAvatarUnlocked('dragon', 46)).toBe(true);
+    expect(avatarById('inconnu').id).toBe('renard');
+    expect(avatarSvg('loup')).toMatch(/^<svg.*<\/svg>$/);
+  });
+});

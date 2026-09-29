@@ -79,7 +79,7 @@ Les règles du jeu (paramètres, saisons) peuvent évoluer. Droit français ; à
 Directeur de la publication : [NOM]
 Hébergement des données : Supabase Inc., 970 Toa Payoh North #07-04, Singapore 318992 — infrastructure [AWS, RÉGION UE À PRÉCISER].
 Cartographie : © contributeurs OpenStreetMap (ODbL), tuiles OpenFreeMap. Altimétrie : IGN RGE ALTI® (Licence Ouverte Etalab), Open Topo Data (SRTM, EU-DEM).
-Visuels des rangs : repris du prototype RunLeveling.`,
+Avatars : créations originales du projet.`,
     },
   },
   en: {

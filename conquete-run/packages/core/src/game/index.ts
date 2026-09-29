@@ -8,3 +8,4 @@ export * from './factions.ts';
 export * from './progression.ts';
 export * from './season.ts';
 export * from './deployment.ts';
+export * from './avatars.ts';

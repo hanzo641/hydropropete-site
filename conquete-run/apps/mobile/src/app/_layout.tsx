@@ -55,6 +55,7 @@ export default function RootLayout() {
           <Stack.Screen name="runs" options={{ title: '' }} />
           <Stack.Screen name="privacy" options={{ title: '' }} />
           <Stack.Screen name="simulation" options={{ title: '' }} />
+          <Stack.Screen name="avatar" options={{ title: '', presentation: 'modal' }} />
           <Stack.Screen name="legal/[doc]" options={{ title: '' }} />
         </Stack>
       </AuthProvider>

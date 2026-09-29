@@ -195,6 +195,7 @@ export const en: Dictionary = {
       wild_captures: 'Capture {n} wild territories',
       new_cells: 'Explore {n} new territories',
     },
+    avatar: 'Change avatar',
     history: 'History and rejection log',
     privacy: 'Privacy',
     simulation: 'Simulation mode (testing)',
@@ -234,6 +235,13 @@ export const en: Dictionary = {
     import: 'Import a GPX file…',
     start: 'Start simulation',
     traces: { 'ville-pau': 'City — Pau (5 km)', 'foret-bastard': 'Forest — Bastard (5.2 km)', 'montagne-ayous': 'Mountain — Ayous (12 km, 830 m gain)' },
+  },
+  avatar: {
+    title: 'Pick your avatar',
+    help: 'Eight avatars are free; the others unlock as you rank up.',
+    locked: 'Level {n}',
+    save: 'Confirm',
+    saved: 'Avatar updated',
   },
   legal: {
     title: 'Legal',

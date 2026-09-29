@@ -21,7 +21,12 @@ export interface HexView {
   /** garnison sauvage estimée (altitude inconnue) */
   estimated: boolean;
   contested: boolean;
+  /** faction qui contrôle la région de la case */
+  regionFaction: number | null;
 }
+
+/** Garnison à partir de laquelle un territoire est une « forteresse » (anneau doré). */
+export const FORTRESS_GARRISON = 15;
 
 /** États de toutes les cases visibles : stockées (serveur) ou sauvages (calculées). */
 export function visibleHexes(
@@ -36,10 +41,10 @@ export function visibleHexes(
     const r = rows.get(cell);
     // état stocké : territoire tenu, ou ruine neutre après une attaque
     if (r && r.garrison != null) {
-      return { cell, region: r.region, owner: r.owner_faction, garrison: Number(r.garrison), estimated: false, contested: r.contested };
+      return { cell, region: r.region, owner: r.owner_faction, garrison: Number(r.garrison), estimated: false, contested: r.contested, regionFaction: r.region_faction };
     }
     if (r && r.wild_garrison != null) {
-      return { cell, region: r.region, owner: null, garrison: Number(r.wild_garrison), estimated: false, contested: r.contested };
+      return { cell, region: r.region, owner: null, garrison: Number(r.wild_garrison), estimated: false, contested: r.contested, regionFaction: r.region_faction };
     }
     return {
       cell,
@@ -48,13 +53,18 @@ export function visibleHexes(
       garrison: wildGarrison(cell, null, seasonSeed, cfg.wild),
       estimated: true,
       contested: false,
+      regionFaction: null,
     };
   });
 }
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, Record<string, string | number | boolean>>;
 
-export function hexFeatures(hexes: readonly HexView[], lit: ReadonlySet<string> = new Set()): GeoJSON.FeatureCollection {
+export function hexFeatures(
+  hexes: readonly HexView[],
+  lit: ReadonlySet<string> = new Set(),
+  myFaction: number | null = null,
+): GeoJSON.FeatureCollection {
   const features: Feature[] = [];
   for (const h of hexes) {
     const color = h.owner ? (factionById(h.owner)?.color ?? WILD_COLOR) : WILD_COLOR;
@@ -70,6 +80,7 @@ export function hexFeatures(hexes: readonly HexView[], lit: ReadonlySet<string> 
         contested: h.contested,
         lit: lit.has(h.cell),
         wild: h.owner == null,
+        mine: myFaction != null && h.owner === myFaction,
       },
     });
   }
@@ -84,19 +95,28 @@ export function labelFeatures(hexes: readonly HexView[]): GeoJSON.FeatureCollect
       return {
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [c.lng, c.lat] },
-        properties: { label: `${h.estimated ? '≈' : ''}${Math.round(h.garrison)}`, owned: h.owner != null },
+        properties: {
+          label: `${h.estimated ? '≈' : ''}${Math.round(h.garrison)}`,
+          owned: h.owner != null,
+          color: h.owner ? (factionById(h.owner)?.color ?? WILD_COLOR) : '#3A3F48',
+          // rayon du jeton de garnison : croît avec la force du territoire
+          radius: Math.min(15, 7 + Math.sqrt(h.garrison) * 1.6),
+          fort: h.garrison >= FORTRESS_GARRISON,
+        },
       };
     }),
   };
 }
 
-export function regionFeatures(regions: Iterable<string>, cfg: GameConfig): GeoJSON.FeatureCollection {
+export function regionFeatures(hexes: readonly HexView[], cfg: GameConfig): GeoJSON.FeatureCollection {
+  const controller = new Map<string, number | null>();
+  for (const h of hexes) if (!controller.has(h.region) || h.regionFaction != null) controller.set(h.region, h.regionFaction);
   return {
     type: 'FeatureCollection',
-    features: [...regions].map((region) => ({
+    features: [...controller].map(([region, f]) => ({
       type: 'Feature',
       geometry: { type: 'MultiPolygon', coordinates: regionPolygon(region, cfg.h3) },
-      properties: { region },
+      properties: { region, controlled: f != null, color: f != null ? (factionById(f)?.color ?? '#FFFFFF') : '#FFFFFF' },
     })),
   };
 }

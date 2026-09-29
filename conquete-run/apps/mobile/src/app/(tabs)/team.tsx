@@ -15,7 +15,7 @@ import {
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { Card, ListItem, Row, Screen, Stat } from '@/ui/components';
-import { FactionBadge } from '@/ui/game';
+import { Avatar, FactionBadge } from '@/ui/game';
 import { colors, font, space } from '@/ui/theme';
 
 function feedText(e: FeedEvent): string {
@@ -110,6 +110,7 @@ export default function Team() {
             <ListItem
               key={r.user_id}
               title={`${r.rank}. ${r.username}`}
+              leading={<Avatar id={r.avatar_id} size={36} />}
               subtitle={t('common.territories', { n: r.captures })}
               right={
                 <Row>
@@ -124,7 +125,7 @@ export default function Team() {
         <Text style={font.h2}>{t('team.members')}</Text>
         <Card>
           {(overview?.members ?? []).map((m) => (
-            <ListItem key={m.id} title={m.username} subtitle={t('profile.level', { n: m.level })} />
+            <ListItem key={m.id} leading={<Avatar id={m.avatar_id} size={36} />} title={m.username} subtitle={t('profile.level', { n: m.level })} />
           ))}
         </Card>
 

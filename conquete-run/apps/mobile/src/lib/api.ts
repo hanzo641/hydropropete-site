@@ -7,6 +7,7 @@ export interface Profile {
   faction_id: number | null;
   home_zone: string | null;
   locale: 'fr' | 'en';
+  avatar_id: string;
   xp: number;
   level: number;
   runs_count: number;
@@ -49,6 +50,7 @@ export interface HexRow {
   elevation_m: number | null;
   last_attacked_at: string | null;
   contested: boolean;
+  region_faction: number | null;
 }
 
 export interface DeployTargetRow {
@@ -166,6 +168,7 @@ export interface ZoneLeaderboardRow {
   user_id: string;
   username: string;
   faction_id: number;
+  avatar_id: string;
   points: number;
   captures: number;
   rank: number;
@@ -186,12 +189,12 @@ export async function zoneFactionScores(zone: string | null): Promise<FactionSco
 }
 
 export async function teamOverview(zone: string): Promise<{
-  members: { id: string; username: string; level: number }[];
+  members: { id: string; username: string; level: number; avatar_id: string }[];
   hexes: number;
   regions: number;
 }> {
   return unwrap(await supabase.rpc('team_overview', { p_zone: zone })) as {
-    members: { id: string; username: string; level: number }[];
+    members: { id: string; username: string; level: number; avatar_id: string }[];
     hexes: number;
     regions: number;
   };
@@ -244,4 +247,9 @@ export async function getGpsConsent(): Promise<boolean> {
 
 export async function setGpsConsent(granted: boolean): Promise<void> {
   unwrap(await supabase.rpc(granted ? 'grant_gps_consent' : 'revoke_gps_consent'));
+}
+
+/** Change l'avatar (le serveur vérifie qu'il est débloqué au niveau du joueur). */
+export async function setAvatar(id: string): Promise<void> {
+  unwrap(await supabase.rpc('set_avatar', { p_avatar: id }));
 }

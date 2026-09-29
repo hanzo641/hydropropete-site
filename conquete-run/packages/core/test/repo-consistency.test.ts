@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_GAME_CONFIG } from '../src/game/config.ts';
+import { AVATARS } from '../src/game/avatars.ts';
 import { FACTIONS } from '../src/game/factions.ts';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
@@ -21,6 +22,12 @@ describe('cohérence du dépôt', () => {
     for (const f of FACTIONS) {
       expect(sql).toContain(`(${f.id}, '${f.slug}', '${f.color}', '${f.name.fr}', '${f.name.en}')`);
     }
+  });
+
+  it('les niveaux de déblocage des avatars SQL = AVATARS', () => {
+    const sql = readFileSync(join(ROOT, 'supabase/migrations/20260929000007_avatars.sql'), 'utf8');
+    for (const a of AVATARS) expect(sql).toContain(`when '${a.id}' then ${a.unlockLevel}`);
+    expect(sql.match(/when '/g)?.length).toBe(AVATARS.length);
   });
 
   it('le test SQL de parité est généré à partir des vecteurs actuels', () => {
