@@ -1,0 +1,39 @@
+# dépendances
+node_modules/
+# builds / caches
+dist/
+build/
+coverage/
+.expo/
+.expo-shared/
+web-build/
+*.tsbuildinfo
+.eslintcache
+.cache/
+.turbo/
+# natif généré (CNG : npx expo prebuild)
+apps/mobile/ios/
+apps/mobile/android/
+# EAS / signatures
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.keystore
+credentials.json
+google-services.json
+GoogleService-Info.plist
+# secrets
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+supabase/.temp/
+supabase/.branches/
+# divers
+.DS_Store
+*.log
+npm-debug.log*
+.tmp/

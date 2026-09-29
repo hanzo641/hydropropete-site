@@ -1,0 +1,33 @@
+{
+  "name": "conquete-run",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test -w @conquete/core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "sync:edge": "node scripts/sync-core-to-edge.mjs",
+    "gen:sql-vectors": "node scripts/gen-sql-vectors.mjs",
+    "test:sql": "bash scripts/test-sql.sh",
+    "check:edge": "bash scripts/check-edge.sh",
+    "gen:traces": "node scripts/build-reference-traces.mjs",
+    "demo:season": "node --experimental-strip-types scripts/demo-season.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:sql"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.3",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.2"
+  }
+}

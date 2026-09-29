@@ -1,0 +1,31 @@
+# Journal des décisions
+
+Décisions prises sans te solliciter (consigne : « ne me pose pas de questions sauf blocage réel »).
+Chacune est réversible ; le coût d'un changement est indiqué quand il n'est pas trivial.
+
+| # | Décision | Pourquoi | Pour changer |
+| --- | --- | --- | --- |
+| D-01 | Le projet vit dans le dossier `conquete-run/` du dépôt `hydropropete-site`, sur la branche `claude/conquete-run` (jamais sur `main`). | C'est le seul dépôt accessible en écriture dans cette session ; `main` est déployé par Netlify (site HydroPropreté) et ne doit pas être touché. | Créer un dépôt dédié puis `git subtree split --prefix conquete-run -b conquete-run-only` et pousser cette branche (voir `TODO.md`). |
+| D-02 | Monorepo npm workspaces : `packages/core` (logique pure), `apps/mobile` (Expo), `supabase/`. | Une seule implémentation des règles, partagée app / serveur / tests. | — |
+| D-03 | Le core est importé **en source** (imports relatifs avec extension `.ts`), sans étape de build. Les Edge Functions reçoivent une **copie générée** (`npm run sync:edge`), vérifiée par un test. | Deno exige les extensions ; Metro et Vitest les acceptent. La CLI Supabase n'embarque pas de façon fiable les fichiers hors de `supabase/functions`. | — |
+| D-04 | Résolutions H3 : territoires 8, régions 6, zones 4. | Voir `GAME_RULES.md` §2. | `game_config` (attention : changer en cours de saison invalide la carte ⇒ uniquement entre saisons). |
+| D-05 | Bonus de région à **50 %** des territoires au lieu de 100 %. | Régions avec lacs/zones inaccessibles : 100 % serait inatteignable. | `region.controlThreshold = 1`. |
+| D-06 | Pas d'extension `h3` en SQL (absente de Supabase). Calcul H3 dans les Edge Functions ; colonnes `region`/`zone` pré-calculées. | Compatibilité Supabase managé. | — |
+| D-07 | Régions = cellules parentes H3 (pas de limites administratives en v1). | Aucune source mondiale libre, légère et homogène intégrable sans préparation manuelle. | Table `region_boundaries` + mapping case→région ; le code ne manipule qu'un identifiant opaque. |
+| D-08 | Garnisons **décimales**, affichage arrondi ; érosion **continue** calculée à la lecture + tâche quotidienne. | Évite les effets d'escalier et reste exact quelle que soit l'heure. | — |
+| D-09 | Prise de territoire : garnison minimale 1 après capture. | Un territoire à 0 serait abandonné immédiatement. | `combat.minGarrisonAfterCapture`. |
+| D-10 | Troupes non déployées perdues après 48 h. | Garder une carte vivante, éviter les stocks. | `troops.deployWindowHours`. |
+| D-11 | Garnisons sauvages dépendant de l'altitude (MNT) + variation déterministe par saison. | « Plus fortes en montagne » sans carte préparée ; l'isolement réel demanderait une donnée de population mondiale. | `wild.*`. |
+| D-12 | D+ serveur : IGN RGE ALTI (Géoplateforme, gratuit, sans clé) en France, Open Topo Data (EU-DEM 25 m / SRTM 30 m) ailleurs, repli GPS lissé. | Précision maximale gratuite ; l'API publique Open Topo Data est limitée (1 req/s, 1 000 req/jour) : suffisant pour 30 testeurs, **à auto-héberger** pour l'ouverture large (voir `TODO.md`). | Variable `DEM_PROVIDERS`. |
+| D-13 | Fond de carte **OpenFreeMap** (style Liberty, sans clé, sans quota). | Libre, gratuit, compatible MapLibre. | `EXPO_PUBLIC_MAP_STYLE_URL`. |
+| D-14 | Traces de test : géométries **réelles** d'OpenStreetMap (itinéraires piétons calculés par le serveur OSRM de FOSSGIS) autour de Pau (ville, forêt de Bastard, montagne vers le lac d'Ayous), altitudes **IGN RGE ALTI** ; bruit GPS généré (erreur corrélée de Gauss-Markov, sauts, trous, arrêts, altitude bruitée). | Je n'ai pas accès à tes traces de montre ; les géométries réelles + un bruit réaliste et reproductible (graine fixe) permettent une référence exacte, ce qu'une trace de montre ne donne pas. Ajoute tes propres GPX dans `test-data/gpx/real/` : ils seront testés en non-régression (pas de référence exacte). | — |
+| D-15 | Ville de la saison test et de la démo : **Pau** (ville + forêt + Pyrénées à 1 h : les trois terrains du jeu). | Couvre ville, forêt et montagne ; modifiable. | `npm run demo:season -- --city "Lyon"` (villes prédéfinies) ou `--lat --lng`. |
+| D-16 | Factions : Braise, Sylve, Marée (+ Ambre en réserve). | Noms courts, bilingues (Ember, Grove, Tide, Amber), couleurs accessibles distinctes. | Table `factions`. |
+| D-17 | i18n maison typée (FR/EN, détection via `expo-localization`) plutôt qu'i18next. | Clés vérifiées par TypeScript, zéro dépendance, 2 langues. | — |
+| D-18 | Connexion e-mail par **code à 6 chiffres** (OTP) plutôt que lien magique. | Pas de configuration de liens universels nécessaire pour la saison test. | — |
+| D-19 | Persistance locale des points GPS : **expo-sqlite** (API synchrone) dans la tâche d'arrière-plan. | Écriture atomique point par point, survit à la mort de l'app. | — |
+| D-20 | Âge minimum 15 ans : déclaration de l'année de naissance à l'inscription (pas de vérification d'identité). | 15 ans = majorité numérique en France (consentement RGPD propre). | — |
+| D-21 | Seule la **cellule de zone** (≈ 1 770 km²) de l'inscription est conservée pour le rééquilibrage, jamais la position exacte. Le centre de la zone de confidentialité est stocké (nécessaire au masquage) dans une table lisible par son seul propriétaire, arrondi à ~100 m. | Minimisation RGPD. | — |
+| D-22 | Traces brutes supprimées après 90 jours ; les résumés (distance, D+, cases) restent. | Minimisation RGPD ; 90 j couvrent la saison + contestations. | `antiCheat.rawTraceRetentionDays`. |
+| D-23 | Seuil de vitesse « véhicule » évalué sur **3 minutes glissantes** (20 km/h). | 20 km/h sur 3 min = 3:00/km, hors de portée d'un amateur ; une fenêtre plus courte pénaliserait les sprints. | `antiCheat.vehicleWindowS`. |
+| D-24 | Déploiement par **glisser** : chaque case traversée a une jauge que l'on fait glisser (PanResponder natif), plus un aperçu du résultat calculé localement. | Fiable sans dépendance d'animation supplémentaire ; le drag & drop libre sur la carte est prévu en v2. | — |
