@@ -1,14 +1,27 @@
 import { AVATARS } from '@conquete/core';
 import { Pressable, Text, View } from 'react-native';
 import { getLocale, t } from '@/i18n';
-import { Avatar } from '@/ui/game';
-import { colors, radius, space } from '@/ui/theme';
+import { HexAvatar } from '@/ui/game';
+import { colors, fonts, space } from '@/ui/theme';
 
-/** Grille d'avatars ; ceux d'un niveau supérieur au joueur sont grisés avec le niveau requis. */
-export function AvatarPicker({ value, level, onChange }: { value: string; level: number; onChange: (id: string) => void }) {
+/** Grille d'avatars hexagonaux ; ceux d'un niveau supérieur au joueur sont verrouillés. */
+export function AvatarPicker({
+  value,
+  level,
+  onChange,
+  accent = colors.gold,
+  onlyUnlocked,
+}: {
+  value: string;
+  level: number;
+  onChange: (id: string) => void;
+  accent?: string;
+  onlyUnlocked?: boolean;
+}) {
+  const list = onlyUnlocked ? AVATARS.filter((a) => a.unlockLevel <= level) : AVATARS;
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md, justifyContent: 'center' }}>
-      {AVATARS.map((a) => {
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' }}>
+      {list.map((a) => {
         const locked = level < a.unlockLevel;
         const selected = a.id === value;
         return (
@@ -19,19 +32,13 @@ export function AvatarPicker({ value, level, onChange }: { value: string; level:
             accessibilityState={{ selected, disabled: locked }}
             accessibilityLabel={`${a.name[getLocale()]}${locked ? ` — ${t('avatar.locked', { n: a.unlockLevel })}` : ''}`}
             onPress={() => onChange(a.id)}
-            style={{
-              alignItems: 'center',
-              gap: space.xs,
-              padding: space.xs,
-              borderRadius: radius.md,
-              borderWidth: 2,
-              borderColor: selected ? colors.accent : 'transparent',
-              width: 84,
-            }}>
-            <View style={{ opacity: locked ? 0.3 : 1 }}>
-              <Avatar id={a.id} size={64} />
+            style={({ pressed }) => ({ alignItems: 'center', gap: 4, width: 78, transform: [{ scale: pressed ? 0.94 : selected ? 1.06 : 1 }] })}>
+            <View style={{ opacity: locked ? 0.28 : 1 }}>
+              <HexAvatar id={a.id} size={66} ring={selected ? accent : undefined} ringWidth={selected ? 3.5 : 1.5} glow={selected} />
             </View>
-            <Text style={{ color: locked ? colors.textDim : colors.text, fontSize: 12, fontWeight: '600' }} numberOfLines={1}>
+            <Text
+              style={{ color: selected ? accent : locked ? colors.textMute : colors.textDim, fontFamily: fonts.label, fontSize: 13, letterSpacing: 0.6 }}
+              numberOfLines={1}>
               {locked ? `🔒 ${t('avatar.locked', { n: a.unlockLevel })}` : a.name[getLocale()]}
             </Text>
           </Pressable>

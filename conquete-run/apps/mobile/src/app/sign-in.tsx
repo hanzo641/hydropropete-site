@@ -6,6 +6,7 @@ import { t } from '@/i18n';
 import { sendEmailCode, signInWithApple, signInWithGoogle, verifyEmailCode } from '@/lib/auth';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Button, ErrorText, Field, Screen } from '@/ui/components';
+import { Emblem } from '@/ui/game';
 import { colors, font, space } from '@/ui/theme';
 
 export default function SignIn() {
@@ -39,7 +40,11 @@ export default function SignIn() {
     <Screen>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', gap: space.lg, paddingVertical: space.xxl }}>
-          <Text style={[font.h1, { fontSize: 36 }]}>{t('common.appName')}</Text>
+          <View style={{ flexDirection: 'row', gap: space.sm }}>
+            <Emblem factionId={1} size={40} />
+            <Emblem factionId={2} size={40} />
+          </View>
+          <Text style={font.hero}>{t('common.appName')}</Text>
           <Text style={font.h2}>{t('auth.title')}</Text>
           <Text style={[font.body, { color: colors.textDim }]}>{t('auth.subtitle')}</Text>
           {!isSupabaseConfigured && (
@@ -94,11 +99,11 @@ export default function SignIn() {
           </View>
           <Text style={[font.small, { textAlign: 'center' }]}>
             {t('auth.legal')}{' '}
-            <Link href="/legal/terms" style={{ color: colors.accent }}>
+            <Link href="/legal/terms" style={{ color: colors.gold }}>
               {t('legal.terms')}
             </Link>{' '}
             ·{' '}
-            <Link href="/legal/privacy" style={{ color: colors.accent }}>
+            <Link href="/legal/privacy" style={{ color: colors.gold }}>
               {t('legal.privacy')}
             </Link>
           </Text>

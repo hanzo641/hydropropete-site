@@ -3,6 +3,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { GAME_MODE } from '@/backend';
 import { setLocale } from '@/i18n';
 import { getMyProfile, type Profile } from './api';
 import { supabase } from './supabase';
@@ -11,6 +12,8 @@ WebBrowser.maybeCompleteAuthSession();
 
 interface AuthState {
   loading: boolean;
+  /** connecté : compte Supabase en ligne, toujours vrai en mode local (pas de compte) */
+  signedIn: boolean;
   session: Session | null;
   profile: Profile | null;
   refreshProfile: () => Promise<Profile | null>;
@@ -36,6 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (GAME_MODE === 'local') {
+      void refreshProfile().then(() => setLoading(false));
+      return;
+    }
     void supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
       if (data.session) await refreshProfile();
@@ -50,12 +57,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refreshProfile]);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    if (GAME_MODE === 'online') await supabase.auth.signOut();
     setProfile(null);
   }, []);
 
   const value = useMemo(
-    () => ({ loading, session, profile, refreshProfile, signOut }),
+    () => ({ loading, signedIn: GAME_MODE === 'local' || session != null, session, profile, refreshProfile, signOut }),
     [loading, session, profile, refreshProfile, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,6 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useRef } from 'react';
 import { PanResponder, Pressable, Text, View } from 'react-native';
-import { colors, radius, space } from '@/ui/theme';
+import { colors, fonts, radius, space } from '@/ui/theme';
 
 /**
  * Jauge de déploiement : on GLISSE le doigt le long de la jauge pour y envoyer des troupes
@@ -9,13 +10,13 @@ import { colors, radius, space } from '@/ui/theme';
 export function DragGauge({
   value,
   max,
-  color,
+  gradient,
   onChange,
   accessibilityLabel,
 }: {
   value: number;
   max: number;
-  color: string;
+  gradient: [string, string];
   onChange: (v: number) => void;
   accessibilityLabel: string;
 }) {
@@ -40,10 +41,11 @@ export function DragGauge({
   }
 
   const pct = max > 0 ? value / max : 0;
+  const step = (d: number) => onChange(Math.max(0, Math.min(max, value + d)));
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-      <Pressable accessibilityLabel="−" onPress={() => onChange(Math.max(0, value - 1))} hitSlop={8}>
-        <Text style={{ color: colors.text, fontSize: 22, width: 22, textAlign: 'center' }}>−</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="−" onPress={() => step(-1)} hitSlop={8} style={btn}>
+        <Text style={btnText}>−</Text>
       </Pressable>
       <View
         accessible
@@ -51,19 +53,22 @@ export function DragGauge({
         accessibilityLabel={accessibilityLabel}
         accessibilityValue={{ min: 0, max, now: value }}
         onAccessibilityAction={(e) => {
-          if (e.nativeEvent.actionName === 'increment') onChange(Math.min(max, value + 1));
-          if (e.nativeEvent.actionName === 'decrement') onChange(Math.max(0, value - 1));
+          if (e.nativeEvent.actionName === 'increment') step(1);
+          if (e.nativeEvent.actionName === 'decrement') step(-1);
         }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onLayout={(e) => (width.current = Math.max(1, e.nativeEvent.layout.width))}
-        style={{ flex: 1, height: 36, borderRadius: radius.pill, backgroundColor: colors.surfaceHigh, overflow: 'hidden', justifyContent: 'center' }}
+        style={{ flex: 1, height: 40, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: colors.border, overflow: 'hidden', justifyContent: 'center' }}
         {...responder.panHandlers}>
-        <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct * 100}%`, backgroundColor: color }} />
-        <Text style={{ textAlign: 'center', color: colors.text, fontWeight: '800', fontSize: 16 }}>{value}</Text>
+        <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct * 100}%` }} />
+        <Text style={{ textAlign: 'center', color: colors.text, fontFamily: fonts.display, fontSize: 22 }}>{value}</Text>
       </View>
-      <Pressable accessibilityLabel="+" onPress={() => onChange(Math.min(max, value + 1))} hitSlop={8}>
-        <Text style={{ color: colors.text, fontSize: 22, width: 22, textAlign: 'center' }}>+</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="+" onPress={() => step(1)} hitSlop={8} style={btn}>
+        <Text style={btnText}>+</Text>
       </Pressable>
     </View>
   );
 }
+
+const btn = { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceHigh, alignItems: 'center', justifyContent: 'center' } as const;
+const btnText = { color: colors.text, fontSize: 22, fontFamily: fonts.bodyBold, lineHeight: 26 } as const;

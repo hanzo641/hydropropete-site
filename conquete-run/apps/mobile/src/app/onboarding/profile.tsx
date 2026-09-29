@@ -1,73 +1,79 @@
-import { activeFactions, assignFaction, zoneAt } from '@conquete/core';
+import { assignFaction, DEFAULT_AVATAR_ID, factionById, type LatLng, zoneAt } from '@conquete/core';
+import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { getLocale, t, type TKey } from '@/i18n';
-import { completeOnboarding, setAvatar, zoneFactionCounts } from '@/lib/api';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { AvatarPicker } from '@/features/avatar/AvatarPicker';
+import { getLocale, t, type TKey } from '@/i18n';
+import { GAME_MODE, onboard, zoneFactionCounts } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { currentConfig, loadGameConfig } from '@/lib/gameConfig';
+import { currentConfig } from '@/lib/gameConfig';
 import { TERMS_VERSION } from '@/legal/texts';
-import { Button, Checkbox, ErrorText, Field, Screen } from '@/ui/components';
-import { colors, font, radius, space } from '@/ui/theme';
+import { Button, Checkbox, ErrorText, Field, Screen, ScreenBg, SectionTitle } from '@/ui/components';
+import { FactionBadge } from '@/ui/game';
+import { colors, font, paletteOf, space } from '@/ui/theme';
 
+/** Nom de guerre, avatar, terrain, consentements — puis la carte. */
 export default function OnboardingProfile() {
+  const params = useLocalSearchParams<{ faction?: string }>();
+  const requested = params.faction && params.faction !== 'auto' ? Number(params.faction) : null;
+  const palette = paletteOf(requested);
   const { refreshProfile } = useAuth();
   const [username, setUsername] = useState('');
   const [birthYear, setBirthYear] = useState('');
-  const [zone, setZone] = useState<string | null>(null);
-  const [counts, setCounts] = useState<Map<number, number>>(new Map());
-  const [faction, setFaction] = useState<number | null>(null);
-  const [avatar, setAvatarId] = useState('renard');
+  const [position, setPosition] = useState<LatLng | null>(null);
+  const [avatar, setAvatarId] = useState(DEFAULT_AVATAR_ID);
   const [gps, setGps] = useState(false);
   const [terms, setTerms] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'locate' | 'submit' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const local = GAME_MODE === 'local';
 
-  useEffect(() => {
-    void loadGameConfig();
-  }, []);
-
-  const cfg = currentConfig();
-  const locked = zone ? assignFaction(counts, null, cfg.factions).locked : [];
   const year = Number(birthYear);
   const tooYoung = birthYear.length === 4 && new Date().getFullYear() - year < 15;
   const validName = /^[A-Za-z0-9_.À-ÖØ-öø-ÿ-]{3,20}$/.test(username);
+  const ready = validName && position != null && (local ? terms : birthYear.length === 4 && !tooYoung && gps && terms);
 
-  const detectZone = async () => {
+  const locate = async () => {
     setError(null);
-    const perm = await Location.requestForegroundPermissionsAsync();
-    if (perm.status !== 'granted') {
-      setError(t('run.permissionDenied'));
-      return;
-    }
-    // précision réduite volontairement : seule la zone (~40 km) est utile
-    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
-    const z = zoneAt({ lat: pos.coords.latitude, lng: pos.coords.longitude }, cfg.h3);
-    setZone(z);
+    setBusy('locate');
     try {
-      setCounts(await zoneFactionCounts(z));
-    } catch {
-      setCounts(new Map());
+      const perm = await Location.requestForegroundPermissionsAsync();
+      if (perm.status !== 'granted') throw new Error(t('run.permissionDenied'));
+      const last = await Location.getLastKnownPositionAsync();
+      const pos = last ?? (await Location.getCurrentPositionAsync({ accuracy: local ? Location.Accuracy.Balanced : Location.Accuracy.Low }));
+      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (!local && requested != null) {
+        // en ligne : un camp surreprésenté dans la zone est fermé (équilibrage)
+        const counts = await zoneFactionCounts(zoneAt(p, currentConfig().h3)).catch(() => new Map<number, number>());
+        if (assignFaction(counts, requested, currentConfig().factions).locked.includes(requested)) throw new Error(t('faction.locked'));
+      }
+      setPosition(p);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      setError((e as Error).message || t('common.error'));
+    } finally {
+      setBusy(null);
     }
   };
 
   const submit = async () => {
-    if (!zone) return;
-    setBusy(true);
+    if (!position) return;
+    setBusy('submit');
     setError(null);
     try {
-      await completeOnboarding({
+      await onboard({
         username,
-        faction,
-        zone,
-        birthYear: year,
+        faction: requested,
+        avatarId: avatar,
         locale: getLocale(),
-        gpsConsent: gps,
+        position,
+        birthYear: local ? null : year,
+        gpsConsent: local ? true : gps,
         termsVersion: TERMS_VERSION,
       });
-      await setAvatar(avatar);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await refreshProfile();
       router.replace('/(tabs)');
     } catch (e) {
@@ -76,84 +82,78 @@ export default function OnboardingProfile() {
       const msg = t(key);
       setError(msg === key ? t('common.error') : msg);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={{ gap: space.lg, paddingVertical: space.xl }}>
-        <Text style={font.h1}>{t('onboarding.profileTitle')}</Text>
-        <Field label={t('onboarding.username')} value={username} onChangeText={setUsername} autoCapitalize="none" maxLength={20} />
-        <Field
-          label={t('onboarding.birthYear')}
-          value={birthYear}
-          onChangeText={(v) => setBirthYear(v.replace(/\D/g, '').slice(0, 4))}
-          keyboardType="number-pad"
-          placeholder="1990"
-        />
-        {tooYoung && <ErrorText>{t('onboarding.tooYoung')}</ErrorText>}
+    <View style={{ flex: 1 }}>
+      <ScreenBg palette={palette} />
+      <Screen bg={false}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ gap: space.lg, paddingVertical: space.xl }} keyboardShouldPersistTaps="handled">
+            <View style={{ gap: space.sm }}>
+              {requested != null && factionById(requested) && <FactionBadge factionId={requested} />}
+              <Text style={font.h1}>{t('onboarding.profileTitle')}</Text>
+            </View>
+            <Field
+              label={t('onboarding.username')}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              autoCorrect={false}
+              maxLength={20}
+              placeholder="Foulée_64"
+            />
+            <Text style={[font.small, { marginTop: -space.sm }]}>{t('onboarding.usernameHint')}</Text>
+            {!local && (
+              <>
+                <Field
+                  label={t('onboarding.birthYear')}
+                  value={birthYear}
+                  onChangeText={(v) => setBirthYear(v.replace(/\D/g, '').slice(0, 4))}
+                  keyboardType="number-pad"
+                  placeholder="1990"
+                />
+                {tooYoung && <ErrorText>{t('onboarding.tooYoung')}</ErrorText>}
+              </>
+            )}
 
-        <Text style={font.h2}>{t('avatar.title')}</Text>
-        <AvatarPicker value={avatar} level={1} onChange={setAvatarId} />
+            <SectionTitle title={t('onboarding.avatarTitle')} color={palette.main} />
+            <AvatarPicker value={avatar} level={1} onChange={setAvatarId} accent={palette.main} onlyUnlocked />
 
-        <Text style={font.h2}>{t('onboarding.zoneTitle')}</Text>
-        <Text style={font.small}>{t('onboarding.zoneHelp')}</Text>
-        <Button
-          title={zone ? t('onboarding.zoneDetected') : t('onboarding.detectZone')}
-          variant={zone ? 'secondary' : 'primary'}
-          icon="locate-outline"
-          onPress={() => void detectZone()}
-        />
+            <SectionTitle title={t('onboarding.zoneTitle')} color={palette.main} />
+            <Text style={font.small}>{local ? t('onboarding.zoneHelpLocal') : t('onboarding.zoneHelp')}</Text>
+            <Button
+              title={position ? t('onboarding.zoneDetected') : t('onboarding.detectZone')}
+              variant={position ? 'secondary' : 'primary'}
+              icon={position ? 'checkmark-circle' : 'locate'}
+              palette={palette}
+              loading={busy === 'locate'}
+              onPress={() => void locate()}
+            />
 
-        <Text style={font.h2}>{t('onboarding.factionTitle')}</Text>
-        <View style={{ gap: space.sm }}>
-          {activeFactions(cfg.factions).map((f) => {
-            const isLocked = locked.includes(f.id);
-            const selected = faction === f.id;
-            return (
-              <Pressable
-                key={f.id}
-                disabled={isLocked}
-                onPress={() => setFaction(f.id)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: space.md,
-                  padding: space.md,
-                  borderRadius: radius.md,
-                  borderWidth: 2,
-                  borderColor: selected ? f.color : colors.border,
-                  backgroundColor: colors.surface,
-                  opacity: isLocked ? 0.4 : 1,
-                }}>
-                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: f.color }} />
-                <Text style={[font.h3, { flex: 1 }]}>{f.name[getLocale()]}</Text>
-                <Text style={font.small}>{isLocked ? t('onboarding.factionLocked') : zone ? `${counts.get(f.id) ?? 0}` : ''}</Text>
-              </Pressable>
-            );
-          })}
-          <Pressable
-            onPress={() => setFaction(null)}
-            style={{ padding: space.md, borderRadius: radius.md, borderWidth: 2, borderColor: faction == null ? colors.accent : colors.border }}>
-            <Text style={font.body}>{t('onboarding.factionAuto')}</Text>
-          </Pressable>
-        </View>
+            <View style={{ gap: space.md, marginTop: space.sm }}>
+              {local ? (
+                <Checkbox checked={terms} onChange={setTerms} label={t('onboarding.consentLocal')} palette={palette} />
+              ) : (
+                <>
+                  <Checkbox checked={gps} onChange={setGps} label={t('onboarding.consentGps')} palette={palette} />
+                  <Checkbox checked={terms} onChange={setTerms} label={t('onboarding.consentTerms')} palette={palette} />
+                </>
+              )}
+              <Text style={[font.small, { color: palette.main }]}>
+                <Text onPress={() => router.push('/legal/terms')}>{t('legal.terms')}</Text>
+                <Text style={{ color: colors.textMute }}> · </Text>
+                <Text onPress={() => router.push('/legal/privacy')}>{t('legal.privacy')}</Text>
+              </Text>
+            </View>
 
-        <Checkbox checked={gps} onChange={setGps} label={t('onboarding.consentGps')} />
-        <Checkbox checked={terms} onChange={setTerms} label={t('onboarding.consentTerms')} />
-        <Text style={[font.small, { color: colors.accent }]} onPress={() => router.push('/legal/privacy')}>
-          {t('legal.privacy')} · <Text onPress={() => router.push('/legal/terms')}>{t('legal.terms')}</Text>
-        </Text>
-
-        <ErrorText>{error}</ErrorText>
-        <Button
-          title={t('onboarding.start')}
-          loading={busy}
-          disabled={!validName || birthYear.length !== 4 || tooYoung || !zone || !gps || !terms}
-          onPress={() => void submit()}
-        />
-      </ScrollView>
-    </Screen>
+            <ErrorText>{error}</ErrorText>
+            <Button title={t('onboarding.start')} size="lg" icon="flash" palette={palette} loading={busy === 'submit'} disabled={!ready} onPress={() => void submit()} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Screen>
+    </View>
   );
 }

@@ -12,7 +12,7 @@ import { useSyncExternalStore } from 'react';
 import { currentConfig } from '@/lib/gameConfig';
 import { onPoints } from './events';
 import { isTracking, startTracking, stopTracking } from './locationTask';
-import { type CompactTrace, startReplay, stopReplay } from './simulation';
+import { type CompactTrace, replayOrigin, startReplay, stopReplay } from './simulation';
 import * as store from './storage';
 
 export type Phase = 'idle' | 'warming' | 'running' | 'finished';
@@ -100,7 +100,7 @@ function feed(pts: readonly RawPoint[]): void {
     const last = track[track.length - 1];
     if (!last || Math.abs(last.lat - f.lat) + Math.abs(last.lng - f.lng) > 0.00005) track = [...track, { lat: f.lat, lng: f.lng }];
   }
-  set({ snapshot: tracker.snapshot(Date.now()), litCells: lit, track });
+  set({ snapshot: tracker.snapshot(clock()), litCells: lit, track });
 }
 
 function subscribe(): void {
@@ -136,12 +136,20 @@ export async function prepare(
 export function start(): void {
   if (state.phase !== 'warming' || !state.localRunId) return;
   const t0 = Date.now();
-  store.markStarted(state.localRunId, t0);
+  const sim = state.source === 'simulation' && pendingSim && state.simulation ? { trace: pendingSim, speed: state.simulation.speed } : null;
+  // en simulation, les points rejoués sont datés dans le passé (la course finit « maintenant ») :
+  // la course commence donc à l'horodatage du premier point rejoué
+  store.markStarted(state.localRunId, sim ? Math.floor(replayOrigin(sim.trace, sim.speed, t0)) : t0);
   newTrackers();
-  set({ phase: 'running', startedAt: t0, snapshot: tracker!.snapshot(t0), litCells: [], track: [] }, true);
-  if (state.source === 'simulation' && pendingSim && state.simulation) {
-    startReplay(pendingSim, state.simulation.speed, () => set({}, true));
-  }
+  const tr = tracker;
+  if (!tr) return;
+  set({ phase: 'running', startedAt: t0, snapshot: tr.snapshot(sim ? undefined : t0), litCells: [], track: [] }, true);
+  if (sim) startReplay(sim.trace, sim.speed, () => set({}, true), t0);
+}
+
+/** Instant « maintenant » du chrono : horloge réelle, ou dernier point rejoué en simulation. */
+function clock(): number | undefined {
+  return state.source === 'simulation' ? undefined : Date.now();
 }
 
 /** Fin : arrêt du GPS, validation locale ; renvoie l'identifiant local à envoyer. */
@@ -173,7 +181,7 @@ export function reset(): void {
 
 /** Tic d'horloge (chrono affiché même sans nouveau point). */
 export function tick(): void {
-  if (state.phase === 'running' && tracker) set({ snapshot: tracker.snapshot(Date.now()) });
+  if (state.phase === 'running' && tracker) set({ snapshot: tracker.snapshot(clock()) });
 }
 
 /**

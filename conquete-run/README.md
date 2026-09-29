@@ -2,6 +2,41 @@
 
 Jeu mobile (iOS + Android) de conquête de territoires façon Risk : les kilomètres courus
 deviennent des troupes, le dénivelé compte, la carte (hexagones H3) couvre le monde entier.
+**Deux factions, la Braise 🔥 et la Marée 🌊, se font une guerre éternelle** ; séries,
+front du jour et rival rendent chaque course décisive.
+
+## ⚡ Tester dès maintenant sur Android (mode solo, sans compte ni serveur)
+
+1. Récupérez l'APK **`conquete-run-0.2.0.apk`** (envoyé dans la conversation ; ou
+   reconstruisez-le, voir « Construire l'APK localement » plus bas).
+2. Sur le téléphone : ouvrez le fichier → autorisez « Installer des applis inconnues » pour
+   l'app qui l'ouvre (Fichiers, Chrome, Gmail…) → **Installer**. Play Protect peut avertir
+   d'une app « inconnue » : c'est normal pour un APK signé avec la clé de test d'Expo.
+3. Lancez **Conquête Run** : choisissez votre camp, votre nom de guerre, un avatar, puis
+   « Localiser mon terrain » (la carte de guerre est créée autour de vous).
+4. Avant de courir : autorisez la localisation **« Toujours autoriser »** (Réglages →
+   Applications → Conquête Run → Autorisations → Position) pour que la course continue écran
+   éteint, et désactivez l'optimisation de batterie pour l'app sur Samsung/Xiaomi.
+5. Onglet central **Courir** → attendez « GPS prêt » → **GO**. À la fin : **maintenez**
+   « Terminer ». La course est validée sur le téléphone (même chaîne que le serveur), vous
+   gagnez vos troupes, puis **Déployer** → **Lancer l'assaut**.
+6. L'ennemi (IA) contre-attaque toutes les 8 h : rouvrez l'app le lendemain pour le rapport
+   « Pendant ton absence ». Pour essayer sans courir : Profil → *Mode simulation*.
+
+Tout reste sur le téléphone ; seule l'altitude du parcours est demandée à l'IGN (France) ou
+à Open Topo Data (ailleurs). **iOS** : impossible d'installer sans compte Apple Developer
+(99 €/an) → TestFlight via EAS (voir §4).
+
+### Construire l'APK localement
+
+```bash
+cd conquete-run/apps/mobile
+CI=1 npx expo prebuild -p android --no-install
+cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+# → android/app/build/outputs/apk/release/app-release.apk
+```
+Sans `EXPO_PUBLIC_SUPABASE_*`, l'app démarre en mode solo ; avec, elle rejoint la guerre en
+ligne (`EXPO_PUBLIC_GAME_MODE=local` force le mode solo).
 
 * Règles : [`GAME_RULES.md`](GAME_RULES.md) · Architecture : [`ARCHITECTURE.md`](ARCHITECTURE.md)
 * Jalons : [`PLAN.md`](PLAN.md) · Décisions prises : [`DECISIONS.md`](DECISIONS.md)
@@ -180,9 +215,11 @@ modèle de terrain. Sur terrain plat, le critère « < 10 % » est remplacé par
 ## 6. Ce qui n'a PAS pu être testé sur un vrai téléphone
 
 Tout a été développé et vérifié dans un conteneur Linux sans téléphone, sans simulateur
-et sans projet Supabase réel. **Vérifié** : logique (Vitest), base de données (pgTAP sur
-Postgres 16 + PostGIS), Edge Functions (`deno check`), typage et lint de l'app, bundle
-Metro Android + iOS (`expo export`), configuration Expo (`expo-doctor` 21/21).
+et sans projet Supabase réel. **Vérifié** : logique (Vitest, dont une partie complète en
+mode solo : inscription → course → déploiement → nuit de contre-attaques → série → fin de
+saison), base de données (pgTAP sur Postgres 16 + PostGIS), Edge Functions (`deno check`),
+typage et lint de l'app, bundle Metro, **compilation d'un APK Android release**, rendu des
+écrans dans un navigateur (version web de l'app, captures).
 
 **Non vérifié, à tester en priorité** (checklist dans `TODO.md`) :
 

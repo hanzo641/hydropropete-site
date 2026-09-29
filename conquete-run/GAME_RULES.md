@@ -1,4 +1,4 @@
-# Conquête Run — Règles du jeu (v1)
+# Conquête Run — Règles du jeu (v2 : la guerre des foulées)
 
 > Nom provisoire. Toutes les valeurs chiffrées de ce document sont des **paramètres serveur**
 > (table `game_config`, voir « Paramètres » en fin de document). Ils se modifient sans
@@ -7,10 +7,17 @@
 ## 1. Principe
 
 Chaque kilomètre que tu cours devient une troupe. Après ta course, tu déploies tes troupes
-sur les territoires que tu viens de traverser : renforcer ceux de ton équipe, attaquer ceux
-des autres ou les territoires sauvages. Trois factions se disputent une carte mondiale
-découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la carte est remise
-à zéro.
+sur les territoires que tu viens de traverser : renforcer ceux de ton camp, attaquer ceux
+de l'ennemi ou les territoires sauvages. **Deux factions, la Braise (rouge) et la Marée
+(bleu), se font une guerre éternelle** sur une carte mondiale découpée automatiquement en
+hexagones. Une saison dure 4 semaines : la faction qui a dominé la zone gagne la saison,
+la victoire s'ajoute au score éternel, puis la carte est remise à zéro et la guerre reprend.
+
+**En une phrase** : cours → gagne des troupes → prends les hexagones traversés → garde-les
+face aux contre-attaques. Trois leviers rendent le jeu addictif : la **série** 🔥 (courir
+chaque jour donne jusqu'à +50 % de troupes), le **front du jour** ⚔️ (une région où les
+prises comptent double) et le **rival** 😈 (le joueur ennemi qui te reprend le plus de
+territoires).
 
 ## 2. La carte
 
@@ -58,11 +65,20 @@ découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la car
 
 ## 4. Les équipes (factions)
 
-* **3 factions mondiales** : **Braise** (rouge-orangé), **Sylve** (vert), **Marée** (bleu).
-  Une 4ᵉ (**Ambre**, jaune) est prête dans la configuration pour une ouverture large.
-* À l'inscription, le joueur choisit sa faction **ou** laisse le jeu l'attribuer.
+* **2 factions en guerre éternelle** :
+  * **Braise** (rouge-orangé, emblème flamme) — « Le feu ne recule jamais. » Nés du premier
+    feu, ses coureurs attaquent à l'aube et brûlent chaque rue qu'ils traversent.
+  * **Marée** (bleu, emblème vague) — « Rien n'arrête la vague. » Patients et implacables,
+    ses coureurs reviennent sans cesse et recouvrent tout sur leur passage.
+  * **Sylve** (vert) et **Ambre** (jaune) restent en réserve (`factions.count` jusqu'à 4)
+    si le jeu grandit au point de justifier plus de camps.
+* Deux camps plutôt que trois : tout le monde comprend immédiatement qui est l'ennemi, le
+  score est une simple barre « nous contre eux », et chaque prise se voit.
+* **Le choix du camp est le premier écran du jeu** (deux grands panneaux, un « VS » au
+  milieu). On peut aussi laisser le destin choisir. Toute l'interface prend ensuite la
+  couleur de sa faction.
 * **Rééquilibrage par zone** : une faction est **fermée** dans une zone si elle y dépasse
-  sa part équitable de plus de 10 points (ex. > 43 % des joueurs actifs avec 3 factions)
+  sa part équitable de plus de 10 points (> 60 % des joueurs actifs à deux factions)
   **et** que la zone compte au moins 6 joueurs. L'attribution automatique choisit la
   faction la moins représentée dans la zone du joueur.
 * La zone du joueur est déterminée **une seule fois** à partir d'une position approximative
@@ -73,8 +89,9 @@ découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la car
 ## 5. Troupes
 
 * **1 km validé = 1 troupe** ; **+1 troupe par 100 m de D+ validé** (le trail est récompensé).
-* Troupes d'une course = `⌊ km + D+/100 ⌋`. Exemple : 7,8 km et 230 m D+ → 10 troupes.
-* Seuls la distance et le dénivelé **recalculés par le serveur** comptent (voir §11).
+* Troupes d'une course = `⌊ (km + D+/100) × (1 + bonus de série) ⌋`. Exemple : 7,8 km et
+  230 m D+ sans série → 10 troupes ; le même jour de série n° 4 (+30 %) → 13 troupes.
+* Seuls la distance et le dénivelé **recalculés par le serveur** comptent (voir §12).
 * **Plafond journalier** : 42 km et 3 000 m D+ validés par jour et par joueur. Au-delà, la
   course est enregistrée mais ne rapporte plus de troupes.
 * Les troupes d'une course doivent être déployées **dans les 48 h** ; passé ce délai, celles
@@ -133,7 +150,24 @@ découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la car
   dans cette région (attaque comme renfort).
 * Une prise de contrôle ou une perte de région génère un événement dans le fil d'actualité.
 
-## 10. Saisons et classements
+## 10. Série, front du jour, rival, guerre éternelle
+
+* **Série 🔥** : nombre de jours consécutifs (jours locaux du coureur) avec au moins une
+  course validée de **2 km**. Chaque jour de série au-delà du premier ajoute **+10 % de
+  troupes**, plafonné à **+50 %** (6ᵉ jour). Un jour sans course remet la série à zéro.
+  L'app prévient le jour où la série va s'éteindre (rappel local à 18 h 30, désactivable).
+* **Front du jour ⚔️** : chaque jour, une région de la zone devient le front (choix
+  déterministe identique pour tous, parmi les régions disputées par les deux camps si
+  possible). Les territoires **pris** sur le front rapportent **×2 points** de saison et
+  **×1,5 XP**. Il est surligné en or sur la carte.
+* **Rival 😈** : le joueur ennemi qui t'a repris le plus de territoires parmi ceux que tu
+  avais conquis. Il est affiché dans l'onglet Guerre, avec le nombre de prises à venger.
+* **Guerre éternelle** : chaque saison gagnée (territoire-jours, voir §11) ajoute une
+  victoire au compteur de la faction dans la zone. Ce compteur ne se remet jamais à zéro.
+* **Rapport d'absence** : à l'ouverture de l'app, un encart résume ce que l'ennemi et tes
+  alliés ont pris depuis ta dernière visite, avec un bouton « Riposter ».
+
+## 11. Saisons et classements
 
 * Une saison dure **4 semaines**. À la fin, la carte est remise à zéro (tous les territoires
   redeviennent sauvages, la variation des garnisons sauvages est re-tirée).
@@ -142,13 +176,13 @@ découpée automatiquement en hexagones. Une saison dure 4 semaines, puis la car
   pas un raid la veille de la fin.
 * **Classement mondial des factions** : somme des territoire-jours de toutes les zones.
 * **Classement individuel par zone** : points de saison =
-  10 × territoires pris + 1 × troupe déployée + 1 × km validé.
+  10 × territoires pris (× 2 sur le front du jour) + 1 × troupe déployée + 1 × km validé.
 * **Titres et badges** de fin de saison : faction victorieuse de la zone (badge de faction),
   « Conquérant » (1ᵉʳ de la zone), « Stratège » (plus de régions prises par son équipe
   avec sa participation), « Bâtisseur » (plus de renforts), « Explorateur » (plus de
   territoires différents traversés), « Sherpa » (plus de D+).
 
-## 11. Validation des courses (anti-triche)
+## 12. Validation des courses (anti-triche)
 
 Le serveur ne fait **jamais** confiance au client. Il reçoit la trace brute et :
 
@@ -168,7 +202,7 @@ Le serveur ne fait **jamais** confiance au client. Il reçoit la trace brute et 
 Chaque course rejetée apparaît dans le **journal des courses** du joueur avec la raison
 (ex. « Vitesse de véhicule détectée entre 12:04 et 12:09 »).
 
-## 12. Progression individuelle
+## 13. Progression individuelle
 
 * **XP** par course validée : 10 XP/km + 1 XP par 10 m de D+ + 2 XP par minute active,
   + 15 XP par territoire pris, + 3 XP par renfort. Les XP ne sont jamais remises à zéro.
@@ -183,14 +217,32 @@ Chaque course rejetée apparaît dans le **journal des courses** du joueur avec 
   distance, D+, nombre de territoires sauvages pris, nombre de nouveaux territoires
   explorés.
 
-## 13. Vie privée (rappel des règles de jeu)
+## 14. Vie privée (rappel des règles de jeu)
 
 * Les autres joueurs ne voient **jamais** tes traces : seulement les territoires, leur
   couleur et leur garnison.
 * Le fil d'actualité ne te nomme pas pour une action située dans ta **zone de
   confidentialité** (domicile) : il affiche « Un membre de Braise a pris … ».
 
-## 14. Paramètres (valeurs par défaut)
+## 15. Mode solo (sans compte ni serveur)
+
+Si l'app n'est pas reliée à un serveur (aucune variable `EXPO_PUBLIC_SUPABASE_*`), ou avec
+`EXPO_PUBLIC_GAME_MODE=local`, le jeu tourne **entièrement sur le téléphone** :
+
+* inscription sans compte (nom de guerre, avatar, camp) ; le champ de bataille est créé
+  autour de la position du joueur : voisinage immédiat sauvage, un front ennemi d'un côté,
+  des territoires alliés de l'autre, des garnisons plus fortes au loin ;
+* validation des courses par **la même chaîne que le serveur** (filtrage, anti-triche,
+  D+ par modèle de terrain IGN / Open Topo Data quand le réseau est disponible, repli GPS) ;
+* l'ennemi et des coéquipiers fictifs (6 par camp, noms thématiques) **jouent toutes les
+  8 heures** : ils attaquent leur frontière (d'abord les prises bon marché et les territoires
+  du joueur), harcèlent, renforcent leurs points faibles. Leur budget suit l'activité du
+  joueur (6 à 30 troupes par jour pour l'ennemi) : le défi reste à sa mesure ;
+* érosion, régions, front du jour, série, rival, trophées, défis, fin de saison et
+  victoires éternelles fonctionnent comme en ligne ;
+* les courses du mode simulation comptent (bac à sable), le délai d'envoi est de 30 jours.
+
+## 16. Paramètres (valeurs par défaut)
 
 | Clé | Défaut | Rôle |
 | --- | --- | --- |
@@ -210,7 +262,9 @@ Chaque course rejetée apparaît dans le **journal des courses** du joueur avec 
 | `region.controlThreshold` | 0.5 | part de la région à tenir |
 | `region.troopBonus` | 0.10 | bonus de troupes |
 | `wild.base` / `wild.altitudeStepM` / `wild.altitudeStartM` / `wild.jitter` / `wild.max` | 1 / 400 / 300 / 1 / 6 | garnisons sauvages |
-| `factions.count` | 3 | nombre de factions actives |
+| `factions.count` | 2 | nombre de factions actives (2 à 4) |
+| `streak.minKm` / `bonusPerDay` / `maxBonus` | 2 / 0.10 / 0.50 | série |
+| `front.pointsMultiplier` / `xpMultiplier` | 2 / 1.5 | front du jour |
 | `factions.balanceMargin` / `balanceMinPlayers` | 0.10 / 6 | rééquilibrage |
 | `season.lengthDays` | 28 | durée d'une saison |
 | `antiCheat.*` | voir `ARCHITECTURE.md` | seuils de validation |

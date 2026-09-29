@@ -3,6 +3,17 @@
 Durées = temps actif estimé (entre parenthèses : délai d'attente externe).
 Les points **bloquants** empêchent la saison test.
 
+## Tout de suite — tester le mode solo (15 min + une course)
+
+0. Installer l'APK Android (README « Tester dès maintenant »), choisir son camp, lancer une
+   course, déployer, puis rouvrir l'app le lendemain (rapport « Pendant ton absence »).
+   À noter pendant le test, pour ajuster l'équilibrage (`game_config` / `world.ts`) :
+   - [ ] la course est-elle bien suivie écran éteint (autorisation « Toujours ») ?
+   - [ ] le nombre de troupes gagnées paraît-il juste pour l'effort ?
+   - [ ] l'ennemi est-il trop agressif / pas assez (budget IA 6–30 troupes/jour) ?
+   - [ ] la carte 3D est-elle fluide ; les couleurs lisibles au soleil ?
+   - [ ] les rappels (série, troupes) arrivent-ils au bon moment ?
+
 ## Semaine 1 — cadre
 
 1. **Cumul d'activités (agent de la fonction publique)** — *bloquant, à lancer en premier*
@@ -50,8 +61,8 @@ Les points **bloquants** empêchent la saison test.
    est **mis en pause après 7 jours sans activité**.
 10. **Fournisseurs de connexion** — 2 h. Apple (Services / App ID), Google (écran de
     consentement + client OAuth Web), SMTP pour les codes e-mail (Brevo / Resend, 30 min).
-11. **Icône et écran de démarrage** — 2 h (graphiste). Les icônes actuelles sont celles du
-    modèle Expo (`apps/mobile/assets/images/`). Les visuels de rangs viennent du prototype.
+11. **Icône et écran de démarrage** — facultatif. Un visuel a été créé (hexagone fendu
+    braise / marée, `apps/mobile/assets/images/`) ; un graphiste peut le remplacer.
 
 ## Semaine 2 — builds et tests terrain
 
@@ -98,7 +109,8 @@ Les points **bloquants** empêchent la saison test.
     à 1 000 requêtes/jour ; renseigner `OPENTOPODATA_URL`.
 21. **Import des montres** (HealthKit / Health Connect) — 1–2 semaines de dev (architecture
     prête : `runs.source`, `submit-run` accepte ces sources).
-22. **Notifications push** (attaque d'un territoire, région perdue) — 3 jours de dev.
+22. **Notifications push serveur** (attaque d'un territoire, région perdue) — 3 jours de dev.
+    Les rappels **locaux** (série, troupes, ennemi qui avance) existent déjà.
 23. **Supervision** (Sentry, alertes Supabase), sauvegardes PITR, offre Supabase Pro.
 24. **Limites administratives** comme régions (DECISIONS D-07) si les joueurs le demandent.
 25. **AIPD RGPD** et relecture juridique complète des CGU / politique de confidentialité.

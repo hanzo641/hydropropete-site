@@ -1,33 +1,23 @@
-import { invokeFunction, type RunRow } from '@/lib/api';
+import type { SubmitRunResponse } from '@conquete/core';
+import { backend } from '@/backend';
 import * as store from './storage';
 
-export interface SubmitRunResponse {
-  run: RunRow;
-  trophies: string[];
-  duplicate: boolean;
-}
+export type { SubmitRunResponse };
 
-/** Envoie la trace BRUTE (le serveur recalcule tout). Idempotent grâce à clientRunId. */
+/**
+ * Envoie la trace BRUTE au backend (serveur, ou moteur local) qui recalcule tout.
+ * Idempotent grâce à clientRunId.
+ */
 export async function uploadRun(localId: string): Promise<SubmitRunResponse> {
   const run = store.getRun(localId);
   if (!run) throw new Error('run_not_found');
   const points = store.readPoints(localId, run.started_at ?? 0);
   try {
-    const res = await invokeFunction<SubmitRunResponse>('submit-run', {
+    const res = await backend().submitRun({
       clientRunId: localId,
       source: run.source,
       tzOffsetMin: -new Date().getTimezoneOffset(),
-      points: points.map((p) => [
-        p.t,
-        Number(p.lat.toFixed(7)),
-        Number(p.lng.toFixed(7)),
-        p.acc == null ? null : Math.round(p.acc * 10) / 10,
-        p.alt == null ? null : Math.round(p.alt * 10) / 10,
-        p.altAcc == null ? null : Math.round(p.altAcc * 10) / 10,
-        p.speed == null ? null : Math.round(p.speed * 100) / 100,
-        p.mocked ? 1 : 0,
-      ]),
-      device: { platform: process.env.EXPO_OS ?? 'unknown' },
+      points,
     });
     store.markUploaded(localId, res.run.id);
     return res;

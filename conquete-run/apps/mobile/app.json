@@ -2,17 +2,17 @@
   "expo": {
     "name": "Conquête Run",
     "slug": "conquete-run",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "conqueterun",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#0E1116",
+    "backgroundColor": "#06080C",
     "ios": {
       "bundleIdentifier": "app.conqueterun.mobile",
       "supportsTablet": false,
       "usesAppleSignIn": true,
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -20,7 +20,7 @@
     "android": {
       "package": "app.conqueterun.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#0E1116",
+        "backgroundColor": "#06080C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -33,17 +33,20 @@
         "FOREGROUND_SERVICE_LOCATION",
         "POST_NOTIFICATIONS"
       ],
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
-      "predictiveBackGestureEnabled": false
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 2
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0E1116",
+          "backgroundColor": "#06080C",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 96
+          "imageWidth": 170
         }
       ],
       [
@@ -61,7 +64,26 @@
       "expo-localization",
       "expo-sharing",
       "expo-web-browser",
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#FF6A2E",
+          "defaultChannel": "war"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useLegacyPackaging": true,
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "# Conquête Run : R8 sert surtout à retirer le code inutilisé (Compose, Guava…).\n# On garde les noms (pas d'obfuscation) et, par prudence, toutes les classes des\n# bibliothèques qui s'appellent par réflexion ou depuis le code natif.\n-dontobfuscate\n-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,SourceFile,LineNumberTable\n-keep class kotlin.Metadata { *; }\n-keep class com.facebook.** { *; }\n-keep class expo.modules.** { *; }\n-keep class host.exp.** { *; }\n-keep class org.maplibre.** { *; }\n-keep class com.swmansion.** { *; }\n-keep class com.horcrux.svg.** { *; }\n-keep class com.th3rdwave.safeareacontext.** { *; }\n-keep class app.conqueterun.** { *; }\n-dontwarn org.maplibre.**"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

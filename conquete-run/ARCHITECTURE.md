@@ -9,8 +9,11 @@ conquete-run/
 │       ├── game/           Règles : config, troupes, garnisons sauvages, combat, érosion,
 │       │                   régions, factions, XP/rangs/trophées, défis, saisons
 │       ├── geo/            H3 (territoires/régions/zones, cases traversées), géodésie, confidentialité
-│       └── server/         Traitement complet d'une course côté serveur (processRun)
+│       ├── server/         Traitement complet d'une course côté serveur (processRun)
+│       ├── api/            Contrat GameBackend (types partagés app ↔ backends)
+│       └── local/          Mode solo : le jeu complet sur le téléphone (LocalGame + IA)
 ├── apps/mobile/            App Expo SDK 57 + Expo Router + TypeScript strict
+│   └── src/backend/        GameBackend en ligne (Supabase) ou local (LocalGame + SQLite kv)
 ├── supabase/
 │   ├── migrations/         Schéma Postgres + PostGIS, RLS, fonctions SQL (combat, érosion…)
 │   ├── functions/          Edge Functions Deno (submit-run, deploy-troops, …)
@@ -19,6 +22,22 @@ conquete-run/
 ├── test-data/              Traces GPX de référence (ville/forêt/montagne) + grilles MNT
 └── scripts/                Génération des traces, synchro edge, saison de démo, tests SQL
 ```
+
+## 0. Deux backends, un seul jeu
+
+Les écrans ne parlent qu'à l'interface `GameBackend` (`packages/core/src/api/types.ts`) :
+
+* **en ligne** (`apps/mobile/src/backend/online.ts`) : Supabase (RPC, RLS, Realtime, Edge
+  Functions) — la vraie guerre multijoueur ;
+* **solo / local** (`LocalGame`, `packages/core/src/local/game.ts`) : même `processRun` que
+  le serveur, combats, érosion, régions, front, série, trophées, et une **IA** (`game/world.ts`)
+  qui fait jouer l'ennemi et des coéquipiers fictifs toutes les 8 h (rattrapage au retour
+  dans l'app, 7 jours max). État dans un magasin clé → JSON (SQLite kv-store sur mobile).
+
+Le mode est choisi au démarrage (`backend/index.ts`) : local si aucun serveur n'est configuré
+ou si `EXPO_PUBLIC_GAME_MODE=local`. La carte partage ses couches entre la version native
+(MapLibre React Native) et la version web (MapLibre GL JS, `*.web.tsx`) via
+`features/map/layers.ts`.
 
 ## 1. Principes
 

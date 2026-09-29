@@ -1,33 +1,38 @@
-import { type BBox, type LatLng } from '@conquete/core';
-import { Camera, type CameraRef, GeoJSONSource, Layer, Map, UserLocation, type ViewStateChangeEvent } from '@maplibre/maplibre-react-native';
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { BBox, LatLng } from '@conquete/core';
+import {
+  Camera,
+  type CameraRef,
+  GeoJSONSource,
+  Layer,
+  Map,
+  type PressEventWithFeatures,
+  UserLocation,
+  type ViewStateChangeEvent,
+} from '@maplibre/maplibre-react-native';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { type NativeSyntheticEvent, StyleSheet, Text, View } from 'react-native';
 import { t } from '@/i18n';
-import { hexesInBBox, type HexRow } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { loadGameConfig, currentConfig } from '@/lib/gameConfig';
-import { supabase } from '@/lib/supabase';
-import { colors, radius, space } from '@/ui/theme';
-import { hexFeatures, labelFeatures, lineFeature, regionFeatures, visibleHexes } from './hexGeo';
+import { Glass } from '@/ui/components';
+import { font, space } from '@/ui/theme';
+import type { HexView } from './hexGeo';
+import { MAP_LIGHT, mapLayers, SOURCES } from './layers';
+import { NIGHT_STYLE } from './nightStyle';
+import { useHexData } from './useHexData';
 
-export const MAP_STYLE = process.env.EXPO_PUBLIC_MAP_STYLE_URL || 'https://tiles.openfreemap.org/styles/liberty';
+const CUSTOM_STYLE = process.env.EXPO_PUBLIC_MAP_STYLE_URL;
 
-/**
- * Carte des territoires. Chargement par zone visible : à chaque arrêt de la caméra, on
- * calcule les cases H3 de l'emprise (≤ 2 500) et on ne demande au serveur que les cases
- * stockées de cette emprise. Mises à jour en direct via Supabase Realtime.
- */
-export function HexMap({
-  center,
-  zoom = 13.5,
-  lit,
-  track,
-  fitTo,
-  followUser,
-  overlay,
-}: {
+export interface FlyTarget {
+  center: LatLng;
+  zoom?: number;
+  /** change à chaque demande (même centre deux fois de suite) */
+  key: number;
+  duration?: number;
+}
+
+export interface HexMapProps {
   center: LatLng | null;
   zoom?: number;
+  pitch?: number;
   /** cases à mettre en évidence (course en cours, déploiement) */
   lit?: readonly string[];
   track?: readonly LatLng[];
@@ -35,179 +40,109 @@ export function HexMap({
   fitTo?: BBox | null;
   followUser?: boolean;
   overlay?: ReactNode;
-}) {
+  front?: string | null;
+  selected?: string | null;
+  onSelectHex?: (h: HexView | null) => void;
+  flyTo?: FlyTarget | null;
+  showUser?: boolean;
+  /** marge basse des mentions OpenStreetMap (au-dessus de la barre d'onglets) */
+  attributionBottom?: number;
+}
+
+/**
+ * Plateau de jeu : carte nocturne, territoires en relief (hauteur = garnison), régions,
+ * front du jour. Chargement par zone visible (≤ 2 500 cases calculées localement, seules
+ * les cases stockées sont demandées au backend) et mises à jour en direct.
+ */
+export function HexMap({
+  center,
+  zoom = 13.6,
+  pitch = 0,
+  lit,
+  track,
+  fitTo,
+  followUser,
+  overlay,
+  front,
+  selected,
+  onSelectHex,
+  flyTo,
+  showUser = true,
+  attributionBottom = 8,
+}: HexMapProps) {
   const camera = useRef<CameraRef>(null);
-  const { profile } = useAuth();
-  const [bbox, setBbox] = useState<BBox | null>(null);
-  const [rows, setRows] = useState<ReadonlyMap<string, HexRow>>(new globalThis.Map());
-  const [seed, setSeed] = useState('');
-  const [seasonId, setSeasonId] = useState<number | null>(null);
-  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected });
+  const layers = useMemo(() => mapLayers({ accent: palette.main, pitch }), [palette.main, pitch]);
 
   useEffect(() => {
-    void loadGameConfig().then(({ season }) => {
-      setSeed(season?.wild_seed ?? '');
-      setSeasonId(season?.id ?? null);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (fitTo) camera.current?.fitBounds([fitTo.west, fitTo.south, fitTo.east, fitTo.north], { padding: { top: 40, bottom: 40, left: 40, right: 40 }, duration: 600 });
+    if (fitTo) {
+      camera.current?.fitBounds([fitTo.west, fitTo.south, fitTo.east, fitTo.north], {
+        padding: { top: 60, bottom: 60, left: 40, right: 40 },
+        duration: 700,
+      });
+    }
   }, [fitTo]);
 
-  const load = useCallback(async (b: BBox) => {
-    try {
-      const data = await hexesInBBox(b);
-      setRows(new globalThis.Map(data.map((r) => [r.h3, r])));
-    } catch {
-      /* hors ligne : on garde l'affichage précédent */
-    }
-  }, []);
+  const flyKey = flyTo?.key ?? 0;
+  useEffect(() => {
+    // on ne vole qu'à chaque nouvelle demande (clé), pas à chaque rendu
+    if (flyTo) camera.current?.flyTo({ center: [flyTo.center.lng, flyTo.center.lat], zoom: flyTo.zoom ?? 14, pitch, duration: flyTo.duration ?? 1400 });
+  }, [flyKey, pitch]);
 
   const onRegionDidChange = useCallback(
     (e: NativeSyntheticEvent<ViewStateChangeEvent>) => {
       const [west, south, east, north] = e.nativeEvent.bounds;
-      const b = { west, south, east, north };
-      setBbox(b);
-      if (debounce.current) clearTimeout(debounce.current);
-      debounce.current = setTimeout(() => void load(b), 400);
+      onBounds({ west, south, east, north });
     },
-    [load],
+    [onBounds],
   );
 
-  // Temps réel : on applique les changements des cases visibles.
-  useEffect(() => {
-    if (seasonId == null) return;
-    const channel = supabase
-      .channel(`hex-${seasonId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'hex_state', filter: `season_id=eq.${seasonId}` },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as Partial<HexRow> & { h3?: string };
-          if (!row.h3) return;
-          setRows((prev) => {
-            if (!prev.has(row.h3!) && payload.eventType !== 'INSERT') return prev;
-            const next = new globalThis.Map(prev);
-            if (payload.eventType === 'DELETE') {
-              const old = prev.get(row.h3!);
-              if (old) next.set(row.h3!, { ...old, owner_faction: null, garrison: null });
-            } else {
-              next.set(row.h3!, { ...(prev.get(row.h3!) as HexRow), ...(row as HexRow), contested: true });
-            }
-            return next;
-          });
-        },
-      )
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
-  }, [seasonId]);
-
-  const cfg = currentConfig();
-  const litSet = useMemo(() => new Set(lit ?? []), [lit]);
-  const hexes = useMemo(() => (bbox ? visibleHexes(bbox, rows, cfg, seed) : []), [bbox, rows, cfg, seed]);
-  const hexGeo = useMemo(() => hexFeatures(hexes ?? [], litSet, profile?.faction_id ?? null), [hexes, litSet, profile?.faction_id]);
-  const labels = useMemo(() => labelFeatures(hexes ?? []), [hexes]);
-  const regions = useMemo(() => regionFeatures(hexes ?? [], cfg), [hexes, cfg]);
-  const line = useMemo(() => lineFeature(track ?? []), [track]);
+  const onHexPress = useCallback(
+    (e: NativeSyntheticEvent<PressEventWithFeatures>) => {
+      const cell = e.nativeEvent.features.find((f) => typeof f.properties?.cell === 'string')?.properties?.cell as string | undefined;
+      if (cell && onSelectHex) {
+        e.stopPropagation();
+        onSelectHex(byCell.get(cell) ?? null);
+      }
+    },
+    [byCell, onSelectHex],
+  );
 
   return (
     <View style={StyleSheet.absoluteFill}>
-      <Map style={StyleSheet.absoluteFill} mapStyle={MAP_STYLE} onRegionDidChange={onRegionDidChange} attribution logo={false}>
+      <Map
+        style={StyleSheet.absoluteFill}
+        mapStyle={CUSTOM_STYLE || NIGHT_STYLE}
+        onRegionDidChange={onRegionDidChange}
+        onPress={() => onSelectHex?.(null)}
+        light={MAP_LIGHT}
+        attribution
+        attributionPosition={{ bottom: attributionBottom, left: 8 }}
+        logo={false}
+        compass={false}>
         <Camera
           ref={camera}
-          initialViewState={center ? { center: [center.lng, center.lat], zoom } : { zoom: 3, center: [2.35, 46.6] }}
+          initialViewState={center ? { center: [center.lng, center.lat], zoom, pitch } : { zoom: 3, center: [2.35, 46.6] }}
           trackUserLocation={followUser ? 'course' : undefined}
           minZoom={3}
+          maxZoom={17.5}
         />
-        <GeoJSONSource id="regions" data={regions}>
-          {/* région contrôlée : légère teinte de la faction + contour épais à sa couleur */}
-          <Layer
-            id="region-tint"
-            type="fill"
-            filter={['==', ['get', 'controlled'], true]}
-            paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.12 }}
-          />
-          <Layer
-            id="region-line"
-            type="line"
-            paint={{
-              'line-color': ['get', 'color'],
-              'line-width': ['case', ['get', 'controlled'], 4, 2.5],
-              'line-opacity': ['case', ['get', 'controlled'], 0.9, 0.55],
-            }}
-          />
-        </GeoJSONSource>
-        <GeoJSONSource id="hexes" data={hexGeo}>
-          <Layer
-            id="hex-fill"
-            type="fill"
-            paint={{
-              'fill-color': ['get', 'color'],
-              'fill-opacity': ['case', ['get', 'lit'], 0.7, ['get', 'opacity']],
-            }}
-          />
-          <Layer
-            id="hex-line"
-            type="line"
-            paint={{ 'line-color': ['get', 'color'], 'line-width': 1, 'line-opacity': 0.7 }}
-          />
-          {/* mes territoires : liseré clair */}
-          <Layer
-            id="hex-mine"
-            type="line"
-            filter={['==', ['get', 'mine'], true]}
-            paint={{ 'line-color': '#FFFFFF', 'line-width': 1.6, 'line-opacity': 0.8 }}
-          />
-          <Layer
-            id="hex-contested"
-            type="line"
-            filter={['==', ['get', 'contested'], true]}
-            paint={{ 'line-color': colors.danger, 'line-width': 2.5, 'line-dasharray': [2, 2] }}
-          />
-          <Layer
-            id="hex-lit"
-            type="line"
-            filter={['==', ['get', 'lit'], true]}
-            paint={{ 'line-color': colors.accent, 'line-width': 3 }}
-          />
-        </GeoJSONSource>
-        <GeoJSONSource id="labels" data={labels}>
-          {/* jeton de garnison : pastille à la couleur du propriétaire, plus grosse si la garnison est forte */}
-          <Layer
-            id="hex-token"
-            type="circle"
-            minzoom={12.5}
-            paint={{
-              'circle-color': ['get', 'color'],
-              'circle-radius': ['get', 'radius'],
-              'circle-opacity': 0.95,
-              'circle-stroke-color': ['case', ['get', 'fort'], colors.accent, '#0E1116'],
-              'circle-stroke-width': ['case', ['get', 'fort'], 2.5, 1],
-            }}
-          />
-          <Layer
-            id="hex-labels"
-            type="symbol"
-            minzoom={12.5}
-            layout={{ 'text-field': ['get', 'label'], 'text-size': 13, 'text-allow-overlap': false }}
-            paint={{
-              'text-color': ['case', ['get', 'owned'], '#FFFFFF', '#D5D9E0'],
-              'text-halo-color': '#000000',
-              'text-halo-width': 1.2,
-            }}
-          />
-        </GeoJSONSource>
-        <GeoJSONSource id="track" data={line}>
-          <Layer id="track-line" type="line" paint={{ 'line-color': colors.accent, 'line-width': 4 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
-        </GeoJSONSource>
-        <UserLocation heading accuracy animated />
+        {SOURCES.map((id) => (
+          <GeoJSONSource key={id} id={id} data={data[id === 'region-lines' ? 'regions' : id]} onPress={id === 'hexes' && onSelectHex ? onHexPress : undefined}>
+            {layers
+              .filter((l) => l.source === id)
+              .map(({ source: _s, ...l }) => (
+                <Layer key={l.id} {...l} />
+              ))}
+          </GeoJSONSource>
+        ))}
+        {showUser && <UserLocation heading accuracy animated />}
       </Map>
-      {hexes === null && (
+      {tooWide && (
         <View style={styles.banner} pointerEvents="none">
-          <Text style={{ color: colors.text }}>{t('map.tooWide')}</Text>
+          <Glass style={{ paddingHorizontal: space.lg, paddingVertical: space.sm, borderRadius: 999 }}>
+            <Text style={[font.bodyBold, { fontSize: 14 }]}>{t('map.tooWide')}</Text>
+          </Glass>
         </View>
       )}
       {overlay}
@@ -216,13 +151,5 @@ export function HexMap({
 }
 
 const styles = StyleSheet.create({
-  banner: {
-    position: 'absolute',
-    bottom: 110,
-    alignSelf: 'center',
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm,
-    borderRadius: radius.pill,
-  },
+  banner: { position: 'absolute', top: '45%', alignSelf: 'center' },
 });

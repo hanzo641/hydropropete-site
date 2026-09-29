@@ -1,4 +1,5 @@
 import { DEFAULT_GAME_CONFIG, type GameConfig, resolveConfig } from '@conquete/core';
+import { GAME_MODE, getLocalGame } from '@/backend';
 import { supabase } from './supabase';
 
 export interface Season {
@@ -14,8 +15,22 @@ export interface Season {
 
 let cached: { cfg: GameConfig; season: Season | null; at: number } | null = null;
 
+function localConfig(): { cfg: GameConfig; season: Season | null; at: number } {
+  const g = getLocalGame();
+  const s = g.seasonInfo();
+  return {
+    cfg: g.cfg,
+    season: { ...s, status: 'active', config_overrides: null, is_demo: false },
+    at: Date.now(),
+  };
+}
+
 /** Paramètres de jeu effectifs, relus toutes les 10 minutes (modifiables sans nouvelle version). */
 export async function loadGameConfig(force = false): Promise<{ cfg: GameConfig; season: Season | null }> {
+  if (GAME_MODE === 'local') {
+    cached = localConfig();
+    return cached;
+  }
   if (!force && cached && Date.now() - cached.at < 600_000) return cached;
   try {
     const [{ data: gc }, { data: season }] = await Promise.all([
@@ -31,5 +46,6 @@ export async function loadGameConfig(force = false): Promise<{ cfg: GameConfig; 
 }
 
 export function currentConfig(): GameConfig {
+  if (GAME_MODE === 'local') return getLocalGame().cfg;
   return cached?.cfg ?? DEFAULT_GAME_CONFIG;
 }

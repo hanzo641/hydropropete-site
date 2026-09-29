@@ -60,6 +60,11 @@ export function visibleHexes(
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, Record<string, string | number | boolean>>;
 
+/** Hauteur (m) d'un territoire en 3D : croît avec la racine de la garnison. */
+export function extrusionHeight(garrison: number): number {
+  return Math.round(30 + Math.sqrt(Math.max(0, garrison)) * 55);
+}
+
 export function hexFeatures(
   hexes: readonly HexView[],
   lit: ReadonlySet<string> = new Set(),
@@ -75,12 +80,15 @@ export function hexFeatures(
       properties: {
         cell: h.cell,
         color,
+        owned: h.owner != null,
+        height: h.owner ? extrusionHeight(h.garrison) : 0,
         // opacité selon la garnison : un territoire solide est plus « plein »
-        opacity: h.owner ? Math.min(0.65, 0.22 + h.garrison / 40) : 0.08,
+        opacity: h.owner ? Math.min(0.6, 0.25 + h.garrison / 40) : 0.05,
         contested: h.contested,
         lit: lit.has(h.cell),
         wild: h.owner == null,
         mine: myFaction != null && h.owner === myFaction,
+        fort: h.garrison >= FORTRESS_GARRISON,
       },
     });
   }
@@ -99,8 +107,6 @@ export function labelFeatures(hexes: readonly HexView[]): GeoJSON.FeatureCollect
           label: `${h.estimated ? '≈' : ''}${Math.round(h.garrison)}`,
           owned: h.owner != null,
           color: h.owner ? (factionById(h.owner)?.color ?? WILD_COLOR) : '#3A3F48',
-          // rayon du jeton de garnison : croît avec la force du territoire
-          radius: Math.min(15, 7 + Math.sqrt(h.garrison) * 1.6),
           fort: h.garrison >= FORTRESS_GARRISON,
         },
       };
@@ -108,15 +114,28 @@ export function labelFeatures(hexes: readonly HexView[]): GeoJSON.FeatureCollect
   };
 }
 
-export function regionFeatures(hexes: readonly HexView[], cfg: GameConfig): GeoJSON.FeatureCollection {
+/** Contour d'une liste de cases (surbrillance : course en cours, sélection). */
+export function outlineFeatures(cells: readonly string[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: cells.map((cell) => ({
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: [cellPolygon(cell)] },
+      properties: { cell },
+    })),
+  };
+}
+
+export function regionFeatures(hexes: readonly HexView[], cfg: GameConfig, front: string | null = null): GeoJSON.FeatureCollection {
   const controller = new Map<string, number | null>();
   for (const h of hexes) if (!controller.has(h.region) || h.regionFaction != null) controller.set(h.region, h.regionFaction);
+  if (front && !controller.has(front)) controller.set(front, null);
   return {
     type: 'FeatureCollection',
     features: [...controller].map(([region, f]) => ({
       type: 'Feature',
       geometry: { type: 'MultiPolygon', coordinates: regionPolygon(region, cfg.h3) },
-      properties: { region, controlled: f != null, color: f != null ? (factionById(f)?.color ?? '#FFFFFF') : '#FFFFFF' },
+      properties: { region, controlled: f != null, front: region === front, color: f != null ? (factionById(f)?.color ?? '#FFFFFF') : '#FFFFFF' },
     })),
   };
 }
