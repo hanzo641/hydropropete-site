@@ -12,6 +12,7 @@ export default tseslint.config(
       'apps/mobile/android/**',
       'supabase/functions/_shared/core/**',
       'apps/mobile/expo-env.d.ts',
+      '**/.tmp/**',
     ],
   },
   js.configs.recommended,
@@ -24,7 +25,8 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.cjs', 'apps/mobile/*.js'],
+    // React Native : require() est la façon standard de référencer images et JSON embarqués
+    files: ['**/*.cjs', 'apps/mobile/*.js', 'apps/mobile/src/**/*.{ts,tsx}'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
 );

@@ -1,11 +1,12 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_GAME_CONFIG } from '../src/game/config.ts';
 import { FACTIONS } from '../src/game/factions.ts';
 
-const ROOT = join(__dirname, '../../..');
+const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 
 describe('cohérence du dépôt', () => {
   it('les valeurs par défaut SQL (game_defaults) = DEFAULT_GAME_CONFIG', () => {

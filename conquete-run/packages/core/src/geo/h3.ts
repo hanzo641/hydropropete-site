@@ -1,5 +1,7 @@
 import {
+  cellsToMultiPolygon,
   cellToBoundary,
+  cellToChildren,
   cellToChildrenSize,
   cellToLatLng,
   cellToParent,
@@ -55,6 +57,11 @@ export function cellCenter(cell: string): LatLng {
 /** Contour GeoJSON ([lng, lat], fermé). */
 export function cellPolygon(cell: string): [number, number][] {
   return cellToBoundary(cell, true) as [number, number][];
+}
+
+/** Contour(s) GeoJSON d'une région = union de ses territoires ([lng, lat]). */
+export function regionPolygon(region: string, res: H3Res): [number, number][][][] {
+  return cellsToMultiPolygon(cellToChildren(region, res.territoryRes), true) as [number, number][][][];
 }
 
 export interface BBox {

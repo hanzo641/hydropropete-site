@@ -15,11 +15,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseGpx } from '../../src/gps/gpx.ts';
 import type { RawPoint } from '../../src/gps/types.ts';
 import type { DemGrid } from '../../src/gps/dem.ts';
 
-export const TEST_DATA = join(__dirname, '../../../../test-data');
+export const TEST_DATA = fileURLToPath(new URL('../../../../test-data', import.meta.url));
 
 export function loadReference(name: string): RawPoint[] {
   return parseGpx(readFileSync(join(TEST_DATA, 'gpx', `${name}.gpx`), 'utf8'));
