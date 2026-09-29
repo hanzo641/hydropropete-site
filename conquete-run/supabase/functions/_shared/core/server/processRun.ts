@@ -1,5 +1,6 @@
 import type { GameConfig } from '../game/config.ts';
 import { runXp } from '../game/progression.ts';
+import { localDay, nextStreak, type StreakState, streakBonus } from '../game/streak.ts';
 import { computeTroops, type TroopsResult } from '../game/troops.ts';
 import { cellCenter, crossedCells, regionOf, zoneOf } from '../geo/h3.ts';
 import type { LatLng } from '../geo/geodesy.ts';
@@ -33,6 +34,9 @@ export interface ProcessRunInput {
   dem: readonly DemProvider[] | null;
   /** déjà compté aujourd'hui pour ce joueur (plafonds journaliers) */
   alreadyToday: { km: number; dplusM: number };
+  /** série du joueur avant cette course, et son décalage horaire (jours locaux) */
+  streak?: StreakState;
+  tzOffsetMin?: number;
 }
 
 export interface ProcessedCell {
@@ -64,6 +68,8 @@ export type ProcessRunResult =
       metrics: RunMetrics;
       cells: ProcessedCell[];
       troops: TroopsResult;
+      /** série après cette course */
+      streak: StreakState;
       xp: number;
       /** anomalies non bloquantes, pour modération */
       flags: string[];
@@ -173,7 +179,9 @@ export async function processRun(input: ProcessRunInput): Promise<ProcessRunResu
     if (input.dem && input.dem.length > 0) flags.push('dem_unavailable');
   }
 
-  const troops = computeTroops({ distanceM, dplusM }, input.alreadyToday, cfg.troops);
+  const runDay = localDay(startedAt, input.tzOffsetMin ?? 0);
+  const streak = nextStreak(input.streak ?? { days: 0, lastDay: null }, runDay, distanceM >= cfg.streak.minKm * 1000);
+  const troops = computeTroops({ distanceM, dplusM }, input.alreadyToday, cfg.troops, streakBonus(streak.days, cfg.streak));
   const movingS = Math.round(movingMs / 1000);
   const xp = runXp({ distanceM: troops.countedKm * 1000, dplusM: troops.countedDplusM, movingS }, cfg.xp);
   return {
@@ -199,6 +207,7 @@ export async function processRun(input: ProcessRunInput): Promise<ProcessRunResu
       elevationM: cellElevations[i] ?? null,
     })),
     troops,
+    streak,
     xp,
     flags,
   };

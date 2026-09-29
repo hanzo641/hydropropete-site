@@ -20,7 +20,7 @@ select is((select count(*) from public.zone_leaderboard('Z9', 10)), 2::bigint, '
 select is((public.team_overview('Z9') ->> 'hexes')::int, 1, 'territoires de mon équipe dans la zone');
 select is(jsonb_array_length(public.team_overview('Z9') -> 'members'), 2, 'membres de ma zone');
 select is((select hexes_now from public.faction_scores('Z9') where faction_id = 1), 1::bigint, 'score de faction (zone)');
-select is((select count(*) from public.faction_scores(null)), 3::bigint, '3 factions actives au classement mondial');
+select is((select count(*) from public.faction_scores(null)), 2::bigint, '2 factions actives (Braise contre Marée)');
 select is((public.my_weekly_progress() ->> 'distance')::numeric, 7.5, 'défi distance de la semaine');
 select is((select has_zone from public.my_privacy_settings()), false, 'pas de zone de confidentialité par défaut');
 select throws_ok($$ select * from public.admin_deploy_troops(auth.uid(), gen_random_uuid(), '[]') $$, '42501', null, 'outil admin interdit aux joueurs');

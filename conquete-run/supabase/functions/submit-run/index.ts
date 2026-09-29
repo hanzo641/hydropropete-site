@@ -110,7 +110,16 @@ Deno.serve(
     const result: ProcessRunResult =
       (sameTrace ?? 0) > 0
         ? { status: 'rejected', rejection: { code: 'duplicate', details: {} }, metrics: { fingerprint } }
-        : await processRun({ raw, source: body.source, now, cfg, dem: demProviders(), alreadyToday });
+        : await processRun({
+            raw,
+            source: body.source,
+            now,
+            cfg,
+            dem: demProviders(),
+            alreadyToday,
+            streak: { days: profile.streak_days ?? 0, lastDay: profile.streak_last_day ?? null },
+            tzOffsetMin: body.tzOffsetMin ?? 0,
+          });
 
     const compactPoints = body.points;
     const base = {
@@ -172,6 +181,18 @@ Deno.serve(
 
     const { data: recorded, error } = await db.rpc('record_run', { p: payload });
     if (error) throw error;
+
+    // Série 🔥 et troupes bonus (calculées par le core)
+    if (result.status === 'validated' && !(recorded as { duplicate?: boolean }).duplicate) {
+      await db
+        .from('profiles')
+        .update({ streak_days: result.streak.days, streak_last_day: result.streak.lastDay })
+        .eq('id', user.id);
+      await db
+        .from('runs')
+        .update({ bonus_troops: result.troops.bonusTroops })
+        .eq('id', (recorded as { run_id: string }).run_id);
+    }
 
     // Trophées (non bloquant pour la course)
     let trophies: string[] = [];

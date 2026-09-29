@@ -21,6 +21,10 @@ export interface GameConfig {
   region: { controlThreshold: number; troopBonus: number };
   wild: { base: number; altitudeStartM: number; altitudeStepM: number; jitter: number; max: number };
   factions: { count: number; balanceMargin: number; balanceMinPlayers: number };
+  /** série : jours consécutifs avec une course validée d'au moins minKm */
+  streak: { minKm: number; bonusPerDay: number; maxBonus: number };
+  /** front du jour : une région par zone où les prises comptent plus */
+  front: { pointsMultiplier: number; xpMultiplier: number };
   season: { lengthDays: number };
   xp: {
     perKm: number;
@@ -43,7 +47,9 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   erosion: { dailyRate: 0.05, abandonThreshold: 1 },
   region: { controlThreshold: 0.5, troopBonus: 0.1 },
   wild: { base: 1, altitudeStartM: 300, altitudeStepM: 400, jitter: 1, max: 6 },
-  factions: { count: 3, balanceMargin: 0.1, balanceMinPlayers: 6 },
+  factions: { count: 2, balanceMargin: 0.1, balanceMinPlayers: 6 },
+  streak: { minKm: 2, bonusPerDay: 0.1, maxBonus: 0.5 },
+  front: { pointsMultiplier: 2, xpMultiplier: 1.5 },
   season: { lengthDays: 28 },
   xp: { perKm: 10, per10mDplus: 1, perActiveMinute: 2, perCapture: 15, perReinforce: 3 },
   score: { perCapture: 10, perTroopDeployed: 1, perKm: 1 },

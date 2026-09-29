@@ -113,7 +113,7 @@ const sql: string[] = [
 const players = Array.from({ length: PLAYERS }, (_, i) => ({
   id: uuid(),
   username: `${NAMES[i % NAMES.length]}${i >= NAMES.length ? i : ''}_${Math.floor(rand() * 90 + 10)}`,
-  faction: (i % 3) + 1,
+  faction: (i % 2) + 1,
   home: {
     lat: city.lat + (rand() - 0.5) * 0.1,
     lng: city.lng + (rand() - 0.5) * 0.14,
