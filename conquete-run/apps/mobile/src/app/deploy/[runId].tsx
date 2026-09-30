@@ -16,6 +16,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BattleSequence } from '@/features/deploy/BattleSequence';
 import { DragGauge } from '@/features/deploy/DragGauge';
 import { ResultsList } from '@/features/deploy/ResultsList';
 import { HexMap } from '@/features/map/HexMap';
@@ -39,6 +40,7 @@ export default function Deploy() {
   const [front, setFront] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>([]);
   const [results, setResults] = useState<DeployResultRow[] | null>(null);
+  const [battle, setBattle] = useState<DeployResultRow[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const flash = useRef(new Animated.Value(0)).current;
@@ -105,11 +107,10 @@ export default function Deploy() {
     try {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       const res = await deployTroops(runId, allocations);
-      flash.setValue(0.75);
-      Animated.timing(flash, { toValue: 0, duration: 650, useNativeDriver: true }).start();
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setResults(res);
       void refreshProfile();
+      // la bataille se joue sur la carte, puis le rapport
+      if (res.length > 0) setBattle(res);
+      else setResults(res);
     } catch (e) {
       const key = `deploy.errors.${(e as Error).message}` as TKey;
       setError(t(key) === key ? t('common.error') : t(key));
@@ -123,6 +124,22 @@ export default function Deploy() {
       <Screen style={{ justifyContent: 'center' }}>
         <ActivityIndicator color={p.main} />
       </Screen>
+    );
+  }
+
+  if (battle) {
+    return (
+      <BattleSequence
+        results={battle}
+        faction={faction}
+        bbox={bbox}
+        onDone={() => {
+          setResults(battle);
+          setBattle(null);
+          flash.setValue(0.35);
+          Animated.timing(flash, { toValue: 0, duration: 500, useNativeDriver: true }).start();
+        }}
+      />
     );
   }
 

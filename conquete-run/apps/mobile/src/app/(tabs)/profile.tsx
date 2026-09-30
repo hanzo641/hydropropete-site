@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, Switch, Text, useWindowDimensions, View } from 'react-native';
 import { GAME_MODE } from '@/backend';
 import { ensureNotificationPermission, remindersEnabled, setRemindersEnabled } from '@/features/notify';
+import { play, setSoundEnabled, soundEnabled } from '@/features/sfx';
 import { wipeLocalData } from '@/features/run/storage';
 import { refreshWar } from '@/features/war/report';
 import { useWar } from '@/features/war/useWar';
@@ -37,6 +38,7 @@ export default function ProfileScreen() {
   const [trophies, setTrophies] = useState<string[]>([]);
   const [progress, setProgress] = useState<Awaited<ReturnType<typeof weeklyProgress>> | null>(null);
   const [reminders, setReminders] = useState(remindersEnabled());
+  const [sound, setSound] = useState(soundEnabled());
   const { width } = useWindowDimensions();
   const trophySize = Math.floor((Math.min(width, 520) - space.lg * 2 - space.sm * 3) / 4);
 
@@ -171,6 +173,23 @@ export default function ProfileScreen() {
             title={t('profile.reminders')}
             subtitle={reminders ? t('profile.remindersOn') : t('profile.remindersOff')}
             right={<Switch value={reminders} onValueChange={(v) => void toggleReminders(v)} trackColor={{ true: p.main, false: colors.surfaceHigh }} thumbColor="#FFFFFF" />}
+          />
+          <ListItem
+            icon="volume-high-outline"
+            title={t('profile.sound')}
+            subtitle={sound ? t('profile.remindersOn') : t('profile.remindersOff')}
+            right={
+              <Switch
+                value={sound}
+                onValueChange={(v) => {
+                  setSoundEnabled(v);
+                  setSound(v);
+                  if (v) play('capture');
+                }}
+                trackColor={{ true: p.main, false: colors.surfaceHigh }}
+                thumbColor="#FFFFFF"
+              />
+            }
           />
           <ListItem icon="language-outline" title={t('profile.language')} subtitle={getLocale() === 'fr' ? 'Français' : 'English'} onPress={() => void toggleLanguage()} />
           <ListItem icon="play-circle-outline" title={t('profile.simulation')} onPress={() => router.push('/simulation')} />

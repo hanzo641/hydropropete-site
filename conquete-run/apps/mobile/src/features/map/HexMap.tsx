@@ -17,7 +17,7 @@ import { font, space } from '@/ui/theme';
 import type { HexView } from './hexGeo';
 import { MAP_LIGHT, mapLayers, SOURCES } from './layers';
 import { NIGHT_STYLE } from './nightStyle';
-import { useHexData } from './useHexData';
+import { type HexOverrides, useHexData } from './useHexData';
 
 const CUSTOM_STYLE = process.env.EXPO_PUBLIC_MAP_STYLE_URL;
 
@@ -47,6 +47,7 @@ export interface HexMapProps {
   showUser?: boolean;
   /** marge basse des mentions OpenStreetMap (au-dessus de la barre d'onglets) */
   attributionBottom?: number;
+  overrides?: HexOverrides;
 }
 
 /**
@@ -69,9 +70,10 @@ export function HexMap({
   flyTo,
   showUser = true,
   attributionBottom = 8,
+  overrides,
 }: HexMapProps) {
   const camera = useRef<CameraRef>(null);
-  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected });
+  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides });
   const layers = useMemo(() => mapLayers({ accent: palette.main, pitch }), [palette.main, pitch]);
 
   useEffect(() => {

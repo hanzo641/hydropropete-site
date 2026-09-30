@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from 'react-native-svg';
 import { HexMap } from '@/features/map/HexMap';
 import { requestPermissions } from '@/features/run/locationTask';
+import { play } from '@/features/sfx';
 import * as session from '@/features/run/session';
 import { formatNumber, t } from '@/i18n';
 import { useAuth } from '@/lib/auth';
@@ -91,6 +92,7 @@ export default function RunScreen() {
     if (s.phase !== 'running') return;
     if (s.litCells.length > lastLit.current && lastLit.current > 0) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      play('tick3', 0.8);
       setToast(Date.now());
     }
     lastLit.current = s.litCells.length;

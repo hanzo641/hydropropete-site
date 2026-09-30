@@ -12,7 +12,16 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
  * Données du plateau pour l'emprise visible (partagé mobile / web) : cases calculées
  * localement, cases stockées demandées au backend, mises à jour en direct.
  */
-export function useHexData(opts: { lit?: readonly string[]; track?: readonly LatLng[]; front?: string | null; selected?: string | null }) {
+export type HexOverrides = ReadonlyMap<string, { owner: number | null; garrison: number }>;
+
+export function useHexData(opts: {
+  lit?: readonly string[];
+  track?: readonly LatLng[];
+  front?: string | null;
+  selected?: string | null;
+  /** état affiché imposé pour certaines cases (séquence de bataille : avant / après) */
+  overrides?: HexOverrides;
+}) {
   const { profile } = useAuth();
   const palette = paletteOf(profile?.faction_id);
   const [bbox, setBbox] = useState<BBox | null>(null);
@@ -53,7 +62,14 @@ export function useHexData(opts: { lit?: readonly string[]; track?: readonly Lat
   const cfg = currentConfig();
   const litList = useMemo(() => [...(opts.lit ?? [])], [opts.lit]);
   const litSet = useMemo(() => new Set(litList), [litList]);
-  const hexes = useMemo(() => (bbox ? visibleHexes(bbox, rows, cfg, seed) : []), [bbox, rows, cfg, seed]);
+  const hexes = useMemo(() => {
+    const base = bbox ? visibleHexes(bbox, rows, cfg, seed) : [];
+    if (!base || !opts.overrides || opts.overrides.size === 0) return base;
+    return base.map((h) => {
+      const o = opts.overrides?.get(h.cell);
+      return o ? { ...h, owner: o.owner, garrison: o.garrison, estimated: false, contested: false } : h;
+    });
+  }, [bbox, rows, cfg, seed, opts.overrides]);
   const byCell = useMemo(() => new globalThis.Map((hexes ?? []).map((h) => [h.cell, h])), [hexes]);
   const data = useMemo(
     () => ({

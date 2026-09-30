@@ -2,7 +2,7 @@
   "expo": {
     "name": "Conquête Run",
     "slug": "conquete-run",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "conqueterun",
@@ -37,7 +37,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false,
-      "versionCode": 2
+      "versionCode": 3
     },
     "plugins": [
       "expo-router",
@@ -83,7 +83,17 @@
             "extraProguardRules": "# Conquête Run : R8 sert surtout à retirer le code inutilisé (Compose, Guava…).\n# On garde les noms (pas d'obfuscation) et, par prudence, toutes les classes des\n# bibliothèques qui s'appellent par réflexion ou depuis le code natif.\n-dontobfuscate\n-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,SourceFile,LineNumberTable\n-keep class kotlin.Metadata { *; }\n-keep class com.facebook.** { *; }\n-keep class expo.modules.** { *; }\n-keep class host.exp.** { *; }\n-keep class org.maplibre.** { *; }\n-keep class com.swmansion.** { *; }\n-keep class com.horcrux.svg.** { *; }\n-keep class com.th3rdwave.safeareacontext.** { *; }\n-keep class app.conqueterun.** { *; }\n-dontwarn org.maplibre.**"
           }
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "./plugins/withResourceLanguages"
     ],
     "experiments": {
       "typedRoutes": true,

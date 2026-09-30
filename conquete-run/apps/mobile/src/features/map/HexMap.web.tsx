@@ -18,12 +18,12 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
  * Version web du plateau (aperçu navigateur, captures) : mêmes données et mêmes couches
  * que la carte native, rendues avec MapLibre GL JS.
  */
-export function HexMap({ center, zoom = 13.6, pitch = 0, lit, track, fitTo, overlay, front, selected, onSelectHex, flyTo, showUser = true }: HexMapProps) {
+export function HexMap({ center, zoom = 13.6, pitch = 0, lit, track, fitTo, overlay, front, selected, onSelectHex, flyTo, showUser = true, overrides }: HexMapProps) {
   const container = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const marker = useRef<maplibregl.Marker | null>(null);
   const [ready, setReady] = useState(false);
-  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected });
+  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides });
   const layers = useMemo(() => mapLayers({ accent: palette.main, pitch }), [palette.main, pitch]);
 
   useEffect(() => {

@@ -15,7 +15,10 @@ import { useAuth } from '@/lib/auth';
 import { currentConfig } from '@/lib/gameConfig';
 import { kv } from '@/lib/kv';
 import { Button, Card, Chip, Glass, Screen, usePalette } from '@/ui/components';
-import { CountUp, FadeIn, ProgressBar, StreakBadge } from '@/ui/game';
+import { TroopHarvest } from '@/features/rewards/TroopHarvest';
+import { play } from '@/features/sfx';
+import { FadeIn, ProgressBar, StreakBadge } from '@/ui/game';
+import { Burst } from '@/ui/fx';
 import { colors, font, fonts, space } from '@/ui/theme';
 
 export default function Summary() {
@@ -25,6 +28,8 @@ export default function Summary() {
   const levelBefore = useRef(profile?.level ?? 1);
   const [state, setState] = useState<'uploading' | 'queued' | 'done'>('uploading');
   const [res, setRes] = useState<SubmitRunResponse | null>(null);
+  const [harvested, setHarvested] = useState(false);
+  const [levelFx, setLevelFx] = useState(0);
 
   useEffect(() => {
     session.reset();
@@ -92,18 +97,28 @@ export default function Summary() {
             </FadeIn>
             <FadeIn delay={120}>
               <Glass glow={p.main} style={{ padding: space.xl, alignItems: 'center', borderRadius: 28 }}>
-                <CountUp
-                  value={run.troops_earned}
-                  duration={1400}
-                  delay={250}
-                  prefix="+"
-                  style={{ fontFamily: fonts.display, fontSize: 112, lineHeight: 116, color: p.main, textShadowColor: p.glow, textShadowRadius: 24 }}
+                <TroopHarvest
+                  total={run.troops_earned}
+                  bonus={run.bonus_troops ?? 0}
+                  palette={p}
+                  onDone={() => {
+                    setHarvested(true);
+                    if (leveledUp) {
+                      setTimeout(() => {
+                        setLevelFx(Date.now());
+                        play('capture');
+                        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }, 700);
+                    }
+                  }}
                 />
-                <Text style={[font.label, { fontSize: 15, color: colors.text }]}>{t('summary.troopsLabel')}</Text>
-                <View style={{ flexDirection: 'row', gap: space.sm, marginTop: space.md, flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Chip text={t('summary.xpEarned', { n: run.xp_earned })} icon="star" color={colors.gold} filled />
-                  {(run.bonus_troops ?? 0) > 0 && <Chip text={`+${run.bonus_troops} 🔥`} color="#FF8A3D" filled />}
-                </View>
+                {harvested && (
+                  <FadeIn from={8}>
+                    <View style={{ flexDirection: 'row', gap: space.sm, marginTop: space.sm, flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <Chip text={t('summary.xpEarned', { n: run.xp_earned })} icon="star" color={colors.gold} filled />
+                    </View>
+                  </FadeIn>
+                )}
               </Glass>
             </FadeIn>
             <FadeIn delay={240}>
@@ -138,7 +153,8 @@ export default function Summary() {
               </Glass>
             </FadeIn>
             <FadeIn delay={480}>
-              <Glass style={{ padding: space.lg, borderRadius: 22, gap: space.sm }}>
+              <Glass glow={levelFx ? colors.gold : undefined} style={{ padding: space.lg, borderRadius: 22, gap: space.sm, overflow: 'visible' }}>
+                <Burst fire={levelFx} color={colors.gold} count={16} radius={120} />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <Text style={[font.h3, leveledUp && { color: colors.gold }]}>
                     {leveledUp ? t('summary.levelUp', { n: lvl.level }) : t('profile.level', { n: lvl.level })}
