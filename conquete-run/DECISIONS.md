@@ -55,3 +55,11 @@ Chacune est réversible ; le coût d'un changement est indiqué quand il n'est p
 | D-48 | Les écrans évitent les assertions non nulles (`x!.y`) dans les fonctions passées en props. | Le React Compiler mémorise ces fonctions en lisant `x.y` pendant le rendu : plantage quand `x` est encore nul (bug trouvé sur l'écran du choix du camp). | Revue de code. |
 | D-49 | Animations de récompense : pluie de troupes (chaque troupe vole dans le compteur, note qui monte, vibration), explosion finale, éclat doré si niveau gagné ; séquence d'assaut sur la carte 3D (plongée caméra, salve, impact avec tremblement, garnison qui fond, case qui bascule, tampon « PRIS ! », victoire), passable. | La récompense doit se voir et se sentir à chaque course et chaque combat. Tout est en animations natives (Animated) : fluide sans dépendance lourde. | `features/rewards/`, `features/deploy/BattleSequence.tsx`, `ui/fx.tsx`. |
 | D-50 | Sons synthétisés maison (WAV courts) via expo-audio, mélangés à la musique du coureur (jamais d'interruption), silencieux en mode silencieux, désactivables ; micro et lecture en arrière-plan désactivés. | Dopamine sonore sans licence de sons tiers ; ne jamais couper la musique pendant une course. | `features/sfx.ts`, `assets/sfx/`. |
+
+## D-51 — Polyfill TextDecoder UTF-16 chargé avant l'app (plantage iOS au lancement)
+- **Constat** : premier build TestFlight (0.3.0) fermé dès l'ouverture (RCTFatal). h3-js exécute
+  `new TextDecoder('utf-16le')` au chargement ; le TextDecoder d'Expo (Hermes) ne gère que l'UTF-8
+  et lève `RangeError: Unknown encoding`. Invisible sur le web (décodeur du navigateur complet).
+- **Décision** : point d'entrée `apps/mobile/index.ts` qui charge `src/polyfills/textDecoder.ts`
+  (décodeur UTF-16LE minimal, le reste délégué au décodeur natif) puis `expo-router/entry`.
+- **Leçon** : vérifier le démarrage sous jest-expo (environnement iOS simulé) avant chaque build.
