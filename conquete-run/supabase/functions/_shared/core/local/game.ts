@@ -52,6 +52,8 @@ interface WorldCell {
   u: number;
   /** dernière attaque (ms) */
   a: number | null;
+  /** niveau du capitaine : dernier joueur qui a pris ou renforcé la case (cosmétique) */
+  c?: number;
 }
 
 interface LocalProfile extends Profile {
@@ -92,6 +94,16 @@ interface DeploymentLog {
 }
 
 const PERIOD_MS = 8 * 3_600_000;
+
+/** Niveau (stable) d'un PNJ : surtout des Joggers et Coureurs, quelques vétérans. */
+export function npcLevel(id: string): number {
+  return 4 + Math.floor(Math.pow(hash01(`${id}:level`), 1.7) * 80);
+}
+
+/** Capitaine des territoires de départ (avant toute bataille) : variété stable par case. */
+function seedCaptainLevel(cell: string): number {
+  return 2 + Math.floor(Math.pow(hash01(`${cell}:captain`), 2) * 50);
+}
 const DAY_MS = 86_400_000;
 const ME = 'local-player';
 
@@ -352,6 +364,7 @@ export class LocalGame {
         last_attacked_at: w.a ? new Date(w.a).toISOString() : null,
         contested: w.a != null && now - w.a < DAY_MS,
         region_faction: ctrl.get(region) ?? null,
+        captain_level: w.o != null ? (w.c ?? seedCaptainLevel(cell)) : null,
       });
     }
     for (const [cell, g] of Object.entries(wild)) {
@@ -572,7 +585,8 @@ export class LocalGame {
       const cur = this.stateNow(world, a.cell, now);
       const eff = effectiveTroops(a.troops, ctrlBefore.get(cell.region) === faction, this.cfg.region);
       const r = resolveAttack(cur, faction, eff, this.cfg.combat, this.cfg.erosion.abandonThreshold);
-      world[a.cell] = { o: r.after.owner, g: r.after.garrison, u: now, a: r.outcome === 'reinforced' ? (world[a.cell]?.a ?? null) : now };
+      const captain = r.outcome === 'damaged' ? world[a.cell]?.c : profile.level;
+      world[a.cell] = { o: r.after.owner, g: r.after.garrison, u: now, a: r.outcome === 'reinforced' ? (world[a.cell]?.a ?? null) : now, ...(captain != null ? { c: captain } : {}) };
       results.push({
         h3: a.cell,
         troops: a.troops,
@@ -677,7 +691,7 @@ export class LocalGame {
       ...(p ? [{ id: ME, username: p.username, level: p.level, avatar_id: p.avatar_id }] : []),
       ...this.npcs()
         .filter((n) => n.faction === f)
-        .map((n) => ({ id: n.id, username: n.name, level: 2 + Math.floor(n.points / 35), avatar_id: n.avatar })),
+        .map((n) => ({ id: n.id, username: n.name, level: npcLevel(n.id), avatar_id: n.avatar })),
     ];
     const hexes = Object.values(world).filter((w) => w.o === f && f != null).length;
     const regions = [...this.controllers(world).values()].filter((x) => x === f && f != null).length;
@@ -781,6 +795,7 @@ export class LocalGame {
       const ctrlBefore = this.controllers(world);
       const snapshot = new Map<string, HexSnapshot>(Object.entries(world).map(([c, w]) => [c, { owner: w.o, garrison: w.g }]));
       const wildOf = (cell: string): number => this.wildAt(cell);
+      const captains = new Map<string, number>();
       for (const [side, faction, rival] of [
         ['enemy', enemy, me],
         ['ally', me, enemy],
@@ -792,6 +807,7 @@ export class LocalGame {
         let caps = 0;
         let firstCap: string | null = null;
         for (const a of actions) {
+          if (a.outcome !== 'damaged') captains.set(a.cell, actor ? npcLevel(actor.id) : seedCaptainLevel(a.cell));
           if (a.outcome === 'captured') {
             caps++;
             firstCap = firstCap ?? a.cell;
@@ -818,7 +834,8 @@ export class LocalGame {
       for (const [cell, s] of snapshot) {
         const prev = world[cell];
         const changed = !prev || prev.o !== s.owner || Math.abs(prev.g - s.garrison) > 1e-6;
-        next[cell] = { o: s.owner, g: s.garrison, u: changed ? t : (prev?.u ?? t), a: changed && prev?.o !== s.owner ? t : (prev?.a ?? null) };
+        const c = captains.get(cell) ?? (prev && prev.o === s.owner ? prev.c : undefined);
+        next[cell] = { o: s.owner, g: s.garrison, u: changed ? t : (prev?.u ?? t), a: changed && prev?.o !== s.owner ? t : (prev?.a ?? null), ...(c != null ? { c } : {}) };
       }
       world = next;
       const ctrlAfter = this.controllers(world);

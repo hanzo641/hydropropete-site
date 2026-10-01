@@ -13,6 +13,7 @@ import { deleteAccount, myTrophies, setLocaleRemote, weeklyProgress } from '@/li
 import { useAuth } from '@/lib/auth';
 import { Glass, ListItem, Screen, SectionTitle, usePalette } from '@/ui/components';
 import { FactionBadge, FadeIn, ProgressBar, RankBadge, StreakBadge } from '@/ui/game';
+import { OutfitShowcase } from '@/ui/Soldier';
 import { TAB_BAR_SPACE } from '@/ui/TabBar';
 import { colors, font, fonts, space } from '@/ui/theme';
 
@@ -117,6 +118,14 @@ export default function ProfileScreen() {
             <Tile label={t('profile.streak')} value={`${w.streak}`} unit="🔥" />
             <Tile label={t('profile.explored')} value={String(profile.distinct_cells)} unit="⬡" />
           </View>
+        </FadeIn>
+
+        <FadeIn delay={120}>
+          <SectionTitle title={t('soldiers.army')} />
+          <Glass style={{ padding: space.lg, borderRadius: 22, gap: space.md }}>
+            <Text style={font.small}>{t('soldiers.armyBody')}</Text>
+            <OutfitShowcase faction={profile.faction_id} level={profile.level} />
+          </Glass>
         </FadeIn>
 
         <SectionTitle title={t('profile.challenges')} />

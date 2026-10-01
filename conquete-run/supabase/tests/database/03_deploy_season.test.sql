@@ -1,6 +1,6 @@
 -- Déploiement, combat, confidentialité, régions, érosion, fin de saison
 begin;
-select plan(31);
+select plan(33);
 
 -- acteurs
 insert into auth.users (id, email) values
@@ -59,6 +59,10 @@ select is((select outcome from public.deploy_troops('11111111-1111-1111-1111-111
 select is((select actor_name from public.events where kind = 'capture' order by id desc limit 1), null, 'fil anonymisé en zone de confidentialité');
 select is((select h3 from public.events where kind = 'capture' order by id desc limit 1), null, 'case non révélée');
 select is((select max_altitude_captured_m from public.profiles where username = 'alice'), 2100, 'altitude max prise (trophée Sommet)');
+-- soldiers on the map: the captain's outfit is the level of the last capturing player
+select is(public.captain_level('c1', public.current_season_id()), (select level from public.profiles where username = 'alice'),
+  'capitaine de la case prise = niveau d''alice');
+select is(public.captain_level('zz', public.current_season_id()), null, 'pas de capitaine sans déploiement');
 
 -- bob ne peut pas utiliser la course d'alice
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000b2","role":"authenticated"}';

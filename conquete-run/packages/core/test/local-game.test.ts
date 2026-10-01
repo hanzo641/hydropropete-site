@@ -78,6 +78,15 @@ describe('mode local : une partie complète sur le téléphone', () => {
     const feed = await game.zoneFeed();
     expect(feed[0]!.kind === 'capture' || feed.some((e) => e.actor_name === 'Thomas')).toBe(true);
     expect((await game.getMyProfile())!.captures_count).toBeGreaterThan(0);
+    // les soldats affichés sur une case prise portent la tenue du joueur
+    const level = (await game.getMyProfile())!.level;
+    const rows = await game.hexesInBBox({ south: 43.2, north: 43.4, west: -0.5, east: -0.25 });
+    for (const r of results.filter((x) => x.outcome === 'captured')) {
+      expect(rows.find((h) => h.h3 === r.h3)?.captain_level).toBeLessThanOrEqual(level);
+      expect(rows.find((h) => h.h3 === r.h3)?.captain_level).toBeGreaterThanOrEqual(1);
+    }
+    expect(rows.filter((h) => h.owner_faction != null).every((h) => (h.captain_level ?? 0) >= 1)).toBe(true);
+    expect(rows.filter((h) => h.owner_faction == null).every((h) => h.captain_level == null)).toBe(true);
     await expect(game.deployTroops(runId, [{ cell: targets[0]!.h3, troops: 1 }])).rejects.toThrow('too_many_troops');
   });
 

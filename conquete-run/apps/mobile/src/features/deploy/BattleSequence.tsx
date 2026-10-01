@@ -2,17 +2,19 @@ import { type BBox, cellCenter, factionById, WILD_COLOR } from '@conquete/core';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 import { type FlyTarget, HexMap } from '@/features/map/HexMap';
+import type { HexOverrides } from '@/features/map/useHexData';
 import { play, preload } from '@/features/sfx';
 import { formatNumber, t } from '@/i18n';
 import type { DeployResultRow } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { tierForLevel } from '@/ui/soldierArt';
+import { Charge } from './Charge';
 import { Glass } from '@/ui/components';
 import { Emblem } from '@/ui/game';
 import { Burst, Flash, Shockwave, Stamp, useShake } from '@/ui/fx';
-import { hexPath } from '@/ui/hex';
 import { colors, fonts, paletteOf } from '@/ui/theme';
 
 type Phase = 'fly' | 'volley' | 'impact' | 'outcome' | 'final';
@@ -35,41 +37,6 @@ function useTween(from: number, to: number, duration: number, key: number): numb
   return v;
 }
 
-/** Salve de troupes qui s'abat du ciel sur la case visée. */
-function Volley({ fire, color, troops }: { fire: number; color: string; troops: number }) {
-  const n = Math.min(14, Math.max(4, troops));
-  const vals = useMemo(() => Array.from({ length: n }, () => new Animated.Value(0)), [n, fire]);
-  useEffect(() => {
-    if (!fire) return;
-    Animated.stagger(
-      32,
-      vals.map((v) => Animated.timing(v, { toValue: 1, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true })),
-    ).start();
-  }, [fire, vals]);
-  if (!fire) return null;
-  return (
-    <View pointerEvents="none" style={styles.center}>
-      {vals.map((v, i) => (
-        <Animated.View
-          key={i}
-          style={{
-            position: 'absolute',
-            opacity: v.interpolate({ inputRange: [0, 0.1, 0.9, 1], outputRange: [0, 1, 1, 0] }),
-            transform: [
-              { translateX: v.interpolate({ inputRange: [0, 1], outputRange: [((i * 53) % 120) - 60, ((i * 17) % 30) - 15] }) },
-              { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-460 - ((i * 41) % 120), 0] }) },
-              { scale: v.interpolate({ inputRange: [0, 1], outputRange: [1.2, 0.6] }) },
-            ],
-          }}>
-          <Svg width={22} height={22} viewBox="0 0 100 100">
-            <Path d={hexPath(100, 0.14, 3)} fill={color} stroke="#FFFFFF" strokeWidth={7} />
-          </Svg>
-        </Animated.View>
-      ))}
-    </View>
-  );
-}
-
 /**
  * La bataille, case par case, sur la vraie carte : la caméra plonge sur chaque territoire
  * visé, les troupes s'abattent, la garnison fond, puis la case bascule (couleur et relief).
@@ -83,8 +50,11 @@ export function BattleSequence({ results, faction, bbox, onDone }: { results: De
   const [i, setI] = useState(0);
   const [phase, setPhase] = useState<Phase>('fly');
   const [fx, setFx] = useState({ volley: 0, impact: 0, outcome: 0, final: 0 });
-  const [overrides, setOverrides] = useState<Map<string, { owner: number | null; garrison: number }>>(
-    () => new Map(results.map((r) => [r.h3, { owner: r.before_owner, garrison: Number(r.before_garrison) }])),
+  const { profile } = useAuth();
+  const myLevel = profile?.level ?? 1;
+  // avant l'assaut, les soldats des cases visées sont dessinés par la séquence (Charge)
+  const [overrides, setOverrides] = useState<HexOverrides>(
+    () => new Map(results.map((r) => [r.h3, { owner: r.before_owner, garrison: Number(r.before_garrison), hideSquad: true }])),
   );
   const [shakeX, shake] = useShake();
   const doneRef = useRef(false);
@@ -124,7 +94,13 @@ export function BattleSequence({ results, faction, bbox, onDone }: { results: De
       setTimeout(() => {
         setPhase('outcome');
         setFx((f) => ({ ...f, outcome: Date.now() }));
-        setOverrides((m) => new Map(m).set(r.h3, { owner: r.after_owner, garrison: Number(r.after_garrison) }));
+        setOverrides((m) =>
+          new Map(m).set(r.h3, {
+            owner: r.after_owner,
+            garrison: Number(r.after_garrison),
+            ...(r.outcome === 'damaged' ? {} : { captain: myLevel }),
+          }),
+        );
         if (captured) {
           play('capture');
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -187,10 +163,21 @@ export function BattleSequence({ results, faction, bbox, onDone }: { results: De
           overrides={overrides}
           flyTo={flyTo}
           showUser={false}
+          animateSquads={false}
           attributionBottom={insets.bottom + 90}
         />
         {/* effets au centre de l'écran = sur la case visée */}
-        <Volley fire={fx.volley} color={p.main} troops={cur.troops} />
+        {phase !== 'final' && (
+          <Charge
+            charge={phase === 'fly' ? 0 : fx.volley}
+            impact={phase === 'impact' || phase === 'outcome' ? fx.impact : 0}
+            outcome={phase === 'outcome' ? fx.outcome : 0}
+            myFaction={faction}
+            myTier={tierForLevel(myLevel)}
+            troops={cur.troops}
+            defender={{ cell: cur.h3, owner: cur.before_owner, before: Number(cur.before_garrison), after: Number(cur.after_garrison), result: cur.outcome as 'captured' | 'reinforced' | 'damaged' }}
+          />
+        )}
         <Shockwave fire={fx.impact} color="#FFFFFF" size={240} />
         {phase !== 'final' && (
           <>
@@ -262,6 +249,3 @@ export function BattleSequence({ results, faction, bbox, onDone }: { results: De
   );
 }
 
-const styles = StyleSheet.create({
-  center: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-});

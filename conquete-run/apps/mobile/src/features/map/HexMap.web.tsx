@@ -6,9 +6,11 @@ import { t } from '@/i18n';
 import { Glass } from '@/ui/components';
 import { font, space } from '@/ui/theme';
 import type { HexMapProps } from './HexMap';
-import { MAP_LIGHT, mapLayers, SOURCES } from './layers';
+import { MAP_LIGHT, mapLayers, SOURCES, SQUAD_LAYER_IDS, squadTranslate } from './layers';
 import { NIGHT_STYLE } from './nightStyle';
+import { soldierImageId, soldierSvg, SOLDIER_TIERS } from '@/ui/soldierArt';
 import { useHexData } from './useHexData';
+import { useSquadBob } from './useSquadBob';
 
 export type { FlyTarget, HexMapProps } from './HexMap';
 
@@ -18,12 +20,29 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
  * Version web du plateau (aperçu navigateur, captures) : mêmes données et mêmes couches
  * que la carte native, rendues avec MapLibre GL JS.
  */
-export function HexMap({ center, zoom = 13.6, pitch = 0, lit, track, fitTo, overlay, front, selected, onSelectHex, flyTo, showUser = true, overrides }: HexMapProps) {
+export function HexMap({
+  center,
+  zoom = 13.6,
+  pitch = 0,
+  lit,
+  track,
+  fitTo,
+  overlay,
+  front,
+  selected,
+  onSelectHex,
+  flyTo,
+  showUser = true,
+  overrides,
+  army,
+  animateSquads = true,
+}: HexMapProps) {
   const container = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const marker = useRef<maplibregl.Marker | null>(null);
   const [ready, setReady] = useState(false);
-  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides });
+  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides, army });
+  const phase = useSquadBob(animateSquads && ready);
   const layers = useMemo(() => mapLayers({ accent: palette.main, pitch }), [palette.main, pitch]);
 
   useEffect(() => {
@@ -45,8 +64,28 @@ export function HexMap({ center, zoom = 13.6, pitch = 0, lit, track, fitTo, over
     m.on('load', () => {
       m.setLight(MAP_LIGHT as maplibregl.LightSpecification);
       for (const id of SOURCES) m.addSource(id, { type: 'geojson', data: EMPTY });
-      setReady(true);
-      emit();
+      // sprites des soldats : dessinés directement depuis le SVG (mêmes images que sur mobile)
+      const looks: [number | null, (typeof SOLDIER_TIERS)[number]][] = [[null, 0], ...[1, 2].flatMap((f) => SOLDIER_TIERS.filter((x) => x > 0).map((x) => [f, x] as [number, (typeof SOLDIER_TIERS)[number]]))];
+      void Promise.all(
+        looks.flatMap(([f, tier]) =>
+          [false, true].map(
+            (captain) =>
+              new Promise<void>((resolve) => {
+                const id = soldierImageId(f, tier, captain);
+                const img = new Image(128, 160);
+                img.onload = () => {
+                  if (!m.hasImage(id)) m.addImage(id, img, { pixelRatio: 2 });
+                  resolve();
+                };
+                img.onerror = () => resolve();
+                img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(soldierSvg(f, tier, captain).replace('<svg ', '<svg width="128" height="160" '))}`;
+              }),
+          ),
+        ),
+      ).finally(() => {
+        setReady(true);
+        emit();
+      });
     });
     m.on('moveend', emit);
     return () => m.remove();
@@ -58,6 +97,15 @@ export function HexMap({ center, zoom = 13.6, pitch = 0, lit, track, fitTo, over
     for (const l of layers) if (m.getLayer(l.id)) m.removeLayer(l.id);
     for (const l of layers) m.addLayer(l as maplibregl.LayerSpecification);
   }, [ready, layers]);
+
+  // respiration des soldats : seule la translation change (pas de reconstruction des couches)
+  useEffect(() => {
+    const m = mapRef.current;
+    if (!m || !ready) return;
+    for (const id of SQUAD_LAYER_IDS) {
+      if (m.getLayer(id)) m.setPaintProperty(id, 'icon-translate', squadTranslate(Number(id.split('-')[1]), phase));
+    }
+  }, [phase, ready]);
 
   useEffect(() => {
     const m = mapRef.current;

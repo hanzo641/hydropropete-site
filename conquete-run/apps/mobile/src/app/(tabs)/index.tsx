@@ -71,6 +71,7 @@ export default function MapScreen() {
           }}
           flyTo={fly}
           zoom={13}
+          army={w.troops > 0 ? { at: center, troops: w.troops } : null}
           attributionBottom={TAB_BAR_SPACE + 12}
         />
       ) : (

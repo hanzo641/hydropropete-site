@@ -114,6 +114,10 @@ territoires).
 
 ## 7. Combat
 
+Le combat est **déterministe** (pas de dés) : chaque troupe vient de kilomètres courus, et
+un assaut ne doit jamais être perdu par malchance. Le suspense vient de la riposte adverse
+(érosion, contre-attaques), et l'assaut est mis en scène comme une bataille.
+
 * Soit `A` les troupes envoyées (après bonus de région éventuel) et `G` la garnison
   actuelle (après érosion). La défense a un avantage **×1,2**.
 * Si `A ≥ 1,2 × G` : **le territoire tombe**. Il passe à l'équipe de l'attaquant avec une
@@ -216,6 +220,12 @@ Chaque course rejetée apparaît dans le **journal des courses** du joueur avec 
 * **Défis solo** hebdomadaires tirés au sort (déterministe par joueur et par semaine) :
   distance, D+, nombre de territoires sauvages pris, nombre de nouveaux territoires
   explorés.
+* **Tenues des soldats** (cosmétique, aucun effet sur les combats) : chaque territoire
+  affiche une escouade de 1 à 5 soldats selon sa garnison, dans la tenue du rang de son
+  **capitaine**, le dernier joueur qui l'a pris ou renforcé : Recrue (Débutant), Fantassin
+  (Jogger), Éclaireur (Coureur), Chevalier (Athlète), Garde d'élite (Champion), Légende
+  (Maître). Les garnisons sauvages sont une milice grise. Seul le niveau du capitaine est
+  publié, jamais son identité. Les troupes à déployer marchent avec le joueur sur la carte.
 
 ## 14. Vie privée (rappel des règles de jeu)
 

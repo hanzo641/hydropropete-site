@@ -3,6 +3,7 @@ import {
   Camera,
   type CameraRef,
   GeoJSONSource,
+  Images,
   Layer,
   Map,
   type PressEventWithFeatures,
@@ -17,7 +18,9 @@ import { font, space } from '@/ui/theme';
 import type { HexView } from './hexGeo';
 import { MAP_LIGHT, mapLayers, SOURCES } from './layers';
 import { NIGHT_STYLE } from './nightStyle';
+import { SOLDIER_IMAGES } from './soldierImages';
 import { type HexOverrides, useHexData } from './useHexData';
+import { useSquadBob } from './useSquadBob';
 
 const CUSTOM_STYLE = process.env.EXPO_PUBLIC_MAP_STYLE_URL;
 
@@ -48,6 +51,10 @@ export interface HexMapProps {
   /** marge basse des mentions OpenStreetMap (au-dessus de la barre d'onglets) */
   attributionBottom?: number;
   overrides?: HexOverrides;
+  /** troupes à déployer : l'armée du joueur affichée à sa position */
+  army?: { at: LatLng; troops: number } | null;
+  /** soldats qui bougent (désactivé pendant les batailles, déjà animées) */
+  animateSquads?: boolean;
 }
 
 /**
@@ -71,10 +78,13 @@ export function HexMap({
   showUser = true,
   attributionBottom = 8,
   overrides,
+  army,
+  animateSquads = true,
 }: HexMapProps) {
   const camera = useRef<CameraRef>(null);
-  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides });
-  const layers = useMemo(() => mapLayers({ accent: palette.main, pitch }), [palette.main, pitch]);
+  const { palette, onBounds, tooWide, byCell, data } = useHexData({ lit, track, front, selected, overrides, army });
+  const phase = useSquadBob(animateSquads);
+  const layers = useMemo(() => mapLayers({ accent: palette.main, pitch, phase }), [palette.main, pitch, phase]);
 
   useEffect(() => {
     if (fitTo) {
@@ -129,6 +139,7 @@ export function HexMap({
           minZoom={3}
           maxZoom={17.5}
         />
+        <Images images={SOLDIER_IMAGES} />
         {SOURCES.map((id) => (
           <GeoJSONSource key={id} id={id} data={data[id === 'region-lines' ? 'regions' : id]} onPress={id === 'hexes' && onSelectHex ? onHexPress : undefined}>
             {layers

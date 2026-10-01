@@ -4,7 +4,7 @@ import { hexesInBBox, type HexRow, subscribeLive } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { currentConfig, loadGameConfig } from '@/lib/gameConfig';
 import { paletteOf } from '@/ui/theme';
-import { hexFeatures, labelFeatures, lineFeature, outlineFeatures, regionFeatures, visibleHexes } from './hexGeo';
+import { armyFeature, hexFeatures, labelFeatures, lineFeature, outlineFeatures, regionFeatures, visibleHexes } from './hexGeo';
 
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
@@ -12,7 +12,7 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
  * Données du plateau pour l'emprise visible (partagé mobile / web) : cases calculées
  * localement, cases stockées demandées au backend, mises à jour en direct.
  */
-export type HexOverrides = ReadonlyMap<string, { owner: number | null; garrison: number }>;
+export type HexOverrides = ReadonlyMap<string, { owner: number | null; garrison: number; captain?: number | null; hideSquad?: boolean }>;
 
 export function useHexData(opts: {
   lit?: readonly string[];
@@ -21,6 +21,8 @@ export function useHexData(opts: {
   selected?: string | null;
   /** état affiché imposé pour certaines cases (séquence de bataille : avant / après) */
   overrides?: HexOverrides;
+  /** troupes du joueur à déployer, affichées en armée à sa position */
+  army?: { at: LatLng; troops: number } | null;
 }) {
   const { profile } = useAuth();
   const palette = paletteOf(profile?.faction_id);
@@ -67,7 +69,9 @@ export function useHexData(opts: {
     if (!base || !opts.overrides || opts.overrides.size === 0) return base;
     return base.map((h) => {
       const o = opts.overrides?.get(h.cell);
-      return o ? { ...h, owner: o.owner, garrison: o.garrison, estimated: false, contested: false } : h;
+      return o
+        ? { ...h, owner: o.owner, garrison: o.garrison, estimated: false, contested: false, captain: o.owner == null ? null : (o.captain ?? h.captain ?? 1), hideSquad: o.hideSquad }
+        : h;
     });
   }, [bbox, rows, cfg, seed, opts.overrides]);
   const byCell = useMemo(() => new globalThis.Map((hexes ?? []).map((h) => [h.cell, h])), [hexes]);
@@ -79,8 +83,9 @@ export function useHexData(opts: {
       lit: litList.length ? outlineFeatures(litList) : EMPTY,
       selected: opts.selected ? outlineFeatures([opts.selected]) : EMPTY,
       track: lineFeature(opts.track ?? []),
+      army: armyFeature(opts.army, profile?.faction_id ?? null, profile?.level ?? null),
     }),
-    [hexes, litSet, litList, profile?.faction_id, cfg, opts.front, opts.selected, opts.track],
+    [hexes, litSet, litList, profile?.faction_id, profile?.level, cfg, opts.front, opts.selected, opts.track, opts.army],
   );
   return { palette, onBounds, tooWide: hexes === null, byCell, data };
 }

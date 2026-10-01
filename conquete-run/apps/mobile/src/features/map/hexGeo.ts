@@ -12,6 +12,7 @@ import {
   wildGarrison,
 } from '@conquete/core';
 import type { HexRow } from '@/lib/api';
+import { soldierImageId, squadSize, tierForLevel } from '@/ui/soldierArt';
 
 export interface HexView {
   cell: string;
@@ -23,6 +24,10 @@ export interface HexView {
   contested: boolean;
   /** faction qui contrôle la région de la case */
   regionFaction: number | null;
+  /** niveau du capitaine (tenue des soldats) ; null = garnison sauvage */
+  captain: number | null;
+  /** soldats masqués (la séquence de bataille les dessine elle-même) */
+  hideSquad?: boolean;
 }
 
 /** Garnison à partir de laquelle un territoire est une « forteresse » (anneau doré). */
@@ -41,10 +46,19 @@ export function visibleHexes(
     const r = rows.get(cell);
     // état stocké : territoire tenu, ou ruine neutre après une attaque
     if (r && r.garrison != null) {
-      return { cell, region: r.region, owner: r.owner_faction, garrison: Number(r.garrison), estimated: false, contested: r.contested, regionFaction: r.region_faction };
+      return {
+        cell,
+        region: r.region,
+        owner: r.owner_faction,
+        garrison: Number(r.garrison),
+        estimated: false,
+        contested: r.contested,
+        regionFaction: r.region_faction,
+        captain: r.owner_faction != null ? (r.captain_level ?? 1) : null,
+      };
     }
     if (r && r.wild_garrison != null) {
-      return { cell, region: r.region, owner: null, garrison: Number(r.wild_garrison), estimated: false, contested: r.contested, regionFaction: r.region_faction };
+      return { cell, region: r.region, owner: null, garrison: Number(r.wild_garrison), estimated: false, contested: r.contested, regionFaction: r.region_faction, captain: null };
     }
     return {
       cell,
@@ -54,6 +68,7 @@ export function visibleHexes(
       estimated: true,
       contested: false,
       regionFaction: null,
+      captain: null,
     };
   });
 }
@@ -95,6 +110,16 @@ export function hexFeatures(
   return { type: 'FeatureCollection', features };
 }
 
+/** Propriétés d'une escouade de soldats (couches `squad-*`, voir layers.ts). */
+function squadProps(owner: number | null, captain: number | null, garrison: number) {
+  const tier = owner == null ? 0 : tierForLevel(captain);
+  return {
+    squad: squadSize(garrison),
+    soldier: soldierImageId(owner, tier),
+    captainImg: soldierImageId(owner, tier, true),
+  };
+}
+
 export function labelFeatures(hexes: readonly HexView[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
@@ -108,9 +133,25 @@ export function labelFeatures(hexes: readonly HexView[]): GeoJSON.FeatureCollect
           owned: h.owner != null,
           color: h.owner ? (factionById(h.owner)?.color ?? WILD_COLOR) : '#3A3F48',
           fort: h.garrison >= FORTRESS_GARRISON,
+          ...squadProps(h.owner, h.captain, h.hideSquad ? 0 : h.garrison),
         },
       };
     }),
+  };
+}
+
+/** L'armée du joueur (troupes pas encore déployées) qui l'accompagne sur la carte. */
+export function armyFeature(army: { at: LatLng; troops: number } | null | undefined, faction: number | null, level: number | null): GeoJSON.FeatureCollection {
+  if (!army || army.troops <= 0 || faction == null) return { type: 'FeatureCollection', features: [] };
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [army.at.lng, army.at.lat] },
+        properties: { label: `⚔ ${army.troops}`, owned: true, ...squadProps(faction, level ?? 1, army.troops * 2) },
+      },
+    ],
   };
 }
 

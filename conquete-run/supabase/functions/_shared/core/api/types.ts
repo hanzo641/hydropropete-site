@@ -56,6 +56,8 @@ export interface HexRow {
   last_attacked_at: string | null;
   contested: boolean;
   region_faction: number | null;
+  /** niveau du dernier joueur qui a pris ou renforcé la case (tenue des soldats affichés) */
+  captain_level?: number | null;
 }
 
 export interface DeployTargetRow {
