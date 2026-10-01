@@ -23,7 +23,7 @@ import type {
   WeeklyProgress,
   ZoneLeaderboardRow,
 } from '../api/types.ts';
-import { AVATARS, isAvatarUnlocked } from '../game/avatars.ts';
+import { AVATARS, avatarForLevel, DEFAULT_AVATAR_ID, isAvatarUnlocked } from '../game/avatars.ts';
 import { effectiveTroops, type FactionId, type HexSnapshot, resolveAttack, round4 } from '../game/combat.ts';
 import { type GameConfig, resolveConfig } from '../game/config.ts';
 import { type Allocation, validateAllocations } from '../game/deployment.ts';
@@ -100,6 +100,11 @@ export function npcLevel(id: string): number {
   return 4 + Math.floor(Math.pow(hash01(`${id}:level`), 1.7) * 80);
 }
 
+/** Avatar d'un PNJ : la tenue de son rang. */
+function npcAvatar(id: string): string {
+  return avatarForLevel(npcLevel(id)).id;
+}
+
 /** Capitaine des territoires de départ (avant toute bataille) : variété stable par case. */
 function seedCaptainLevel(cell: string): number {
   return 2 + Math.floor(Math.pow(hash01(`${cell}:captain`), 2) * 50);
@@ -158,7 +163,10 @@ export class LocalGame {
   }
 
   private profileRaw(): LocalProfile | null {
-    return this.read<LocalProfile | null>('profile', null);
+    const p = this.read<LocalProfile | null>('profile', null);
+    // anciennes parties (avatars animaux) : la plus belle tenue débloquée
+    if (p && !AVATARS.some((a) => a.id === p.avatar_id)) return { ...p, avatar_id: avatarForLevel(p.level).id };
+    return p;
   }
 
   private season(): LocalSeason {
@@ -261,7 +269,7 @@ export class LocalGame {
       faction_id: faction,
       home_zone: zoneAt(input.position, this.cfg.h3),
       locale: input.locale,
-      avatar_id: isAvatarUnlocked(input.avatarId, 1) ? input.avatarId : 'renard',
+      avatar_id: isAvatarUnlocked(input.avatarId, 1) ? input.avatarId : DEFAULT_AVATAR_ID,
       xp: 0,
       level: 1,
       runs_count: 0,
@@ -285,7 +293,6 @@ export class LocalGame {
     for (const h of seedWorld({ center: input.position, playerFaction: faction, enemyFaction: enemy, seed }, this.cfg)) {
       world[h.cell] = { o: h.owner, g: h.garrison, u: now, a: null };
     }
-    const freeAvatars = AVATARS.filter((a) => a.unlockLevel === 1).map((a) => a.id);
     const npcs: Npc[] = [];
     for (const f of [faction, enemy]) {
       for (const [i, name] of (NPC_NAMES[f] ?? []).slice(0, 6).entries()) {
@@ -293,7 +300,7 @@ export class LocalGame {
           id: `npc:${f}:${i}`,
           name,
           faction: f,
-          avatar: freeAvatars[Math.floor(hash01(`${seed}:${name}`) * freeAvatars.length)]!,
+          avatar: DEFAULT_AVATAR_ID,
           points: Math.floor(hash01(`${seed}:${name}:p`) * 40),
           captures: 0,
         });
@@ -674,7 +681,7 @@ export class LocalGame {
       user_id: n.id,
       username: n.name,
       faction_id: n.faction,
-      avatar_id: n.avatar,
+      avatar_id: npcAvatar(n.id),
       points: n.points,
       captures: n.captures,
     }));
@@ -691,7 +698,7 @@ export class LocalGame {
       ...(p ? [{ id: ME, username: p.username, level: p.level, avatar_id: p.avatar_id }] : []),
       ...this.npcs()
         .filter((n) => n.faction === f)
-        .map((n) => ({ id: n.id, username: n.name, level: npcLevel(n.id), avatar_id: n.avatar })),
+        .map((n) => ({ id: n.id, username: n.name, level: npcLevel(n.id), avatar_id: npcAvatar(n.id) })),
     ];
     const hexes = Object.values(world).filter((w) => w.o === f && f != null).length;
     const regions = [...this.controllers(world).values()].filter((x) => x === f && f != null).length;
@@ -734,7 +741,7 @@ export class LocalGame {
     if (!best) return null;
     const npc = this.npcs().find((n) => n.id === best![0]);
     if (!npc) return null;
-    return { user_id: npc.id, username: npc.name, avatar_id: npc.avatar, faction_id: npc.faction, taken: best[1] };
+    return { user_id: npc.id, username: npc.name, avatar_id: npcAvatar(npc.id), faction_id: npc.faction, taken: best[1] };
   }
 
   async myTrophies(): Promise<string[]> {

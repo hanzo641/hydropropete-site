@@ -220,14 +220,15 @@ describe('confidentialité', () => {
 });
 
 describe('avatars', () => {
-  it('13 avatars, 8 libres, identifiants uniques, déblocage par niveau', async () => {
-    const { AVATARS, isAvatarUnlocked, avatarById, avatarSvg } = await import('../src/game/avatars.ts');
-    expect(AVATARS).toHaveLength(13);
-    expect(new Set(AVATARS.map((a) => a.id)).size).toBe(13);
-    expect(AVATARS.filter((a) => a.unlockLevel === 1)).toHaveLength(8);
-    expect(isAvatarUnlocked('dragon', 45)).toBe(false);
-    expect(isAvatarUnlocked('dragon', 46)).toBe(true);
-    expect(avatarById('inconnu').id).toBe('renard');
-    expect(avatarSvg('loup')).toMatch(/^<svg.*<\/svg>$/);
+  it('6 tenues de soldat, une par rang, identifiants uniques', async () => {
+    const { AVATARS, isAvatarUnlocked, avatarById, avatarForLevel } = await import('../src/game/avatars.ts');
+    const { RANKS } = await import('../src/game/progression.ts');
+    expect(AVATARS.map((a) => a.unlockLevel)).toEqual(RANKS.map((r) => r.minLevel));
+    expect(new Set(AVATARS.map((a) => a.id)).size).toBe(AVATARS.length);
+    expect(isAvatarUnlocked('recrue', 1)).toBe(true);
+    expect(isAvatarUnlocked('fantassin', 10)).toBe(false);
+    expect(isAvatarUnlocked('fantassin', 11)).toBe(true);
+    expect(avatarById('renard').id).toBe('recrue');
+    expect(avatarForLevel(50).id).toBe('chevalier');
   });
 });

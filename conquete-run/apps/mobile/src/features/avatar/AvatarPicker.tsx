@@ -4,16 +4,18 @@ import { getLocale, t } from '@/i18n';
 import { HexAvatar } from '@/ui/game';
 import { colors, fonts, space } from '@/ui/theme';
 
-/** Grille d'avatars hexagonaux ; ceux d'un niveau supérieur au joueur sont verrouillés. */
+/** Les tenues de soldat (avatars) ; celles d'un rang supérieur au joueur sont verrouillées. */
 export function AvatarPicker({
   value,
   level,
+  faction,
   onChange,
   accent = colors.gold,
   onlyUnlocked,
 }: {
   value: string;
   level: number;
+  faction: number | null;
   onChange: (id: string) => void;
   accent?: string;
   onlyUnlocked?: boolean;
@@ -32,9 +34,9 @@ export function AvatarPicker({
             accessibilityState={{ selected, disabled: locked }}
             accessibilityLabel={`${a.name[getLocale()]}${locked ? ` — ${t('avatar.locked', { n: a.unlockLevel })}` : ''}`}
             onPress={() => onChange(a.id)}
-            style={({ pressed }) => ({ alignItems: 'center', gap: 4, width: 78, transform: [{ scale: pressed ? 0.94 : selected ? 1.06 : 1 }] })}>
+            style={({ pressed }) => ({ alignItems: 'center', gap: 4, width: 96, transform: [{ scale: pressed ? 0.94 : selected ? 1.06 : 1 }] })}>
             <View style={{ opacity: locked ? 0.28 : 1 }}>
-              <HexAvatar id={a.id} size={66} ring={selected ? accent : undefined} ringWidth={selected ? 3.5 : 1.5} glow={selected} />
+              <HexAvatar id={a.id} faction={faction} size={84} ring={selected ? accent : undefined} ringWidth={selected ? 3.5 : 1.5} glow={selected} />
             </View>
             <Text
               style={{ color: selected ? accent : locked ? colors.textMute : colors.textDim, fontFamily: fonts.label, fontSize: 13, letterSpacing: 0.6 }}

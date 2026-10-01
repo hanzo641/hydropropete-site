@@ -16,11 +16,9 @@ import { currentConfig } from '@/lib/gameConfig';
 import { kv } from '@/lib/kv';
 import { Button, Card, Chip, Glass, Screen, usePalette } from '@/ui/components';
 import { TroopHarvest } from '@/features/rewards/TroopHarvest';
-import { play } from '@/features/sfx';
 import { FadeIn, ProgressBar, StreakBadge } from '@/ui/game';
 import { Burst } from '@/ui/fx';
-import { outfitName, Soldier } from '@/ui/Soldier';
-import { tierForLevel } from '@/ui/soldierArt';
+import { showLevelUp } from '@/features/levelup/LevelUp';
 import { colors, font, fonts, space } from '@/ui/theme';
 
 export default function Summary() {
@@ -66,8 +64,6 @@ export default function Summary() {
   const bonusPct = Math.round(streakBonus(streakDays, currentConfig().streak) * 100);
   const lvl = levelFromXp(profile?.xp ?? 0);
   const leveledUp = (profile?.level ?? 1) > levelBefore.current;
-  const newTier = tierForLevel(profile?.level ?? 1);
-  const newOutfit = leveledUp && newTier > tierForLevel(levelBefore.current);
 
   return (
     <Screen>
@@ -110,8 +106,7 @@ export default function Summary() {
                     if (leveledUp) {
                       setTimeout(() => {
                         setLevelFx(Date.now());
-                        play('capture');
-                        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        showLevelUp(profile?.level ?? 1);
                       }, 700);
                     }
                   }}
@@ -168,18 +163,6 @@ export default function Summary() {
                 <ProgressBar value={lvl.currentXp / lvl.nextXp} gradient={['#FFD86B', '#F59E0B']} height={10} />
               </Glass>
             </FadeIn>
-            {newOutfit && levelFx > 0 && (
-              <FadeIn from={20}>
-                <Glass glow={colors.gold} style={{ padding: space.lg, borderRadius: 22, flexDirection: 'row', alignItems: 'center', gap: space.md, overflow: 'visible' }}>
-                  <Burst fire={levelFx + 1} color={p.main} count={14} radius={110} />
-                  <Soldier faction={profile?.faction_id ?? null} tier={newTier} captain size={96} />
-                  <View style={{ flex: 1, gap: 4 }}>
-                    <Text style={[font.h3, { color: colors.gold }]}>{t('summary.newOutfit')}</Text>
-                    <Text style={font.small}>{t('summary.newOutfitBody', { name: outfitName(newTier) })}</Text>
-                  </View>
-                </Glass>
-              </FadeIn>
-            )}
             {won.length > 0 && (
               <FadeIn delay={600}>
                 <Text style={[font.h2, { marginBottom: space.sm }]}>{t('summary.trophies')}</Text>

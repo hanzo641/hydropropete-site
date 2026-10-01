@@ -143,7 +143,7 @@ export default function War() {
         {/* le rival */}
         <FadeIn delay={180}>
           <Glass glow={w.rival ? pe.main : undefined} style={{ padding: space.lg, borderRadius: 22, flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
-            {w.rival ? <HexAvatar id={w.rival.avatar_id} size={58} ring={pe.main} glow /> : <Text style={{ fontSize: 40 }}>😈</Text>}
+            {w.rival ? <HexAvatar id={w.rival.avatar_id} faction={w.rival.faction_id} size={58} ring={pe.main} glow /> : <Text style={{ fontSize: 40 }}>😈</Text>}
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={[font.label, { color: pe.main }]}>{t('war.nemesisTitle')}</Text>
               {w.rival ? (
@@ -169,7 +169,7 @@ export default function War() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
                 {squad.members.slice(0, 12).map((m) => (
                   <View key={m.id} style={{ alignItems: 'center', width: 58, gap: 2 }}>
-                    <HexAvatar id={m.avatar_id} size={46} ring={m.username === profile?.username ? p.main : 'rgba(255,255,255,0.2)'} />
+                    <HexAvatar id={m.avatar_id} faction={profile?.faction_id} size={46} ring={m.username === profile?.username ? p.main : 'rgba(255,255,255,0.2)'} />
                     <Text style={{ fontFamily: fonts.bodyBold, fontSize: 10.5, color: colors.textDim }} numberOfLines={1}>
                       {m.username}
                     </Text>
@@ -222,7 +222,7 @@ export default function War() {
                 <Text style={{ width: 30, textAlign: 'center', fontFamily: fonts.display, fontSize: r.rank <= 3 ? 20 : 18, color: colors.textDim }}>
                   {r.rank <= 3 ? MEDALS[r.rank - 1] : r.rank}
                 </Text>
-                <HexAvatar id={r.avatar_id} size={38} ring={fc} ringWidth={2} />
+                <HexAvatar id={r.avatar_id} faction={r.faction_id} size={38} ring={fc} ringWidth={2} />
                 <View style={{ flex: 1 }}>
                   <Text style={[font.bodyBold, me && { color: p.main }]} numberOfLines={1}>
                     {r.username}

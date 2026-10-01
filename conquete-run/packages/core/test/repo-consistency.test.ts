@@ -27,7 +27,7 @@ describe('cohérence du dépôt', () => {
   });
 
   it('les niveaux de déblocage des avatars SQL = AVATARS', () => {
-    const sql = readFileSync(join(ROOT, 'supabase/migrations/20260929000007_avatars.sql'), 'utf8');
+    const sql = readFileSync(join(ROOT, 'supabase/migrations/20261001000010_soldier_avatars.sql'), 'utf8');
     for (const a of AVATARS) expect(sql).toContain(`when '${a.id}' then ${a.unlockLevel}`);
     expect(sql.match(/when '/g)?.length).toBe(AVATARS.length);
   });

@@ -226,6 +226,9 @@ Chaque course rejetée apparaît dans le **journal des courses** du joueur avec 
   (Jogger), Éclaireur (Coureur), Chevalier (Athlète), Garde d'élite (Champion), Légende
   (Maître). Les garnisons sauvages sont une milice grise. Seul le niveau du capitaine est
   publié, jamais son identité. Les troupes à déployer marchent avec le joueur sur la carte.
+* **Avatar** = le buste de son soldat, aux couleurs de son camp, dans une tenue débloquée
+  (choix libre parmi les tenues débloquées). Chaque montée de niveau ouvre un pop-up ; au
+  passage d'un rang, la nouvelle tenue est proposée (« Équiper la tenue »).
 
 ## 14. Vie privée (rappel des règles de jeu)
 

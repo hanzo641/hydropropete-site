@@ -1,10 +1,11 @@
 import { avatarById, factionById, rankForLevel } from '@conquete/core';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Text, View, type ViewStyle } from 'react-native';
-import Svg, { ClipPath, Defs, G, LinearGradient as SvgGradient, Path, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop, SvgXml } from 'react-native-svg';
 import { getLocale } from '@/i18n';
 import { hexPath } from './hex';
+import { soldierPortraitSvg } from './soldierArt';
 import { alpha, colors, fonts, paletteOf, radius, space } from './theme';
 
 /** Emblèmes des factions (vectoriels, viewBox 100 × 100). */
@@ -58,15 +59,17 @@ export function Emblem({ factionId, size = 28, color }: { factionId: number | nu
   );
 }
 
-/** Avatar dans un hexagone, liseré de la couleur du rang (ou de la faction). */
+/** Avatar : buste du soldat (tenue choisie) dans un hexagone aux couleurs de son camp. */
 export function HexAvatar({
   id,
+  faction,
   size = 56,
   ring,
   ringWidth,
   glow,
 }: {
   id: string | null | undefined;
+  faction: number | null | undefined;
   size?: number;
   ring?: string;
   ringWidth?: number;
@@ -74,41 +77,28 @@ export function HexAvatar({
 }) {
   const a = avatarById(id);
   const sw = ringWidth ?? Math.max(2, size / 18);
-  const clip = `hexclip-${size}`;
+  const xml = useMemo(() => soldierPortraitSvg(faction ?? null, a.tier, ring ?? 'rgba(255,255,255,0.25)', (sw * 100) / size), [faction, a.tier, ring, sw, size]);
   return (
     <View
       accessibilityRole="image"
       accessibilityLabel={a.name[getLocale()]}
       style={[{ width: size, height: size }, glow && ring ? { boxShadow: `0 0 ${size / 3}px ${alpha(ring, 0.55)}`, borderRadius: size / 2 } : null]}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Defs>
-          <ClipPath id={clip}>
-            <Path d={hexPath(100, 0.14, 3)} />
-          </ClipPath>
-        </Defs>
-        <G clipPath={`url(#${clip})`}>
-          <Path d="M0 0 H100 V100 H0 Z" fill={a.bg} />
-          {a.shapes.map((sh, i) => (
-            <Path key={i} d={sh.d} fill={sh.fill} fillOpacity={sh.opacity ?? 1} transform="translate(8 8) scale(0.84)" />
-          ))}
-        </G>
-        <Path d={hexPath(100, 0.14, 3)} fill="none" stroke={ring ?? 'rgba(255,255,255,0.25)'} strokeWidth={(sw * 100) / size} />
-      </Svg>
+      <SvgXml xml={xml} width={size} height={size} />
     </View>
   );
 }
 
 /** Compat : ancien avatar rond (listes). */
-export function Avatar({ id, size = 48, ringColor }: { id: string | null | undefined; size?: number; ringColor?: string }) {
-  return <HexAvatar id={id} size={size} ring={ringColor} />;
+export function Avatar({ id, faction, size = 48, ringColor }: { id: string | null | undefined; faction: number | null | undefined; size?: number; ringColor?: string }) {
+  return <HexAvatar id={id} faction={faction} size={size} ring={ringColor} />;
 }
 
 /** Avatar hexagonal cerclé de la couleur du rang, avec le nom du rang. */
-export function RankBadge({ level, avatarId, size = 84 }: { level: number; avatarId: string | null | undefined; size?: number }) {
+export function RankBadge({ level, avatarId, faction, size = 84 }: { level: number; avatarId: string | null | undefined; faction: number | null | undefined; size?: number }) {
   const rank = rankForLevel(level);
   return (
     <View style={{ alignItems: 'center', gap: space.xs }}>
-      <HexAvatar id={avatarId} size={size} ring={rank.color} glow />
+      <HexAvatar id={avatarId} faction={faction} size={size} ring={rank.color} glow />
       <Text style={{ color: rank.color, fontFamily: fonts.label, fontSize: 14, letterSpacing: 1.4, textTransform: 'uppercase' }}>
         {rank.name[getLocale()]}
       </Text>

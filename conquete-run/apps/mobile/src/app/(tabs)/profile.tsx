@@ -90,7 +90,7 @@ export default function ProfileScreen() {
         <FadeIn>
           <View style={{ flexDirection: 'row', gap: space.lg, alignItems: 'center' }}>
             <Pressable accessibilityRole="button" accessibilityLabel={t('profile.avatar')} onPress={() => router.push('/avatar')}>
-              <RankBadge level={profile.level} avatarId={profile.avatar_id} size={96} />
+              <RankBadge level={profile.level} avatarId={profile.avatar_id} faction={profile.faction_id} size={96} />
             </Pressable>
             <View style={{ flex: 1, gap: 6 }}>
               <Text style={font.h1} numberOfLines={1} adjustsFontSizeToFit>

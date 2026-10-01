@@ -46,6 +46,26 @@ const o = `stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" stroke-lin
  * Un soldat de face (viewBox 64 × 80). `captain` ajoute l'étendard du camp.
  */
 export function soldierSvg(faction: number | null, tier: SoldierTier, captain = false): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80">${soldierParts(faction, tier, captain)}</svg>`;
+}
+
+/**
+ * Portrait d'avatar (viewBox 100 × 100) : buste du soldat dans un hexagone aux couleurs
+ * du camp, liseré `ring` (couleur du rang, de la faction ou de la sélection).
+ */
+export function soldierPortraitSvg(faction: number | null, tier: SoldierTier, ring = 'rgba(255,255,255,0.25)', ringWidth = 4): string {
+  const main = faction == null ? '#8E97A6' : (factionById(faction)?.color ?? '#8E97A6');
+  const hex = 'M50 3 L90.7 26.5 L90.7 73.5 L50 97 L9.3 73.5 L9.3 26.5 Z';
+  // identifiants uniques par apparence (le web partage les id entre SVG d'une page)
+  const k = `${faction ?? 0}-${tier}`;
+  const bg = `<defs><linearGradient id="bg${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(main, -0.55)}"/><stop offset="1" stop-color="${shade(main, -0.85)}"/></linearGradient><clipPath id="hx${k}"><path d="${hex}"/></clipPath></defs>`;
+  const glow = `<circle cx="50" cy="42" r="34" fill="${tier === 6 ? GOLD : main}" opacity="0.28"/>`;
+  // buste : tête et épaules (y de -3 à 55 dans le repère du soldat)
+  const body = `<g transform="translate(-1.2 12) scale(1.6)">${soldierParts(faction, tier, false, true)}</g>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${bg}<g clip-path="url(#hx${k})"><path d="${hex}" fill="url(#bg${k})"/>${glow}${body}</g><path d="${hex}" fill="none" stroke="${ring}" stroke-width="${ringWidth}" stroke-linejoin="round"/></svg>`;
+}
+
+function soldierParts(faction: number | null, tier: SoldierTier, captain: boolean, portrait = false): string {
   const wild = faction == null || tier === 0;
   const main = wild ? '#8E97A6' : (factionById(faction)?.color ?? '#8E97A6');
   const dark = shade(main, -0.45);
@@ -53,7 +73,7 @@ export function soldierSvg(faction: number | null, tier: SoldierTier, captain = 
   const parts: string[] = [];
 
   // aura de la légende
-  if (tier === 6) parts.push(`<circle cx="32" cy="42" r="30" fill="${GOLD}" opacity="0.28"/><circle cx="32" cy="42" r="22" fill="${GOLD}" opacity="0.22"/>`);
+  if (tier === 6 && !portrait) parts.push(`<circle cx="32" cy="42" r="30" fill="${GOLD}" opacity="0.28"/><circle cx="32" cy="42" r="22" fill="${GOLD}" opacity="0.22"/>`);
 
   // étendard (derrière le soldat)
   if (captain) {
@@ -158,7 +178,7 @@ export function soldierSvg(faction: number | null, tier: SoldierTier, captain = 
     parts.push(`<path d="M41 52 H53" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M41 52 H53" stroke="${tier === 6 ? GOLD : STEEL_DARK}" stroke-width="2.6" stroke-linecap="round"/>`);
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80">${parts.join('')}</svg>`;
+  return parts.join('');
 }
 
 /** Nombre de soldats affichés sur une case selon sa garnison (1 à 5). */

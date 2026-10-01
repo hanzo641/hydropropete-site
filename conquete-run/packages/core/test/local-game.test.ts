@@ -31,7 +31,7 @@ describe('mode local : une partie complète sur le téléphone', () => {
     const p = await game.onboard({
       username: 'Thomas',
       faction: 1,
-      avatarId: 'loup',
+      avatarId: 'recrue',
       locale: 'fr',
       position: PAU,
       birthYear: null,
@@ -39,7 +39,7 @@ describe('mode local : une partie complète sur le téléphone', () => {
       termsVersion: 'local',
     });
     expect(p.faction_id).toBe(1);
-    expect(p.avatar_id).toBe('loup');
+    expect(p.avatar_id).toBe('recrue');
     const rows = await game.hexesInBBox({ south: 43.2, north: 43.4, west: -0.5, east: -0.25 });
     expect(rows.filter((r) => r.owner_faction === 2).length).toBeGreaterThan(10);
     expect((await game.zoneLeaderboard()).length).toBe(13);

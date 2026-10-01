@@ -4,14 +4,13 @@ import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
-import { AvatarPicker } from '@/features/avatar/AvatarPicker';
 import { getLocale, t, type TKey } from '@/i18n';
 import { GAME_MODE, onboard, zoneFactionCounts } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { currentConfig } from '@/lib/gameConfig';
 import { TERMS_VERSION } from '@/legal/texts';
 import { Button, Checkbox, ErrorText, Field, Screen, ScreenBg, SectionTitle } from '@/ui/components';
-import { FactionBadge } from '@/ui/game';
+import { FactionBadge, HexAvatar } from '@/ui/game';
 import { colors, font, paletteOf, space } from '@/ui/theme';
 
 /** Nom de guerre, avatar, terrain, consentements — puis la carte. */
@@ -23,7 +22,7 @@ export default function OnboardingProfile() {
   const [username, setUsername] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [position, setPosition] = useState<LatLng | null>(null);
-  const [avatar, setAvatarId] = useState(DEFAULT_AVATAR_ID);
+  const avatar = DEFAULT_AVATAR_ID;
   const [gps, setGps] = useState(false);
   const [terms, setTerms] = useState(false);
   const [busy, setBusy] = useState<'locate' | 'submit' | null>(null);
@@ -120,7 +119,10 @@ export default function OnboardingProfile() {
             )}
 
             <SectionTitle title={t('onboarding.avatarTitle')} color={palette.main} />
-            <AvatarPicker value={avatar} level={1} onChange={setAvatarId} accent={palette.main} onlyUnlocked />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+              <HexAvatar id={avatar} faction={requested} size={92} ring={palette.main} glow />
+              <Text style={[font.small, { flex: 1 }]}>{t('onboarding.avatarHint')}</Text>
+            </View>
 
             <SectionTitle title={t('onboarding.zoneTitle')} color={palette.main} />
             <Text style={font.small}>{local ? t('onboarding.zoneHelpLocal') : t('onboarding.zoneHelp')}</Text>

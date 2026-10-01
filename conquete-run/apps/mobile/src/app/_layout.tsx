@@ -14,6 +14,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
+import { LevelUpHost } from '@/features/levelup/LevelUp';
 import { restoreIfNeeded } from '@/features/run/session';
 import { flushUploads } from '@/features/run/upload';
 import { refreshWar } from '@/features/war/report';
@@ -96,6 +97,7 @@ export default function RootLayout() {
             <Stack.Screen name="legal/[doc]" options={{ title: '' }} />
           </Stack>
         )}
+        {fontsReady && <LevelUpHost />}
       </AuthProvider>
     </ThemeProvider>
   );
