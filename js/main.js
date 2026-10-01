@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFaq();
   initContactForm();
   initQuoteWidget();
+  initQuotePrefill();
   initYear();
   initAnalytics();
   initCookieConsent();
@@ -308,50 +309,127 @@ function initContactForm() {
   });
 }
 
-/* ---------- Devis instantané : sélection service -> tarif -> Calendly ---------- */
+/* ---------- Devis instantané : plusieurs prestations -> total -> Calendly / devis ---------- */
+const CALENDLY_URL = 'https://calendly.com/hydroproprete';
+const CALENDAR_ICON = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+const QTY_MAX = 9;
+
 function initQuoteWidget() {
-  const select = document.querySelector('#quote-service');
-  if (!select) return;
+  const options = document.querySelector('#quote-options');
+  if (!options) return;
 
   const result = document.querySelector('#quote-result');
-  const nameEl = document.querySelector('#quote-result-name');
+  const linesEl = document.querySelector('#quote-lines');
   const priceEl = document.querySelector('#quote-result-price');
+  const noteEl = document.querySelector('#quote-result-note');
   const cta = document.querySelector('#quote-result-cta');
+  const alt = document.querySelector('#quote-result-alt');
+  const rows = [...options.querySelectorAll('.quote-option')];
 
-  select.addEventListener('change', () => {
-    const opt = select.options[select.selectedIndex];
+  const qtyOf = (row) => Number(row.querySelector('.quote-qty-value')?.textContent || 1);
+  const euros = (n) => `${n.toLocaleString('fr-FR')} €`;
 
-    if (!opt.value) {
+  function render() {
+    const chosen = rows.filter((row) => row.querySelector('input').checked);
+    rows.forEach((row) => {
+      const on = row.querySelector('input').checked;
+      row.classList.toggle('is-selected', on);
+      const qty = row.querySelector('.quote-qty');
+      if (qty) qty.hidden = !on;
+    });
+
+    if (!chosen.length) {
       result.hidden = true;
       return;
     }
 
-    const isDevis = opt.dataset.price === 'devis';
+    const fixed = chosen.filter((row) => row.dataset.price !== 'devis');
+    const onQuote = chosen.filter((row) => row.dataset.price === 'devis');
+    const total = fixed.reduce((sum, row) => sum + Number(row.dataset.price) * qtyOf(row), 0);
 
-    nameEl.textContent = opt.dataset.name;
-    priceEl.textContent = isDevis ? 'Sur devis' : `${opt.dataset.price} €`;
-    priceEl.classList.toggle('is-devis', isDevis);
+    linesEl.replaceChildren(
+      ...chosen.map((row) => {
+        const li = document.createElement('li');
+        const name = document.createElement('span');
+        const price = document.createElement('span');
+        const isQuote = row.dataset.price === 'devis';
+        const qty = isQuote ? 1 : qtyOf(row);
+        name.textContent = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+        price.textContent = isQuote ? 'sur devis' : euros(Number(row.dataset.price) * qty);
+        if (isQuote) price.className = 'is-devis';
+        li.append(name, price);
+        return li;
+      }),
+    );
 
-    if (isDevis) {
-      cta.href = opt.dataset.url;
+    if (fixed.length) {
+      priceEl.textContent = onQuote.length ? `${euros(total)} + devis` : euros(total);
+      priceEl.classList.remove('is-devis');
+    } else {
+      priceEl.textContent = 'Sur devis';
+      priceEl.classList.add('is-devis');
+    }
+
+    if (onQuote.length) {
+      // au moins une prestation sur devis : demande de devis groupée (formulaire pré-rempli)
+      const names = chosen.map((row) => {
+        const qty = row.dataset.price === 'devis' ? 1 : qtyOf(row);
+        return qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+      });
+      noteEl.textContent = fixed.length
+        ? 'Le total comprend les prestations à prix fixe ; nous chiffrons le reste rapidement.'
+        : 'Nous vous envoyons un devis gratuit, sans engagement.';
+      noteEl.hidden = false;
+      cta.href = `contact.html?prestations=${encodeURIComponent(names.join(', '))}#contact-form`;
       cta.target = '_self';
       cta.removeAttribute('rel');
-      cta.textContent = 'Demander un devis';
+      cta.textContent = onQuote.length + fixed.length > 1 ? 'Demander mon devis groupé' : 'Demander un devis';
+      alt.hidden = !fixed.length;
     } else {
-      cta.href = 'https://calendly.com/hydroproprete';
+      noteEl.hidden = true;
+      cta.href = CALENDLY_URL;
       cta.target = '_blank';
       cta.setAttribute('rel', 'noopener');
-      cta.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Réserver mon créneau';
+      cta.innerHTML = `${CALENDAR_ICON}Réserver mon créneau`;
+      alt.hidden = true;
     }
 
     result.hidden = false;
-    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 
-    trackEvent('quote_widget_select', {
-      service_name: opt.dataset.name,
-      price: isDevis ? 'devis' : opt.dataset.price,
-    });
+  options.addEventListener('change', (e) => {
+    const input = e.target.closest('input[type="checkbox"]');
+    if (!input) return;
+    const row = input.closest('.quote-option');
+    render();
+    if (input.checked) {
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      trackEvent('quote_widget_select', { service_name: row.dataset.name, price: row.dataset.price });
+    }
   });
+
+  options.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quote-qty-btn');
+    if (!btn) return;
+    const out = btn.parentElement.querySelector('.quote-qty-value');
+    const next = Math.min(QTY_MAX, Math.max(1, Number(out.textContent) + Number(btn.dataset.step)));
+    out.textContent = String(next);
+    render();
+  });
+}
+
+/* ---------- Formulaire de contact pré-rempli depuis le devis instantané ---------- */
+function initQuotePrefill() {
+  const message = document.querySelector('#message');
+  if (!message) return;
+  const list = new URLSearchParams(window.location.search).get('prestations');
+  if (!list || message.value) return;
+  message.value = `Bonjour, je souhaite un devis pour : ${list.slice(0, 500)}.\n\n`;
+  const service = document.querySelector('#service');
+  if (service) {
+    const match = [...service.options].find((o) => o.value && list.toLowerCase().includes(o.value.toLowerCase()));
+    service.value = list.includes(',') || !match ? 'Autre demande' : match.value;
+  }
 }
 
 /* ---------- Footer year ---------- */
