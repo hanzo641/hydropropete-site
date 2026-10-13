@@ -27,7 +27,7 @@
 
   <link rel="preload" href="fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="stylesheet" href="css/style.min.css">
+  <link rel="stylesheet" href="css/style.min.css?v=20261001">
 
   <script type="application/ld+json">
   {
@@ -437,31 +437,128 @@
         <div class="section-head reveal">
           <span class="eyebrow">Devis instantané</span>
           <h2>Votre tarif en 10 secondes</h2>
-          <p>Choisissez votre prestation, découvrez le prix et réservez directement votre créneau.</p>
+          <p>Choisissez une ou plusieurs prestations, découvrez le prix et réservez directement votre créneau.</p>
         </div>
 
         <div class="quote-widget reveal">
-          <label for="quote-service" class="quote-label">Quelle prestation souhaitez-vous ?</label>
-          <select id="quote-service" class="quote-select">
-            <option value="">— Sélectionnez votre nettoyage —</option>
-            <option value="canape-23" data-price="80" data-name="Nettoyage de canapé 2/3 places">Canapé 2/3 places — 80 €</option>
-            <option value="canape-45angle" data-price="110" data-name="Nettoyage de canapé 4/5 places ou d'angle">Canapé 4/5 places ou d'angle — 110 €</option>
-            <option value="fauteuil" data-price="50" data-name="Nettoyage de fauteuil">Fauteuil — 50 €</option>
-            <option value="matelas-1p" data-price="60" data-name="Nettoyage de matelas 1 place">Matelas 1 place — 60 €</option>
-            <option value="matelas-2p" data-price="90" data-name="Nettoyage de matelas 2 places">Matelas 2 places — 90 €</option>
-            <option value="tapis" data-price="devis" data-name="Nettoyage de tapis" data-url="pages/nettoyage-tapis-pau.html">Nettoyage de tapis — sur devis</option>
-            <option value="voiture" data-price="devis" data-name="Nettoyage de voiture" data-url="pages/nettoyage-voiture-pau.html">Nettoyage de voiture — à partir de 60 €</option>
-            <option value="vitres" data-price="devis" data-name="Nettoyage de vitres" data-url="pages/nettoyage-vitres-pau.html">Nettoyage de vitres — sur devis</option>
-            <option value="copro" data-price="devis" data-name="Entretien de copropriété" data-url="pages/nettoyage-copropriete-pau.html">Entretien de copropriété — sur devis</option>
-            <option value="debarras" data-price="devis" data-name="Débarras" data-url="pages/debarras-pau.html">Débarras — sur devis</option>
-          </select>
+          <fieldset class="quote-options" id="quote-options">
+            <legend class="quote-label">Quelles prestations souhaitez-vous ? <span class="quote-hint">Plusieurs choix possibles</span></legend>
+            <div class="quote-option" data-price="80" data-name="Canapé 2/3 places">
+              <label class="quote-check">
+                <input type="checkbox" value="canape-23">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Canapé 2/3 places</span>
+                <span class="quote-option-price">80 €</span>
+              </label>
+              <div class="quote-qty" hidden>
+                <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 2/3 places">−</button>
+                <output class="quote-qty-value" aria-live="polite">1</output>
+                <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 2/3 places">+</button>
+              </div>
+            </div>
+            <div class="quote-option" data-price="110" data-name="Canapé 4/5 places ou d'angle">
+              <label class="quote-check">
+                <input type="checkbox" value="canape-45angle">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Canapé 4/5 places ou d'angle</span>
+                <span class="quote-option-price">110 €</span>
+              </label>
+              <div class="quote-qty" hidden>
+                <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 4/5 places ou d'angle">−</button>
+                <output class="quote-qty-value" aria-live="polite">1</output>
+                <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 4/5 places ou d'angle">+</button>
+              </div>
+            </div>
+            <div class="quote-option" data-price="50" data-name="Fauteuil">
+              <label class="quote-check">
+                <input type="checkbox" value="fauteuil">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Fauteuil</span>
+                <span class="quote-option-price">50 €</span>
+              </label>
+              <div class="quote-qty" hidden>
+                <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un fauteuil">−</button>
+                <output class="quote-qty-value" aria-live="polite">1</output>
+                <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un fauteuil">+</button>
+              </div>
+            </div>
+            <div class="quote-option" data-price="60" data-name="Matelas 1 place">
+              <label class="quote-check">
+                <input type="checkbox" value="matelas-1p">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Matelas 1 place</span>
+                <span class="quote-option-price">60 €</span>
+              </label>
+              <div class="quote-qty" hidden>
+                <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 1 place">−</button>
+                <output class="quote-qty-value" aria-live="polite">1</output>
+                <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 1 place">+</button>
+              </div>
+            </div>
+            <div class="quote-option" data-price="90" data-name="Matelas 2 places">
+              <label class="quote-check">
+                <input type="checkbox" value="matelas-2p">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Matelas 2 places</span>
+                <span class="quote-option-price">90 €</span>
+              </label>
+              <div class="quote-qty" hidden>
+                <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 2 places">−</button>
+                <output class="quote-qty-value" aria-live="polite">1</output>
+                <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 2 places">+</button>
+              </div>
+            </div>
+            <div class="quote-option" data-price="devis" data-name="Nettoyage de tapis">
+              <label class="quote-check">
+                <input type="checkbox" value="tapis">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Nettoyage de tapis</span>
+                <span class="quote-option-price is-devis">sur devis</span>
+              </label>
+            </div>
+            <div class="quote-option" data-price="devis" data-name="Nettoyage de voiture">
+              <label class="quote-check">
+                <input type="checkbox" value="voiture">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Nettoyage de voiture</span>
+                <span class="quote-option-price is-devis">dès 60 €</span>
+              </label>
+            </div>
+            <div class="quote-option" data-price="devis" data-name="Nettoyage de vitres">
+              <label class="quote-check">
+                <input type="checkbox" value="vitres">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Nettoyage de vitres</span>
+                <span class="quote-option-price is-devis">sur devis</span>
+              </label>
+            </div>
+            <div class="quote-option" data-price="devis" data-name="Entretien de copropriété">
+              <label class="quote-check">
+                <input type="checkbox" value="copro">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Entretien de copropriété</span>
+                <span class="quote-option-price is-devis">sur devis</span>
+              </label>
+            </div>
+            <div class="quote-option" data-price="devis" data-name="Débarras">
+              <label class="quote-check">
+                <input type="checkbox" value="debarras">
+                <span class="quote-check-box" aria-hidden="true"></span>
+                <span class="quote-option-name">Débarras</span>
+                <span class="quote-option-price is-devis">sur devis</span>
+              </label>
+            </div>
+          </fieldset>
 
           <div class="quote-result" id="quote-result" hidden>
+            <ul class="quote-lines" id="quote-lines"></ul>
             <div class="quote-result-inner">
-              <span class="quote-result-label" id="quote-result-name"></span>
+              <span class="quote-result-label" id="quote-result-name">Total</span>
               <span class="quote-result-price" id="quote-result-price"></span>
             </div>
+            <p class="quote-result-note" id="quote-result-note" hidden></p>
             <a href="https://calendly.com/hydroproprete" id="quote-result-cta" class="btn btn-primary btn-block" target="_blank" rel="noopener"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Réserver mon créneau</a>
+            <a href="https://calendly.com/hydroproprete" id="quote-result-alt" class="quote-alt-link" target="_blank" rel="noopener" hidden>Ou réserver directement les prestations à prix fixe</a>
           </div>
         </div>
       </div>
@@ -801,6 +898,6 @@
   </div>
 </div>
 
-<script src="js/main.min.js" defer></script>
+<script src="js/main.min.js?v=20261001" defer></script>
 </body>
 </html>
