@@ -403,7 +403,6 @@ function initQuoteWidget() {
     const row = input.closest('.quote-option');
     render();
     if (input.checked) {
-      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       trackEvent('quote_widget_select', { service_name: row.dataset.name, price: row.dataset.price });
     }
   });
