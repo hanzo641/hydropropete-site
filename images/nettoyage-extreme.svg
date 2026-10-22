@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Nettoyage extrême et désencombrement discret par HydroPropreté à Pau">
+  <defs>
+    <linearGradient id="bgX" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E3A5F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bgX)"/>
+
+  <circle cx="1300" cy="220" r="260" fill="#5A8FD8" opacity="0.14"/>
+  <circle cx="220" cy="800" r="220" fill="#5A8FD8" opacity="0.1"/>
+
+  <!-- Dense, uneven stack of boxes: conveys overwhelming accumulation -->
+  <g>
+    <rect x="360" y="620" width="220" height="190" rx="8" fill="#F8FAFC" opacity="0.85" transform="rotate(-4 470 715)"/>
+    <rect x="560" y="560" width="240" height="250" rx="8" fill="#F8FAFC" opacity="0.92"/>
+    <rect x="770" y="620" width="200" height="190" rx="8" fill="#5A8FD8" opacity="0.8" transform="rotate(3 870 715)"/>
+    <rect x="600" y="400" width="200" height="180" rx="8" fill="#F8FAFC" opacity="0.8" transform="rotate(-2 700 490)"/>
+    <rect x="430" y="440" width="150" height="160" rx="8" fill="#5A8FD8" opacity="0.7" transform="rotate(5 505 520)"/>
+    <line x1="560" y1="685" x2="800" y2="685" stroke="#2B4D7F" stroke-width="7" opacity="0.4"/>
+    <line x1="680" y1="560" x2="680" y2="685" stroke="#2B4D7F" stroke-width="7" opacity="0.4"/>
+  </g>
+
+  <!-- Protective equipment badge: gloves + mask, signalling safe, professional handling -->
+  <g transform="translate(1180,560)">
+    <circle r="110" fill="#0F172A" opacity="0.35" stroke="#5A8FD8" stroke-width="4"/>
+    <path d="M-45 10c0-30 20-50 45-50s45 20 45 50v15a10 10 0 0 1-10 10h-70a10 10 0 0 1-10-10z" fill="#F8FAFC"/>
+    <path d="M-20 -25 q20-18 40 0" stroke="#1E3A5F" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="-14" cy="-6" r="5" fill="#5A8FD8"/>
+    <circle cx="14" cy="-6" r="5" fill="#5A8FD8"/>
+  </g>
+
+  <!-- Outward arrow: clearing and restoring the space -->
+  <g fill="#F8FAFC" opacity="0.75">
+    <path d="M1020 820 h160 v-36 l110 72 -110 72 v-36 h-160 z"/>
+  </g>
+
+  <!-- Sparkle accents suggesting the space restored after intervention -->
+  <g fill="#FFFFFF" opacity="0.8">
+    <path d="M1300 760c0 10-9 18-18 18s-18-8-18-18c0-10 18-34 18-34s18 24 18 34z"/>
+    <path d="M300 300c0 8-7 15-15 15s-15-7-15-15c0-8 15-27 15-27s15 19 15 27z"/>
+  </g>
+  <g fill="#FFFFFF" opacity="0.55">
+    <circle cx="380" cy="210" r="7"/>
+    <circle cx="1120" cy="300" r="6"/>
+    <circle cx="260" cy="620" r="6"/>
+  </g>
+</svg>
