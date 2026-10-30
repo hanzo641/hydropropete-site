@@ -338,6 +338,12 @@ function initQuoteWidget() {
       row.classList.toggle('is-selected', on);
       const qty = row.querySelector('.quote-qty');
       if (qty) qty.hidden = !on;
+      const detail = row.querySelector('.quote-detail');
+      if (detail) detail.hidden = !on;
+      const amountEl = row.querySelector('.quote-option-price-amount');
+      if (amountEl && row.dataset.price !== 'devis') {
+        amountEl.textContent = euros(Number(row.dataset.price) * qtyOf(row));
+      }
     });
 
     if (!chosen.length) {
@@ -347,7 +353,18 @@ function initQuoteWidget() {
 
     const fixed = chosen.filter((row) => row.dataset.price !== 'devis');
     const onQuote = chosen.filter((row) => row.dataset.price === 'devis');
-    const total = fixed.reduce((sum, row) => sum + Number(row.dataset.price) * qtyOf(row), 0);
+    const fullTotal = fixed.reduce((sum, row) => sum + Number(row.dataset.price) * qtyOf(row), 0);
+
+    const units = [];
+    fixed.forEach((row) => {
+      const price = Number(row.dataset.price);
+      for (let i = 0; i < qtyOf(row); i += 1) units.push({ row, price });
+    });
+    const cheapestUnit = units.length >= 2
+      ? units.reduce((min, u) => (u.price < min.price ? u : min), units[0])
+      : null;
+    const promoSavings = cheapestUnit ? cheapestUnit.price / 2 : 0;
+    const total = fullTotal - promoSavings;
 
     linesEl.replaceChildren(
       ...chosen.map((row) => {
@@ -356,12 +373,25 @@ function initQuoteWidget() {
         const price = document.createElement('span');
         const isQuote = row.dataset.price === 'devis';
         const qty = isQuote ? 1 : qtyOf(row);
-        name.textContent = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+        let label = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+        const detailSelect = row.querySelector('[data-detail]');
+        if (detailSelect && detailSelect.value) label += ` (${detailSelect.value})`;
+        name.textContent = label;
         price.textContent = isQuote ? 'sur devis' : euros(Number(row.dataset.price) * qty);
         if (isQuote) price.className = 'is-devis';
         li.append(name, price);
         return li;
       }),
+      ...(promoSavings > 0 ? [(() => {
+        const li = document.createElement('li');
+        li.className = 'quote-line-promo';
+        const name = document.createElement('span');
+        const price = document.createElement('span');
+        name.textContent = `Offre 2e article : -50% sur ${cheapestUnit.row.dataset.name}`;
+        price.textContent = `-${euros(promoSavings)}`;
+        li.append(name, price);
+        return li;
+      })()] : []),
     );
 
     if (fixed.length) {
@@ -390,7 +420,10 @@ function initQuoteWidget() {
       // au moins une prestation sur devis : demande de devis groupée (formulaire pré-rempli)
       const names = chosen.map((row) => {
         const qty = row.dataset.price === 'devis' ? 1 : qtyOf(row);
-        return qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+        let label = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
+        const detailSelect = row.querySelector('[data-detail]');
+        if (detailSelect && detailSelect.value) label += ` (${detailSelect.value})`;
+        return label;
       });
       noteEl.textContent = fixed.length
         ? 'Le total comprend les prestations à prix fixe ; nous chiffrons le reste rapidement.'
@@ -403,7 +436,15 @@ function initQuoteWidget() {
       alt.hidden = !fixed.length;
     } else {
       noteEl.hidden = true;
-      cta.href = CALENDLY_URL;
+      const summary = fixed.map((row) => {
+        const qty = qtyOf(row);
+        const base = qty > 1 ? `${row.dataset.name} x${qty}` : row.dataset.name;
+        return `${base} (${euros(Number(row.dataset.price) * qty)})`;
+      }).join(', ');
+      const summaryText = promoSavings > 0
+        ? `${summary} — remise 2e article -${euros(promoSavings)} — Total à payer : ${euros(total)}`
+        : `${summary} — Total à payer : ${euros(total)}`;
+      cta.href = `${CALENDLY_URL}?a1=${encodeURIComponent(summaryText)}`;
       cta.target = '_blank';
       cta.setAttribute('rel', 'noopener');
       cta.innerHTML = `${CALENDAR_ICON}Réserver mon créneau`;
@@ -419,6 +460,11 @@ function initQuoteWidget() {
   };
 
   options.addEventListener('change', (e) => {
+    const detailSelect = e.target.closest('[data-detail]');
+    if (detailSelect) {
+      render();
+      return;
+    }
     const input = e.target.closest('input[type="checkbox"]');
     if (!input) return;
     const row = input.closest('.quote-option');

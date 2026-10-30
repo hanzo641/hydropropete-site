@@ -963,6 +963,7 @@ html.js .reveal.is-visible {
 .quote-option {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   background: var(--color-light);
   border: 1px solid var(--color-border);
@@ -1062,6 +1063,26 @@ html.js .reveal.is-visible {
   color: var(--color-dark);
 }
 
+.quote-detail {
+  flex-basis: 100%;
+  padding: 0 0 8px 10px;
+}
+
+.quote-detail[hidden] { display: none; }
+
+.quote-detail-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.quote-detail .quote-select {
+  padding: 10px 40px 10px 12px;
+  font-size: 0.92rem;
+}
+
 .quote-lines {
   list-style: none;
   display: flex;
@@ -1078,6 +1099,9 @@ html.js .reveal.is-visible {
 
 .quote-lines li span:last-child { font-weight: 600; white-space: nowrap; }
 .quote-lines li .is-devis { font-weight: 500; color: var(--color-text-muted); }
+
+.quote-lines li.quote-line-promo { color: var(--color-primary); }
+.quote-lines li.quote-line-promo span:last-child { color: var(--color-primary); }
 
 .quote-result-inner { padding-top: 14px; border-top: 1px dashed var(--color-border); }
 
@@ -1234,6 +1258,13 @@ html.js .reveal.is-visible {
   margin-bottom: 10px;
 }
 
+.quote-promo-hint {
+  margin: -4px 0 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
 #quote-to-step2, #quote-to-step3 { margin-top: 24px; }
 #quote-to-step2[disabled], #quote-to-step3[disabled] { opacity: 0.45; cursor: not-allowed; }
 
@@ -1301,6 +1332,7 @@ html.js .reveal.is-visible {
   .quote-hint { font-size: 0.78rem; }
   .quote-options { gap: 6px; }
   .quote-category-group-title { margin-bottom: 6px; }
+  .quote-promo-hint { font-size: 0.76rem; margin: -2px 0 8px; }
   .quote-category-group + .quote-category-group { margin-top: 10px; }
   .quote-check { min-height: 38px; padding: 2px 0 2px 8px; gap: 10px; }
   .quote-option-name { font-size: 0.92rem; }
