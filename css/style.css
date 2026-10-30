@@ -864,7 +864,7 @@ html.js .reveal.is-visible {
 
 /* ---------- 10c. Devis instantané (widget interactif) ---------- */
 .quote-widget {
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto;
   background: var(--color-white);
   border: 1px solid var(--color-border);
@@ -1075,11 +1075,159 @@ html.js .reveal.is-visible {
 
 .quote-alt-link[hidden] { display: none; }
 
+/* ---------- Devis instantané : assistant en 3 étapes ---------- */
+.quote-steps {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.quote-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.quote-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-light);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+}
+
+.quote-step.is-active { color: var(--color-primary); }
+.quote-step.is-active .quote-step-num { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-white); }
+
+.quote-step-panel[hidden] { display: none; }
+
+.quote-step-intro { font-weight: 600; color: var(--color-dark); margin-bottom: 20px; }
+
+.quote-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.quote-category-tile {
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: var(--color-light);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.quote-category-tile:hover { border-color: var(--color-primary-light); }
+
+.quote-category-tile.is-selected {
+  background: rgba(43, 77, 127, 0.06);
+  border-color: var(--color-primary);
+}
+
+.quote-category-check {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  background: var(--color-white);
+}
+
+.quote-category-tile.is-selected .quote-category-check {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.quote-category-tile.is-selected .quote-category-check::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid var(--color-white);
+  border-bottom: 2px solid var(--color-white);
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+.quote-category-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+.quote-category-icon svg { width: 22px; height: 22px; }
+
+.quote-category-name { font-weight: 600; color: var(--color-dark); }
+.quote-category-desc { font-size: 0.82rem; color: var(--color-text-muted); }
+
+.quote-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-bottom: 20px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.quote-back svg { width: 16px; height: 16px; }
+.quote-back:hover { text-decoration: underline; }
+
+.quote-category-group + .quote-category-group { margin-top: 20px; }
+.quote-category-group[hidden] { display: none; }
+
+.quote-category-group-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+#quote-to-step2, #quote-to-step3 { margin-top: 24px; }
+#quote-to-step2[disabled], #quote-to-step3[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+#quote-panel-3 .quote-result { margin-top: 0; padding-top: 0; border-top: 0; }
+
 @media (max-width: 560px) {
   .quote-widget { padding: 24px 16px; }
   .quote-option { flex-wrap: wrap; padding-right: 10px; }
   .quote-qty { flex-basis: 100%; justify-content: flex-end; padding: 0 0 8px; }
   .quote-result-price { font-size: 1.7rem; }
+  .quote-categories { grid-template-columns: 1fr; }
+  .quote-steps { gap: 14px; }
+  .quote-step-label { display: none; }
 }
 
 /* ---------- 11. Before / After slider ---------- */

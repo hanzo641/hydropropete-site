@@ -315,8 +315,9 @@ const CALENDAR_ICON = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" str
 const QTY_MAX = 9;
 
 function initQuoteWidget() {
+  const widget = document.querySelector('#quote-widget');
   const options = document.querySelector('#quote-options');
-  if (!options) return;
+  if (!options || !widget) return;
 
   const result = document.querySelector('#quote-result');
   const linesEl = document.querySelector('#quote-lines');
@@ -397,11 +398,17 @@ function initQuoteWidget() {
     result.hidden = false;
   }
 
+  const toStep3Btn = document.querySelector('#quote-to-step3');
+  const syncStep3Button = () => {
+    if (toStep3Btn) toStep3Btn.disabled = !rows.some((row) => row.querySelector('input').checked);
+  };
+
   options.addEventListener('change', (e) => {
     const input = e.target.closest('input[type="checkbox"]');
     if (!input) return;
     const row = input.closest('.quote-option');
     render();
+    syncStep3Button();
     if (input.checked) {
       trackEvent('quote_widget_select', { service_name: row.dataset.name, price: row.dataset.price });
     }
@@ -414,6 +421,63 @@ function initQuoteWidget() {
     const next = Math.min(QTY_MAX, Math.max(1, Number(out.textContent) + Number(btn.dataset.step)));
     out.textContent = String(next);
     render();
+  });
+
+  /* ---------- Navigation en 3 étapes : catégorie -> prestations -> résultat ---------- */
+  const panels = [...widget.querySelectorAll('.quote-step-panel')];
+  const stepIndicators = [...widget.querySelectorAll('.quote-step')];
+  const tiles = [...widget.querySelectorAll('.quote-category-tile')];
+  const groups = [...widget.querySelectorAll('.quote-category-group')];
+  const toStep2Btn = document.querySelector('#quote-to-step2');
+  const selectedCategories = new Set();
+
+  const goToStep = (n) => {
+    panels.forEach((panel) => { panel.hidden = Number(panel.dataset.stepPanel) !== n; });
+    stepIndicators.forEach((ind) => ind.classList.toggle('is-active', Number(ind.dataset.stepIndicator) === n));
+  };
+
+  tiles.forEach((tile) => {
+    tile.addEventListener('click', () => {
+      const cat = tile.dataset.category;
+      const nowOn = !tile.classList.contains('is-selected');
+      tile.classList.toggle('is-selected', nowOn);
+      tile.setAttribute('aria-pressed', String(nowOn));
+
+      if (nowOn) {
+        selectedCategories.add(cat);
+      } else {
+        selectedCategories.delete(cat);
+        const group = groups.find((g) => g.dataset.categoryGroup === cat);
+        if (group) {
+          const hadChecked = group.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+          group.querySelectorAll('input[type="checkbox"]:checked').forEach((input) => { input.checked = false; });
+          if (hadChecked) {
+            render();
+            syncStep3Button();
+          }
+        }
+      }
+
+      if (toStep2Btn) toStep2Btn.disabled = selectedCategories.size === 0;
+    });
+  });
+
+  if (toStep2Btn) {
+    toStep2Btn.addEventListener('click', () => {
+      groups.forEach((g) => { g.hidden = !selectedCategories.has(g.dataset.categoryGroup); });
+      goToStep(2);
+    });
+  }
+
+  if (toStep3Btn) {
+    toStep3Btn.addEventListener('click', () => goToStep(3));
+  }
+
+  widget.querySelectorAll('[data-action="to-step-1"]').forEach((btn) => {
+    btn.addEventListener('click', () => goToStep(1));
+  });
+  widget.querySelectorAll('[data-action="to-step-2"]').forEach((btn) => {
+    btn.addEventListener('click', () => goToStep(2));
   });
 }
 
