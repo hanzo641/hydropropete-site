@@ -444,7 +444,7 @@ function initQuoteWidget() {
       const summaryText = promoSavings > 0
         ? `${summary} — remise 2e article -${euros(promoSavings)} — Total à payer : ${euros(total)}`
         : `${summary} — Total à payer : ${euros(total)}`;
-      cta.href = `${CALENDLY_URL}?a3=${encodeURIComponent(summaryText)}`;
+      cta.href = `${CALENDLY_URL}?a5=${encodeURIComponent(summaryText)}`;
       cta.target = '_blank';
       cta.setAttribute('rel', 'noopener');
       cta.innerHTML = `${CALENDAR_ICON}Réserver mon créneau`;
