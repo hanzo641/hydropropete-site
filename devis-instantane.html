@@ -227,14 +227,33 @@
                     <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
                   </label>
                   <div class="quote-detail" hidden>
-                    <label class="quote-detail-label" for="vitres-count">Nombre de vitres à nettoyer</label>
-                    <select class="quote-select" id="vitres-count" data-detail="vitres-count">
-                      <option value="">Sélectionnez...</option>
-                      <option value="1 à 5 vitres">1 à 5 vitres</option>
-                      <option value="6 à 10 vitres">6 à 10 vitres</option>
-                      <option value="11 à 20 vitres">11 à 20 vitres</option>
-                      <option value="Plus de 20 vitres">Plus de 20 vitres</option>
-                    </select>
+                    <span class="quote-detail-label">Précisez le nombre de chaque type de vitrage</span>
+                    <div class="quote-type-list" data-detail-group="vitres">
+                      <div class="quote-type-row" data-type-name="Velux">
+                        <span class="quote-type-name">Velux</span>
+                        <div class="quote-type-qty">
+                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer un velux">−</button>
+                          <output class="quote-type-qty-value" aria-live="polite">0</output>
+                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter un velux">+</button>
+                        </div>
+                      </div>
+                      <div class="quote-type-row" data-type-name="Baie vitrée">
+                        <span class="quote-type-name">Baie vitrée</span>
+                        <div class="quote-type-qty">
+                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer une baie vitrée">−</button>
+                          <output class="quote-type-qty-value" aria-live="polite">0</output>
+                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter une baie vitrée">+</button>
+                        </div>
+                      </div>
+                      <div class="quote-type-row" data-type-name="Fenêtre">
+                        <span class="quote-type-name">Fenêtre</span>
+                        <div class="quote-type-qty">
+                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer une fenêtre">−</button>
+                          <output class="quote-type-qty-value" aria-live="polite">0</output>
+                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter une fenêtre">+</button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="quote-option" data-price="devis" data-name="Nettoyage de terrasse" data-credit="1">

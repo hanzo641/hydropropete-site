@@ -313,6 +313,7 @@ function initContactForm() {
 const CALENDLY_URL = 'https://calendly.com/hydroproprete';
 const CALENDAR_ICON = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 const QTY_MAX = 9;
+const TYPE_QTY_MAX = 30;
 
 function initQuoteWidget() {
   const widget = document.querySelector('#quote-widget');
@@ -330,6 +331,22 @@ function initQuoteWidget() {
 
   const qtyOf = (row) => Number(row.querySelector('.quote-qty-value')?.textContent || 1);
   const euros = (n) => `${n.toLocaleString('fr-FR')} €`;
+
+  const detailTextOf = (row) => {
+    const typeList = row.querySelector('.quote-type-list');
+    if (typeList) {
+      return [...typeList.querySelectorAll('.quote-type-row')]
+        .map((typeRow) => ({
+          name: typeRow.dataset.typeName,
+          count: Number(typeRow.querySelector('.quote-type-qty-value')?.textContent || 0),
+        }))
+        .filter((t) => t.count > 0)
+        .map((t) => `${t.count} ${t.name}`)
+        .join(', ');
+    }
+    const detailSelect = row.querySelector('[data-detail]');
+    return detailSelect ? detailSelect.value : '';
+  };
 
   function render() {
     const chosen = rows.filter((row) => row.querySelector('input').checked);
@@ -374,8 +391,8 @@ function initQuoteWidget() {
         const isQuote = row.dataset.price === 'devis';
         const qty = isQuote ? 1 : qtyOf(row);
         let label = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
-        const detailSelect = row.querySelector('[data-detail]');
-        if (detailSelect && detailSelect.value) label += ` (${detailSelect.value})`;
+        const detailText = detailTextOf(row);
+        if (detailText) label += ` (${detailText})`;
         name.textContent = label;
         price.textContent = isQuote ? 'sur devis' : euros(Number(row.dataset.price) * qty);
         if (isQuote) price.className = 'is-devis';
@@ -421,8 +438,8 @@ function initQuoteWidget() {
       const names = chosen.map((row) => {
         const qty = row.dataset.price === 'devis' ? 1 : qtyOf(row);
         let label = qty > 1 ? `${row.dataset.name} × ${qty}` : row.dataset.name;
-        const detailSelect = row.querySelector('[data-detail]');
-        if (detailSelect && detailSelect.value) label += ` (${detailSelect.value})`;
+        const detailText = detailTextOf(row);
+        if (detailText) label += ` (${detailText})`;
         return label;
       });
       noteEl.textContent = fixed.length
@@ -476,6 +493,14 @@ function initQuoteWidget() {
   });
 
   options.addEventListener('click', (e) => {
+    const typeBtn = e.target.closest('.quote-type-qty-btn');
+    if (typeBtn) {
+      const out = typeBtn.parentElement.querySelector('.quote-type-qty-value');
+      const next = Math.min(TYPE_QTY_MAX, Math.max(0, Number(out.textContent) + Number(typeBtn.dataset.step)));
+      out.textContent = String(next);
+      render();
+      return;
+    }
     const btn = e.target.closest('.quote-qty-btn');
     if (!btn) return;
     const out = btn.parentElement.querySelector('.quote-qty-value');

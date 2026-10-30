@@ -1083,6 +1083,56 @@ html.js .reveal.is-visible {
   font-size: 0.92rem;
 }
 
+.quote-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quote-type-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.quote-type-name {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-dark);
+}
+
+.quote-type-qty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quote-type-qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-light);
+  color: var(--color-primary);
+  font: 600 1.1rem/1 var(--font-main);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+}
+
+.quote-type-qty-btn:hover { background: var(--color-white); }
+
+.quote-type-qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
 .quote-lines {
   list-style: none;
   display: flex;
