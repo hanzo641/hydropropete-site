@@ -140,7 +140,7 @@
               <a href="pages/nettoyage-extreme-pau.html"><span class="dot"></span>Nettoyage extrême</a>
             </div>
           </li>
-          <li><a href="#devis-instantane" class="nav-link">Devis instantané</a></li>
+          <li><a href="devis-instantane.html" class="nav-link">Devis instantané</a></li>
           <li><a href="#avant-apres" class="nav-link">Résultats</a></li>
           <li><a href="#avis" class="nav-link">Avis</a></li>
           <li><a href="contact.html" class="nav-link">Contact</a></li>
@@ -457,227 +457,12 @@
     <!-- ============ DEVIS INSTANTANÉ ============ -->
     <section class="section section-light" id="devis-instantane">
       <div class="container">
-        <div class="section-head reveal">
-          <span class="eyebrow">Devis instantané</span>
-          <h2>Votre tarif en 10 secondes</h2>
-          <p>Choisissez une catégorie, sélectionnez vos prestations et obtenez votre tarif.</p>
-        </div>
-
-        <div class="quote-widget reveal" id="quote-widget">
-          <div class="quote-steps" aria-hidden="true">
-            <span class="quote-step is-active" data-step-indicator="1"><span class="quote-step-num">1</span><span class="quote-step-label">Catégorie</span></span>
-            <span class="quote-step" data-step-indicator="2"><span class="quote-step-num">2</span><span class="quote-step-label">Prestations</span></span>
-            <span class="quote-step" data-step-indicator="3"><span class="quote-step-num">3</span><span class="quote-step-label">Résultat</span></span>
-          </div>
-
-          <!-- ÉTAPE 1 : catégorie -->
-          <div class="quote-step-panel" id="quote-panel-1" data-step-panel="1">
-            <p class="quote-step-intro">Quel type de prestation recherchez-vous ? <span class="quote-hint">Plusieurs choix possibles</span></p>
-            <div class="quote-categories">
-              <button type="button" class="quote-category-tile" data-category="textile" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M4 10V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M2 12v5a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h14v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg></span>
-                <span class="quote-category-name">Textile &amp; intérieur</span>
-                <span class="quote-category-desc">Canapé, fauteuil, matelas, tapis</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="exterieur" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>
-                <span class="quote-category-name">Extérieur &amp; vitres</span>
-                <span class="quote-category-desc">Vitres, terrasse</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="pro" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1M10 21v-4h4v4"/></svg></span>
-                <span class="quote-category-name">Professionnels</span>
-                <span class="quote-category-desc">Copropriété, bureaux</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="special" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>
-                <span class="quote-category-name">Services spécifiques</span>
-                <span class="quote-category-desc">Chantier, remise en état, débarras, extrême</span>
-              </button>
-            </div>
-            <button type="button" class="btn btn-primary btn-block" id="quote-to-step2" disabled>Continuer</button>
-          </div>
-
-          <!-- ÉTAPE 2 : prestations -->
-          <div class="quote-step-panel" id="quote-panel-2" data-step-panel="2" hidden>
-            <button type="button" class="quote-back" data-action="to-step-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Changer de catégorie</button>
-
-            <fieldset class="quote-options" id="quote-options">
-              <legend class="quote-label">Sélectionnez vos prestations <span class="quote-hint">Plusieurs choix possibles</span></legend>
-
-              <div class="quote-category-group" data-category-group="textile" hidden>
-                <h3 class="quote-category-group-title">Textile &amp; intérieur</h3>
-                <div class="quote-option" data-price="80" data-name="Canapé 2/3 places">
-                  <label class="quote-check">
-                    <input type="checkbox" value="canape-23">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Canapé 2/3 places</span>
-                    <span class="quote-option-price">80 €</span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 2/3 places">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 2/3 places">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="110" data-name="Canapé 4/5 places ou d'angle">
-                  <label class="quote-check">
-                    <input type="checkbox" value="canape-45angle">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Canapé 4/5 places ou d'angle</span>
-                    <span class="quote-option-price">110 €</span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 4/5 places ou d'angle">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 4/5 places ou d'angle">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="50" data-name="Fauteuil">
-                  <label class="quote-check">
-                    <input type="checkbox" value="fauteuil">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Fauteuil</span>
-                    <span class="quote-option-price">50 €</span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un fauteuil">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un fauteuil">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="60" data-name="Matelas 1 place">
-                  <label class="quote-check">
-                    <input type="checkbox" value="matelas-1p">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Matelas 1 place</span>
-                    <span class="quote-option-price">60 €</span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 1 place">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 1 place">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="90" data-name="Matelas 2 places">
-                  <label class="quote-check">
-                    <input type="checkbox" value="matelas-2p">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Matelas 2 places</span>
-                    <span class="quote-option-price">90 €</span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 2 places">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 2 places">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de tapis">
-                  <label class="quote-check">
-                    <input type="checkbox" value="tapis">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de tapis</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="exterieur" hidden>
-                <h3 class="quote-category-group-title">Extérieur &amp; vitres</h3>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de vitres">
-                  <label class="quote-check">
-                    <input type="checkbox" value="vitres">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de vitres</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de terrasse">
-                  <label class="quote-check">
-                    <input type="checkbox" value="terrasse">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de terrasse</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="pro" hidden>
-                <h3 class="quote-category-group-title">Professionnels</h3>
-                <div class="quote-option" data-price="devis" data-name="Entretien de copropriété">
-                  <label class="quote-check">
-                    <input type="checkbox" value="copro">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Entretien de copropriété</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de bureaux">
-                  <label class="quote-check">
-                    <input type="checkbox" value="bureaux">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de bureaux</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="special" hidden>
-                <h3 class="quote-category-group-title">Services spécifiques</h3>
-                <div class="quote-option" data-price="devis" data-name="Fin de chantier">
-                  <label class="quote-check">
-                    <input type="checkbox" value="chantier">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Fin de chantier</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Remise en état">
-                  <label class="quote-check">
-                    <input type="checkbox" value="remise-etat">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Remise en état</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Débarras">
-                  <label class="quote-check">
-                    <input type="checkbox" value="debarras">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Débarras</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage extrême">
-                  <label class="quote-check">
-                    <input type="checkbox" value="extreme">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage extrême</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-            </fieldset>
-            <button type="button" class="btn btn-primary btn-block" id="quote-to-step3" disabled>Voir mon résultat</button>
-          </div>
-
-          <!-- ÉTAPE 3 : résultat -->
-          <div class="quote-step-panel" id="quote-panel-3" data-step-panel="3" hidden>
-            <button type="button" class="quote-back" data-action="to-step-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Modifier ma sélection</button>
-
-            <div class="quote-result" id="quote-result">
-              <ul class="quote-lines" id="quote-lines"></ul>
-              <div class="quote-result-inner">
-                <span class="quote-result-label" id="quote-result-name">Total</span>
-                <span class="quote-result-price" id="quote-result-price"></span>
-              </div>
-              <p class="quote-result-note" id="quote-result-note" hidden></p>
-              <a href="https://calendly.com/hydroproprete" id="quote-result-cta" class="btn btn-primary btn-block" target="_blank" rel="noopener"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Réserver mon créneau</a>
-              <a href="https://calendly.com/hydroproprete" id="quote-result-alt" class="quote-alt-link" target="_blank" rel="noopener" hidden>Ou réserver directement les prestations à prix fixe</a>
+        <div class="cta-banner reveal">
+          <div class="cta-banner-content">
+            <h2>Votre tarif en 10 secondes</h2>
+            <p>Sélectionnez vos prestations et découvrez votre prix instantanément, crédit d'impôt de 50% déduit pour les prestations éligibles.</p>
+            <div class="btn-actions">
+              <a href="devis-instantane.html" class="btn btn-glass">Faire mon devis instantané</a>
             </div>
           </div>
         </div>
@@ -976,7 +761,7 @@
           <h3>Entreprise</h3>
           <ul>
             <li><a href="index.html">Accueil</a></li>
-            <li><a href="index.html#devis-instantane">Devis instantané</a></li>
+            <li><a href="devis-instantane.html">Devis instantané</a></li>
             <li><a href="index.html#avant-apres">Nos résultats</a></li>
             <li><a href="index.html#avis">Avis clients</a></li>
             <li><a href="contact.html">Contact</a></li>
@@ -1006,7 +791,7 @@
   </footer>
 
   <!-- ============ CTA MOBILE + DEVIS FLOTTANT ============ -->
-<a href="#devis-instantane" class="quote-float" aria-label="Obtenir un devis instantané">
+<a href="devis-instantane.html" class="quote-float" aria-label="Obtenir un devis instantané">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/></svg>
     <span class="quote-float-text">Devis instantané</span>
   </a>

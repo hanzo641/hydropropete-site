@@ -323,6 +323,7 @@ function initQuoteWidget() {
   const linesEl = document.querySelector('#quote-lines');
   const priceEl = document.querySelector('#quote-result-price');
   const noteEl = document.querySelector('#quote-result-note');
+  const creditNoteEl = document.querySelector('#quote-credit-note');
   const cta = document.querySelector('#quote-result-cta');
   const alt = document.querySelector('#quote-result-alt');
   const rows = [...options.querySelectorAll('.quote-option')];
@@ -369,6 +370,20 @@ function initQuoteWidget() {
     } else {
       priceEl.textContent = 'Sur devis';
       priceEl.classList.add('is-devis');
+    }
+
+    if (creditNoteEl) {
+      const creditEligible = chosen.filter((row) => row.dataset.credit === '1');
+      let creditText = '';
+      if (total > 0) {
+        creditText = `Soit ${euros(total / 2)} après crédit d'impôt de 50%*`;
+      } else if (creditEligible.length) {
+        creditText = creditEligible.length > 1
+          ? "Ces prestations sont éligibles au crédit d'impôt de 50%*"
+          : "Cette prestation est éligible au crédit d'impôt de 50%*";
+      }
+      creditNoteEl.textContent = creditText;
+      creditNoteEl.hidden = !creditText;
     }
 
     if (onQuote.length) {
