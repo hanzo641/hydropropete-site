@@ -1285,7 +1285,7 @@ html.js .reveal.is-visible {
 }
 
 @media (max-width: 560px) {
-  .quote-widget { padding: 24px 16px; }
+  .quote-widget { padding: 16px; }
   .quote-option { flex-wrap: wrap; padding-right: 10px; }
   .quote-qty { flex-basis: 100%; justify-content: flex-end; padding: 0 0 8px; }
   .quote-result-price { font-size: 1.7rem; }
@@ -1294,8 +1294,17 @@ html.js .reveal.is-visible {
   .quote-category-icon { width: 32px; height: 32px; }
   .quote-category-icon svg { width: 18px; height: 18px; }
   .quote-category-desc { font-size: 0.74rem; }
-  .quote-steps { gap: 14px; }
+  .quote-steps { gap: 10px; margin-bottom: 16px; }
   .quote-step-label { display: none; }
+  .quote-back { margin-bottom: 10px; }
+  .quote-label { margin-bottom: 6px; }
+  .quote-hint { font-size: 0.78rem; }
+  .quote-options { gap: 6px; }
+  .quote-category-group-title { margin-bottom: 6px; }
+  .quote-category-group + .quote-category-group { margin-top: 10px; }
+  .quote-check { min-height: 38px; padding: 2px 0 2px 8px; gap: 10px; }
+  .quote-option-name { font-size: 0.92rem; }
+  #quote-to-step2, #quote-to-step3 { margin-top: 14px; }
 }
 
 /* ---------- 11. Before / After slider ---------- */
