@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Bureau professionnel nettoyé par HydroPropreté à Pau">
+  <defs>
+    <linearGradient id="wallB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="deskB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3E6BA8"/>
+      <stop offset="100%" stop-color="#1E3A5F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#wallB)"/>
+  <rect y="760" width="1600" height="240" fill="#CBD5E1"/>
+  <g stroke="#64748B" stroke-opacity="0.25" stroke-width="3">
+    <line x1="0" y1="820" x2="1600" y2="820"/>
+    <line x1="0" y1="880" x2="1600" y2="880"/>
+    <line x1="0" y1="940" x2="1600" y2="940"/>
+  </g>
+
+  <!-- Large office window -->
+  <rect x="1120" y="100" width="400" height="560" rx="8" fill="#5A8FD8" opacity="0.4"/>
+  <rect x="1120" y="100" width="400" height="560" rx="8" fill="none" stroke="#0F172A" stroke-opacity="0.15" stroke-width="9"/>
+  <line x1="1320" y1="100" x2="1320" y2="660" stroke="#0F172A" stroke-opacity="0.15" stroke-width="9"/>
+  <line x1="1120" y1="380" x2="1520" y2="380" stroke="#0F172A" stroke-opacity="0.15" stroke-width="9"/>
+
+  <!-- Desk -->
+  <rect x="260" y="620" width="620" height="28" rx="6" fill="url(#deskB)"/>
+  <rect x="300" y="648" width="24" height="150" fill="#1E3A5F" opacity="0.8"/>
+  <rect x="820" y="648" width="24" height="150" fill="#1E3A5F" opacity="0.8"/>
+
+  <!-- Monitor -->
+  <g transform="translate(470,420)">
+    <rect x="0" y="0" width="260" height="170" rx="10" fill="#0F172A"/>
+    <rect x="14" y="14" width="232" height="142" rx="4" fill="#5A8FD8" opacity="0.55"/>
+    <rect x="110" y="170" width="40" height="34" fill="#0F172A"/>
+    <rect x="70" y="202" width="120" height="14" rx="6" fill="#0F172A"/>
+  </g>
+
+  <!-- Keyboard + mouse -->
+  <rect x="440" y="600" width="200" height="22" rx="6" fill="#F8FAFC"/>
+  <circle cx="680" cy="611" r="14" fill="#F8FAFC"/>
+
+  <!-- Desk lamp -->
+  <g stroke="#1E3A5F" stroke-width="8" stroke-linecap="round" fill="none">
+    <line x1="820" y1="620" x2="820" y2="540"/>
+    <line x1="820" y1="540" x2="760" y2="500"/>
+  </g>
+  <circle cx="760" cy="500" r="16" fill="#5A8FD8"/>
+
+  <!-- Office chair -->
+  <g transform="translate(360,800)" opacity="0.92">
+    <rect x="-50" y="-150" width="100" height="120" rx="20" fill="#2B4D7F"/>
+    <rect x="-60" y="-30" width="120" height="24" rx="10" fill="#1E3A5F"/>
+    <line x1="0" y1="-6" x2="0" y2="60" stroke="#0F172A" stroke-width="10" stroke-linecap="round"/>
+    <line x1="0" y1="60" x2="-40" y2="90" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+    <line x1="0" y1="60" x2="40" y2="90" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+    <line x1="0" y1="60" x2="0" y2="96" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Small plant for warmth -->
+  <g transform="translate(1000,820)">
+    <ellipse cx="0" cy="50" rx="46" ry="13" fill="#0F172A" opacity="0.12"/>
+    <path d="M-26 50 l8-70 h36 l8 70 z" fill="#1E3A5F"/>
+    <path d="M0 -20 C-20 -54 -28 -80 -34 -106 M0 -20 C8 -58 26 -84 44 -106 M0 -20 C0 -62 0 -88 0 -116" stroke="#2B4D7F" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sparkle accents suggesting a freshly cleaned workspace -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <path d="M1260 740c0 11-9 20-20 20s-20-9-20-20c0-11 20-36 20-36s20 25 20 36z"/>
+    <path d="M220 420c0 9-7 16-16 16s-16-7-16-16c0-9 16-29 16-29s16 20 16 29z"/>
+  </g>
+</svg>
