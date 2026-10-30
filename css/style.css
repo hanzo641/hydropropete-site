@@ -173,6 +173,12 @@ h1, h2, h3, h4 {
   .section { padding: 72px 0; }
 }
 
+.section-compact { padding: 32px 0 80px; }
+
+@media (max-width: 768px) {
+  .section-compact { padding: 16px 0 56px; }
+}
+
 .section-light { background: var(--color-light); }
 .section-dark {
   background: var(--color-dark);
@@ -199,6 +205,19 @@ h1, h2, h3, h4 {
   max-width: 640px;
   margin: 0 auto 64px;
   text-align: center;
+}
+
+.section-head-compact {
+  margin-bottom: 24px;
+}
+
+.section-head-compact h1 {
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  margin-bottom: 8px;
+}
+
+.section-head-compact p {
+  font-size: 1rem;
 }
 
 .section-head h1,
@@ -1270,7 +1289,11 @@ html.js .reveal.is-visible {
   .quote-option { flex-wrap: wrap; padding-right: 10px; }
   .quote-qty { flex-basis: 100%; justify-content: flex-end; padding: 0 0 8px; }
   .quote-result-price { font-size: 1.7rem; }
-  .quote-categories { grid-template-columns: 1fr; }
+  .quote-categories { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .quote-category-tile { padding: 14px 12px; gap: 6px; }
+  .quote-category-icon { width: 32px; height: 32px; }
+  .quote-category-icon svg { width: 18px; height: 18px; }
+  .quote-category-desc { font-size: 0.74rem; }
   .quote-steps { gap: 14px; }
   .quote-step-label { display: none; }
 }
@@ -1660,6 +1683,16 @@ html.js .reveal.is-visible {
   padding: calc(var(--header-height) + 24px) 0 24px;
   background: var(--color-light);
   border-bottom: 1px solid var(--color-border);
+}
+
+.breadcrumb-bar-compact {
+  padding: calc(var(--header-height) + 12px) 0 12px;
+}
+
+@media (max-width: 560px) {
+  .breadcrumb-bar-compact { padding: calc(var(--header-height) + 6px) 0 6px; }
+  .section-head-compact p { display: none; }
+  .section-head-compact { margin-bottom: 16px; }
 }
 
 .breadcrumb {

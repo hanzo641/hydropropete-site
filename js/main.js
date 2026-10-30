@@ -449,6 +449,7 @@ function initQuoteWidget() {
   const goToStep = (n) => {
     panels.forEach((panel) => { panel.hidden = Number(panel.dataset.stepPanel) !== n; });
     stepIndicators.forEach((ind) => ind.classList.toggle('is-active', Number(ind.dataset.stepIndicator) === n));
+    widget.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   tiles.forEach((tile) => {
