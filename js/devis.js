@@ -219,7 +219,10 @@ function openCalendar(){
       window.Calendly.initInlineWidget({
         url: CONFIG.calendlyUrl + (CONFIG.calendlyUrl.includes("?") ? "&" : "?") + "hide_gdpr_banner=1&primary_color=" + CONFIG.color,
         parentElement: el,
-        prefill: { name: fullName(), email: $("f-email").value.trim(), customAnswers: calendlyAnswers() }
+        prefill: {
+          name: fullName(), firstName: $("f-firstname").value.trim(), lastName: $("f-lastname").value.trim(),
+          email: $("f-email").value.trim(), customAnswers: calendlyAnswers()
+        }
       });
     } catch(e){ showFallback(); }
   });
