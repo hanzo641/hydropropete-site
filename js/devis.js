@@ -175,11 +175,19 @@ function recapText(){
   const m = $("f-msg").value.trim(); if (m) L.push("Précisions : " + m);
   return L.join("\n");
 }
+/* Questions personnalisées Calendly (ordre réel du formulaire) :
+   a1 = Votre Adresse, a3 = Numéro de téléphone, a4 = Quel est le problème rencontré, a5 = Détail du devis.
+   a2 (Quel type de nettoyage, à cases à cocher) ne peut pas être pré-rempli par Calendly. */
+function calendlyAnswers(){
+  const answers = { a1: $("f-addr").value.trim(), a3: $("f-phone").value.trim(), a5: recapText() };
+  const m = $("f-msg").value.trim(); if (m) answers.a4 = m;
+  return answers;
+}
 function calendlyLink(){
   const u = new URL(CONFIG.calendlyUrl);
   u.searchParams.set("name", $("f-name").value.trim());
   u.searchParams.set("email", $("f-email").value.trim());
-  u.searchParams.set("a5", recapText());
+  Object.entries(calendlyAnswers()).forEach(([k,v]) => u.searchParams.set(k, v));
   u.searchParams.set("hide_gdpr_banner","1"); u.searchParams.set("primary_color", CONFIG.color);
   return u.toString();
 }
@@ -209,7 +217,7 @@ function openCalendar(){
       window.Calendly.initInlineWidget({
         url: CONFIG.calendlyUrl + (CONFIG.calendlyUrl.includes("?") ? "&" : "?") + "hide_gdpr_banner=1&primary_color=" + CONFIG.color,
         parentElement: el,
-        prefill: { name: $("f-name").value.trim(), email: $("f-email").value.trim(), customAnswers: { a5: recapText() } }
+        prefill: { name: $("f-name").value.trim(), email: $("f-email").value.trim(), customAnswers: calendlyAnswers() }
       });
     } catch(e){ showFallback(); }
   });
