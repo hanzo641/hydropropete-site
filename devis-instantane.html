@@ -2,17 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <script>document.documentElement.classList.add('js');</script>
   <title>Devis instantané – Nettoyage à Pau | HydroPropreté</title>
-  <meta name="description" content="Obtenez votre tarif en 10 secondes : canapé, vitres, tapis, copropriété, bureaux... Calculez votre prix et l'économie réalisée avec le crédit d'impôt de 50% pour les particuliers.">
+  <meta name="description" content="Obtenez votre tarif en 30 secondes et réservez votre créneau immédiatement : canapé, matelas, tapis, vitres au pan, et plus. Crédit d'impôt de 50% pour les particuliers, avance immédiate possible.">
   <link rel="canonical" href="https://www.hydroproprete.fr/devis-instantane.html">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="HydroPropreté">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="Devis instantané – Nettoyage à Pau | HydroPropreté">
-  <meta property="og:description" content="Sélectionnez vos prestations et découvrez votre tarif en 10 secondes, crédit d'impôt de 50% déduit pour les particuliers.">
+  <meta property="og:description" content="Sélectionnez vos prestations, découvrez votre tarif et réservez votre créneau tout de suite, crédit d'impôt de 50% déduit pour les particuliers.">
   <meta property="og:url" content="https://www.hydroproprete.fr/devis-instantane.html">
   <meta property="og:image" content="https://www.hydroproprete.fr/images/og-cover.svg">
   <meta name="twitter:card" content="summary_large_image">
@@ -32,6 +32,123 @@
     ]
   }
   </script>
+
+  <style>
+  /* ============ Devis instantané : flux dédié (scope #devis-app) ============ */
+  #devis-app {
+    --qd-bg: var(--color-light); --qd-surface: var(--color-white); --qd-ink: var(--color-dark);
+    --qd-muted: var(--color-text-muted); --qd-line: var(--color-border);
+    --qd-turq: var(--color-primary); --qd-on-turq: var(--color-white); --qd-turq-soft: #E6EDF8;
+    --qd-sun: #FBBF24; --qd-on-sun: #3A2A00;
+    --qd-bub-bg: var(--color-dark); --qd-bub-fg: #FFFFFF; --qd-brand: var(--color-dark); --qd-on-brand: #FFFFFF; --qd-lead: #CBD5E1;
+    --qd-cta-bg: var(--gradient-primary); --qd-on-cta: #FFFFFF; --qd-chip: #EEF1F5; --qd-chip-ink: var(--color-primary);
+    --qd-coral: var(--color-primary-light); --qd-danger: #B3261E;
+    --qd-blob-a: #1B3A6B; --qd-blob-b: var(--color-primary); --qd-blob-c: #3D6194;
+
+    max-width: 720px; margin: 8px auto 0; display: flex; flex-direction: column; gap: 18px;
+    padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px));
+  }
+  #devis-app *, #devis-app *::before, #devis-app *::after { box-sizing: border-box; }
+  #devis-app [hidden] { display: none !important; }
+  #devis-app h1, #devis-app h2, #devis-app h3, #devis-app p { margin: 0; }
+  #devis-app h1 { font-size: clamp(1.7rem, 6.4vw, 2.4rem); line-height: 1.15; font-weight: 700; letter-spacing: -.02em; color: var(--qd-on-brand); }
+  #devis-app h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: -.01em; color: var(--qd-ink); }
+
+  #devis-app .qd-hero { background: var(--qd-brand); color: var(--qd-on-brand); position: relative; overflow: hidden; border-radius: var(--radius-lg); padding: 28px 20px 26px; isolation: isolate; }
+  #devis-app .qd-hero-in { display: flex; flex-direction: column; gap: 12px; max-width: 540px; }
+  #devis-app .qd-blob { position: absolute; z-index: -1; }
+  #devis-app .qd-b1 { opacity: .75; width: 260px; height: 240px; right: -100px; top: -90px; background: var(--qd-blob-a); border-radius: 62% 38% 55% 45% / 48% 58% 42% 52%; }
+  #devis-app .qd-b2 { opacity: .6; width: 150px; height: 130px; right: -50px; bottom: -70px; background: var(--qd-blob-b); border-radius: 45% 55% 40% 60% / 55% 40% 60% 45%; }
+  #devis-app .qd-b3 { opacity: .55; width: 130px; height: 120px; left: -50px; bottom: -70px; background: var(--qd-blob-c); border-radius: 55% 45% 60% 40% / 40% 60% 40% 60%; }
+  #devis-app .qd-chipline { align-self: flex-start; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: var(--qd-chip); color: var(--qd-chip-ink); border-radius: var(--radius-full); padding: 7px 14px; }
+  #devis-app .qd-lead { color: var(--qd-lead); max-width: 52ch; }
+  #devis-app .qd-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  #devis-app .qd-tag { font-size: .8rem; font-weight: 600; padding: 5px 11px; border-radius: var(--radius-full); background: var(--qd-surface); color: var(--qd-ink); border: 1px solid var(--qd-line); }
+  #devis-app .qd-tag.qd-sun { background: var(--qd-sun); color: var(--qd-on-sun); border-color: transparent; }
+
+  #devis-app .qd-step { background: var(--qd-surface); border: 1px solid var(--qd-line); border-radius: var(--radius-lg); padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+  #devis-app .qd-step > header { display: flex; align-items: center; gap: 12px; }
+  #devis-app .qd-num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--qd-turq); color: var(--qd-on-turq); display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+  #devis-app .qd-hint { color: var(--qd-muted); font-size: .88rem; }
+  #devis-app .qd-svc-divider { font-size: .8rem; font-weight: 700; color: var(--qd-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; grid-column: 1 / -1; }
+  #devis-app .qd-svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  #devis-app .qd-svc { border: 1.5px solid var(--qd-line); border-radius: var(--radius-md); padding: 12px 12px 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--qd-bg); min-width: 0; transition: border-color .15s, background .15s; }
+  #devis-app .qd-svc.qd-on { border-color: var(--qd-turq); background: var(--qd-turq-soft); }
+  #devis-app .qd-svc .qd-t { min-width: 0; }
+  #devis-app .qd-svc .qd-n { font-weight: 700; font-size: .95rem; line-height: 1.25; }
+  #devis-app .qd-svc .qd-p { font-size: .82rem; color: var(--qd-muted); margin-top: 2px; }
+  #devis-app .qd-qty { display: flex; align-items: center; gap: 8px; flex: none; }
+  #devis-app .qd-qty button, #devis-app .qd-tog { font: inherit; cursor: pointer; }
+  #devis-app .qd-qty button { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--qd-turq); background: var(--qd-surface); color: var(--qd-turq); font-size: 1.15rem; font-weight: 700; line-height: 1; display: grid; place-items: center; padding: 0; }
+  #devis-app .qd-qty button:disabled { opacity: .35; cursor: default; }
+  #devis-app .qd-qty output { min-width: 1.2ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #devis-app .qd-tog { border: 1.5px solid var(--qd-turq); background: var(--qd-surface); color: var(--qd-turq); font-weight: 700; font-size: .85rem; border-radius: var(--radius-full); padding: 7px 14px; flex: none; }
+  #devis-app .qd-svc.qd-on .qd-tog { background: var(--qd-turq); color: var(--qd-on-turq); }
+  #devis-app .qd-estimate { display: flex; flex-direction: column; gap: 2px; background: var(--qd-turq-soft); border-radius: var(--radius-md); padding: 12px 14px; font-size: .92rem; }
+  #devis-app .qd-estimate b { font-variant-numeric: tabular-nums; }
+
+  #devis-app .qd-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #devis-app .qd-fld { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  #devis-app .qd-fld.qd-full { grid-column: 1 / -1; }
+  #devis-app label { font-size: .85rem; font-weight: 700; color: var(--qd-ink); }
+  #devis-app input[type=text], #devis-app input[type=tel], #devis-app input[type=email], #devis-app textarea {
+    font: inherit; color: var(--qd-ink); background: var(--qd-bg); border: 1.5px solid var(--qd-line); border-radius: var(--radius-sm); padding: 11px 12px; width: 100%; min-width: 0;
+  }
+  #devis-app textarea { min-height: 92px; resize: vertical; }
+  #devis-app input[aria-invalid="true"], #devis-app textarea[aria-invalid="true"] { border-color: var(--qd-danger); }
+  #devis-app .qd-err { color: var(--qd-danger); font-size: .82rem; min-height: 0; }
+
+  #devis-app .qd-credit { display: flex; gap: 12px; align-items: flex-start; border: 1.5px solid var(--qd-line); border-radius: var(--radius-md); padding: 14px; background: var(--qd-bg); cursor: pointer; }
+  #devis-app .qd-credit input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--qd-turq); flex: none; }
+  #devis-app .qd-credit .qd-ct { display: flex; flex-direction: column; gap: 3px; }
+  #devis-app .qd-credit .qd-ct b { font-size: .98rem; }
+  #devis-app .qd-credit .qd-ct span { font-size: .85rem; color: var(--qd-muted); }
+  #devis-app .qd-credit.qd-on { border-color: var(--qd-turq); background: var(--qd-turq-soft); }
+
+  #devis-app .qd-cta { font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; border: 0; border-radius: var(--radius-full); background: var(--qd-cta-bg); color: var(--qd-on-cta); padding: 15px 20px; width: 100%; }
+  #devis-app .qd-cta:disabled { opacity: .6; cursor: default; }
+  #devis-app .qd-btn2 { font: inherit; font-weight: 700; cursor: pointer; border: 1.5px solid var(--qd-turq); background: var(--qd-surface); color: var(--qd-turq); border-radius: var(--radius-full); padding: 12px 18px; text-decoration: none; text-align: center; display: inline-block; }
+
+  #devis-app .qd-recap { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: .92rem; background: var(--qd-bg); border: 1px solid var(--qd-line); border-radius: var(--radius-md); padding: 14px; }
+  #devis-app .qd-recap dt { color: var(--qd-muted); font-weight: 600; }
+  #devis-app .qd-recap dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  #devis-app .qd-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  #devis-app .qd-cal { min-width: 0; width: 100%; min-height: 680px; border-radius: var(--radius-md); overflow: hidden; }
+  #devis-app .qd-ok { background: var(--qd-turq-soft); border: 1.5px solid var(--qd-turq); border-radius: var(--radius-md); padding: 14px; font-weight: 700; }
+
+  #devis-app .qd-bubble {
+    position: fixed; z-index: 20; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; max-width: 696px;
+    background: var(--qd-bub-bg); color: var(--qd-bub-fg); border-radius: var(--radius-lg); padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-lg);
+  }
+  #devis-app .qd-bubble .qd-l, #devis-app .qd-bubble .qd-r { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  #devis-app .qd-bubble .qd-r { align-items: flex-end; text-align: right; }
+  #devis-app .qd-bubble small { font-size: .72rem; font-weight: 600; opacity: .8; line-height: 1.25; }
+  #devis-app .qd-bubble strong { font-size: 1.3rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  #devis-app .qd-bubble .qd-r strong { background: var(--qd-sun); color: var(--qd-on-sun); border-radius: var(--radius-full); padding: 2px 12px; }
+  body.has-bubble { padding-bottom: 104px; }
+
+  #devis-app .qd-dlg { border: 0; border-radius: var(--radius-lg); padding: 0; max-width: 440px; width: calc(100% - 24px); background: var(--qd-surface); color: var(--qd-ink); box-shadow: var(--shadow-lg); }
+  #devis-app .qd-dlg::backdrop { background: rgba(15, 23, 42, .55); }
+  #devis-app .qd-dlg .qd-dlg-in { padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+  #devis-app .qd-dlg h2 { font-size: 1.2rem; }
+  #devis-app .qd-wrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1.5px solid var(--qd-line); border-radius: var(--radius-md); padding: 12px 12px 12px 14px; background: var(--qd-bg); }
+  #devis-app .qd-wrow.qd-on { border-color: var(--qd-turq); background: var(--qd-turq-soft); }
+  #devis-app .qd-wsub { font-size: .82rem; color: var(--qd-muted); }
+  #devis-app .qd-wtot { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; border-top: 1.5px solid var(--qd-line); padding-top: 12px; }
+  #devis-app .qd-wtot b { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  #devis-app .qd-linkbtn { font: inherit; font-weight: 700; background: none; border: 0; color: var(--qd-turq); cursor: pointer; text-decoration: underline; padding: 6px; }
+
+  #devis-app .qd-creditinfo { background: var(--qd-turq-soft); border: 1.5px solid var(--qd-turq); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; }
+  #devis-app .qd-creditinfo ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  #devis-app .qd-foot { font-size: .8rem; color: var(--qd-muted); text-align: center; }
+
+  #devis-app button:focus-visible, #devis-app input:focus-visible, #devis-app textarea:focus-visible, #devis-app a:focus-visible { outline: 3px solid var(--qd-coral); outline-offset: 2px; }
+
+  @media (max-width: 520px) { #devis-app .qd-fields { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { #devis-app * { transition: none !important; } }
+  </style>
 </head>
 <body>
   <a href="#main" class="skip-link">Aller au contenu principal</a>
@@ -85,267 +202,94 @@
   </div>
 
   <main id="main">
-    <section class="section section-compact">
-      <div class="container">
-        <div class="section-head section-head-compact reveal">
-          <span class="eyebrow">Devis instantané</span>
-          <h1>Votre tarif en 10 secondes</h1>
-          <p>Choisissez une catégorie, sélectionnez vos prestations et obtenez votre tarif — crédit d'impôt de 50% déduit pour les prestations éligibles.</p>
-        </div>
-
-        <div class="quote-widget reveal" id="quote-widget">
-          <div class="quote-steps" aria-hidden="true">
-            <span class="quote-step is-active" data-step-indicator="1"><span class="quote-step-num">1</span><span class="quote-step-label">Catégorie</span></span>
-            <span class="quote-step" data-step-indicator="2"><span class="quote-step-num">2</span><span class="quote-step-label">Prestations</span></span>
-            <span class="quote-step" data-step-indicator="3"><span class="quote-step-num">3</span><span class="quote-step-label">Résultat</span></span>
-          </div>
-
-          <!-- ÉTAPE 1 : catégorie -->
-          <div class="quote-step-panel" id="quote-panel-1" data-step-panel="1">
-            <h2 class="quote-step-intro">Quel type de prestation recherchez-vous ? <span class="quote-hint">Plusieurs choix possibles</span></h2>
-            <div class="quote-categories">
-              <button type="button" class="quote-category-tile" data-category="textile" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M4 10V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M2 12v5a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h14v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg></span>
-                <span class="quote-category-name">Textile &amp; intérieur</span>
-                <span class="quote-category-desc">Canapé, fauteuil, matelas, tapis</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="exterieur" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>
-                <span class="quote-category-name">Extérieur &amp; vitres</span>
-                <span class="quote-category-desc">Vitres, terrasse</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="pro" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1M10 21v-4h4v4"/></svg></span>
-                <span class="quote-category-name">Professionnels</span>
-                <span class="quote-category-desc">Copropriété, bureaux</span>
-              </button>
-              <button type="button" class="quote-category-tile" data-category="special" aria-pressed="false">
-                <span class="quote-category-check" aria-hidden="true"></span>
-                <span class="quote-category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>
-                <span class="quote-category-name">Services spécifiques</span>
-                <span class="quote-category-desc">Chantier, remise en état, débarras, extrême</span>
-              </button>
-            </div>
-            <button type="button" class="btn btn-primary btn-block" id="quote-to-step2" disabled>Continuer</button>
-          </div>
-
-          <!-- ÉTAPE 2 : prestations -->
-          <div class="quote-step-panel" id="quote-panel-2" data-step-panel="2" hidden>
-            <button type="button" class="quote-back" data-action="to-step-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Changer de catégorie</button>
-
-            <fieldset class="quote-options" id="quote-options">
-              <legend class="quote-label">Sélectionnez vos prestations <span class="quote-hint">Plusieurs choix possibles · <span class="quote-credit-flag">-50%</span> = éligible au crédit d'impôt</span></legend>
-
-              <div class="quote-category-group" data-category-group="textile" hidden>
-                <h2 class="quote-category-group-title">Textile &amp; intérieur</h2>
-                <p class="quote-promo-hint">Dès 2 articles sélectionnés, le moins cher est à -50%.</p>
-                <div class="quote-option" data-price="80" data-name="Canapé 2/3 places" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="canape-23">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Canapé 2/3 places</span>
-                    <span class="quote-option-price"><span class="quote-option-price-amount">80 €</span><span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 2/3 places">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 2/3 places">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="110" data-name="Canapé 4/5 places ou d'angle" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="canape-45angle">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Canapé 4/5 places ou d'angle</span>
-                    <span class="quote-option-price"><span class="quote-option-price-amount">110 €</span><span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un canapé 4/5 places ou d'angle">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un canapé 4/5 places ou d'angle">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="50" data-name="Fauteuil" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="fauteuil">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Fauteuil</span>
-                    <span class="quote-option-price"><span class="quote-option-price-amount">50 €</span><span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un fauteuil">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un fauteuil">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="60" data-name="Matelas 1 place" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="matelas-1p">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Matelas 1 place</span>
-                    <span class="quote-option-price"><span class="quote-option-price-amount">60 €</span><span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 1 place">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 1 place">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="90" data-name="Matelas 2 places" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="matelas-2p">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Matelas 2 places</span>
-                    <span class="quote-option-price"><span class="quote-option-price-amount">90 €</span><span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-qty" hidden>
-                    <button type="button" class="quote-qty-btn" data-step="-1" aria-label="Retirer un matelas 2 places">−</button>
-                    <output class="quote-qty-value" aria-live="polite">1</output>
-                    <button type="button" class="quote-qty-btn" data-step="1" aria-label="Ajouter un matelas 2 places">+</button>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de tapis" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="tapis">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de tapis</span>
-                    <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="exterieur" hidden>
-                <h2 class="quote-category-group-title">Extérieur &amp; vitres</h2>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de vitres" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="vitres">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de vitres</span>
-                    <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
-                  </label>
-                  <div class="quote-detail" hidden>
-                    <span class="quote-detail-label">Précisez le nombre de chaque type de vitrage</span>
-                    <div class="quote-type-list" data-detail-group="vitres">
-                      <div class="quote-type-row" data-type-name="Velux">
-                        <span class="quote-type-name">Velux</span>
-                        <div class="quote-type-qty">
-                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer un velux">−</button>
-                          <output class="quote-type-qty-value" aria-live="polite">0</output>
-                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter un velux">+</button>
-                        </div>
-                      </div>
-                      <div class="quote-type-row" data-type-name="Baie vitrée">
-                        <span class="quote-type-name">Baie vitrée</span>
-                        <div class="quote-type-qty">
-                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer une baie vitrée">−</button>
-                          <output class="quote-type-qty-value" aria-live="polite">0</output>
-                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter une baie vitrée">+</button>
-                        </div>
-                      </div>
-                      <div class="quote-type-row" data-type-name="Fenêtre">
-                        <span class="quote-type-name">Fenêtre</span>
-                        <div class="quote-type-qty">
-                          <button type="button" class="quote-type-qty-btn" data-step="-1" aria-label="Retirer une fenêtre">−</button>
-                          <output class="quote-type-qty-value" aria-live="polite">0</output>
-                          <button type="button" class="quote-type-qty-btn" data-step="1" aria-label="Ajouter une fenêtre">+</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de terrasse" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="terrasse">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de terrasse</span>
-                    <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="pro" hidden>
-                <h2 class="quote-category-group-title">Professionnels</h2>
-                <div class="quote-option" data-price="devis" data-name="Entretien de copropriété">
-                  <label class="quote-check">
-                    <input type="checkbox" value="copro">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Entretien de copropriété</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage de bureaux">
-                  <label class="quote-check">
-                    <input type="checkbox" value="bureaux">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage de bureaux</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="quote-category-group" data-category-group="special" hidden>
-                <h2 class="quote-category-group-title">Services spécifiques</h2>
-                <div class="quote-option" data-price="devis" data-name="Fin de chantier" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="chantier">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Fin de chantier</span>
-                    <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Remise en état" data-credit="1">
-                  <label class="quote-check">
-                    <input type="checkbox" value="remise-etat">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Remise en état</span>
-                    <span class="quote-option-price is-devis">sur devis<span class="quote-option-credit">-50%</span></span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Débarras">
-                  <label class="quote-check">
-                    <input type="checkbox" value="debarras">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Débarras</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-                <div class="quote-option" data-price="devis" data-name="Nettoyage extrême">
-                  <label class="quote-check">
-                    <input type="checkbox" value="extreme">
-                    <span class="quote-check-box" aria-hidden="true"></span>
-                    <span class="quote-option-name">Nettoyage extrême</span>
-                    <span class="quote-option-price is-devis">sur devis</span>
-                  </label>
-                </div>
-              </div>
-            </fieldset>
-            <button type="button" class="btn btn-primary btn-block" id="quote-to-step3" disabled>Voir mon résultat</button>
-          </div>
-
-          <!-- ÉTAPE 3 : résultat -->
-          <div class="quote-step-panel" id="quote-panel-3" data-step-panel="3" hidden>
-            <button type="button" class="quote-back" data-action="to-step-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Modifier ma sélection</button>
-
-            <div class="quote-result" id="quote-result">
-              <ul class="quote-lines" id="quote-lines"></ul>
-              <div class="quote-result-inner">
-                <span class="quote-result-label" id="quote-result-name">Total</span>
-                <span class="quote-result-price" id="quote-result-price"></span>
-              </div>
-              <p class="quote-credit-note" id="quote-credit-note" hidden></p>
-              <p class="quote-result-note" id="quote-result-note" hidden></p>
-              <a href="https://calendly.com/hydroproprete" id="quote-result-cta" class="btn btn-primary btn-block" target="_blank" rel="noopener"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Réserver mon créneau</a>
-              <a href="https://calendly.com/hydroproprete" id="quote-result-alt" class="quote-alt-link" target="_blank" rel="noopener" hidden>Ou réserver directement les prestations à prix fixe</a>
+    <div class="container">
+      <div id="devis-app">
+        <header class="qd-hero">
+          <span class="qd-blob qd-b1"></span><span class="qd-blob qd-b2"></span><span class="qd-blob qd-b3"></span>
+          <div class="qd-hero-in">
+            <span class="qd-chipline">Entreprise de nettoyage à Pau</span>
+            <h1>Votre devis en 30 secondes, puis réservez votre créneau</h1>
+            <p class="qd-lead">Canapés, matelas, tapis, vitres, logements. Choisissez vos prestations, voyez le tarif, puis prenez rendez-vous directement dans mon agenda : la réservation est confirmée tout de suite.</p>
+            <div class="qd-tags">
+              <span class="qd-tag qd-sun">Crédit d'impôt 50 %</span>
+              <span class="qd-tag">Avance immédiate possible</span>
+              <span class="qd-tag">Pau et alentours</span>
             </div>
           </div>
-        </div>
+        </header>
 
-        <p class="quote-legal-note">* Crédit d'impôt de 50% pour les services à la personne réalisés au domicile personnel d'un particulier, sous conditions. Ne s'applique pas aux prestations professionnelles (copropriété, bureaux) ni à certaines prestations spécifiques — nous vérifions votre éligibilité exacte lors du devis.</p>
+        <form id="form" novalidate autocomplete="on">
+          <div class="qd-wrap" id="steps" style="display:flex;flex-direction:column;gap:18px">
+            <section class="qd-step" aria-labelledby="h-svc">
+              <header><span class="qd-num">1</span><h2 id="h-svc">Que faut-il nettoyer ?</h2></header>
+              <div class="qd-svc-grid" id="svcs"></div>
+              <div class="qd-estimate" id="estimate" hidden></div>
+              <p class="qd-err" id="e-svc" role="alert"></p>
+            </section>
+
+            <section class="qd-step" aria-labelledby="h-info">
+              <header><span class="qd-num">2</span><h2 id="h-info">Vos coordonnées</h2></header>
+              <div class="qd-fields">
+                <div class="qd-fld"><label for="f-name">Nom et prénom</label><input id="f-name" name="name" type="text" autocomplete="name"><span class="qd-err" id="e-name"></span></div>
+                <div class="qd-fld"><label for="f-phone">Téléphone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"><span class="qd-err" id="e-phone"></span></div>
+                <div class="qd-fld qd-full"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email"><span class="qd-err" id="e-email"></span></div>
+                <div class="qd-fld qd-full"><label for="f-addr">Adresse de l'intervention</label><input id="f-addr" name="address" type="text" autocomplete="street-address" placeholder="Rue, code postal, ville"><span class="qd-err" id="e-addr"></span></div>
+                <div class="qd-fld qd-full"><label for="f-msg">Précisions (facultatif)</label><textarea id="f-msg" name="message" placeholder="Matière du canapé, dimensions du tapis, nombre de fenêtres, taches à signaler..."></textarea><span class="qd-hint">Vous pouvez aussi m'envoyer des photos par SMS ou WhatsApp au <span id="ph-hint"></span>.</span></div>
+              </div>
+              <label class="qd-credit" id="credit-box" for="f-credit">
+                <input type="checkbox" id="f-credit" name="credit">
+                <span class="qd-ct"><b>Je souhaite l'avance immédiate de crédit d'impôt</b>
+                <span>Vous ne payez que la moitié le jour de l'intervention. Réservé aux particuliers, à leur domicile.</span></span>
+              </label>
+              <div class="qd-creditinfo" id="credit-info" hidden>
+                <b>Comment ça se passe ?</b>
+                <ol>
+                  <li>Vous réservez votre créneau sur cette page.</li>
+                  <li><b>Vous recevez un email envoyé par Abby</b>, la plateforme de facturation d'HydroPropreté, avec un formulaire sécurisé pour votre inscription : nom, prénom, date et lieu de naissance, adresse, téléphone, email et coordonnées bancaires. Pensez à vérifier vos spams.</li>
+                  <li>Vous validez la demande sur votre espace Urssaf. Après l'intervention, vous ne réglez que la moitié.</li>
+                </ol>
+                <span class="qd-wsub">Aucune donnée bancaire n'est demandée sur cette page : tout passe par le formulaire d'Abby.</span>
+              </div>
+            </section>
+
+            <section class="qd-step" aria-labelledby="h-send">
+              <header><span class="qd-num">3</span><h2 id="h-send">Votre créneau</h2></header>
+              <dl class="qd-recap" id="recap"></dl>
+              <p class="qd-hint">Un clic sur le bouton ouvre mon agenda : vous choisissez le jour et l'heure, et le rendez-vous est confirmé immédiatement, sans attendre ma réponse.</p>
+              <button class="qd-cta" id="send" type="submit">Choisir mon créneau</button>
+              <p class="qd-err" id="e-send" role="alert"></p>
+              <p class="qd-foot">Vos informations servent uniquement à répondre à votre demande.</p>
+            </section>
+          </div>
+        </form>
+
+        <section class="qd-step" id="calstep" hidden aria-labelledby="h-cal">
+          <header><span class="qd-num">3</span><h2 id="h-cal">Choisissez votre jour et votre heure</h2></header>
+          <div class="qd-ok" id="booked" hidden role="status"></div>
+          <div class="qd-creditinfo" id="credit-note" hidden><b>Avance immédiate : surveillez vos emails.</b> Vous allez recevoir un email envoyé par Abby, au nom d'HydroPropreté, pour renseigner les informations nécessaires à votre inscription (pensez aux spams).</div>
+          <dl class="qd-recap" id="recap2"></dl>
+          <div class="qd-row"><button type="button" class="qd-btn2" id="edit">Modifier ma demande</button></div>
+          <div id="cal" class="qd-cal"><p class="qd-hint">Chargement du calendrier...</p></div>
+          <p class="qd-hint" id="cal-fallback" hidden></p>
+        </section>
+
+        <dialog class="qd-dlg" id="win-dlg" aria-labelledby="win-h">
+          <div class="qd-dlg-in">
+            <h2 id="win-h">Vos vitres</h2>
+            <p class="qd-hint">Indiquez combien de vitres à nettoyer. Le tarif est au pan : une fenêtre à 2 battants compte pour 2 pans. Minimum d'intervention : 60 €.</p>
+            <div id="win-rows" style="display:flex;flex-direction:column;gap:10px"></div>
+            <div class="qd-wtot"><span>Total vitres</span><b id="win-total">0 €</b></div>
+            <p class="qd-hint" id="win-note"></p>
+            <button type="button" class="qd-cta" id="win-ok">Valider</button>
+            <div class="qd-row" style="justify-content:space-between">
+              <button type="button" class="qd-linkbtn" id="win-cancel">Annuler</button>
+              <button type="button" class="qd-linkbtn" id="win-remove">Retirer les vitres</button>
+            </div>
+          </div>
+        </dialog>
+        <div class="qd-bubble" id="bubble" role="status" aria-live="polite" hidden></div>
       </div>
-    </section>
+    </div>
   </main>
 
   <footer class="footer">
@@ -418,5 +362,6 @@
 </div>
 
 <script src="js/main.min.js?v=20261001" defer></script>
+<script src="js/devis.min.js?v=20261001" defer></script>
 </body>
 </html>
