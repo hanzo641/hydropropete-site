@@ -155,11 +155,12 @@ function changed(){ renderSvcs(); renderEstimate(); renderRecap(); renderBubble(
 
 function validate(){
   let ok = true, first = null;
-  ["f-name","f-phone","f-email","f-addr"].forEach(i => $(i).removeAttribute("aria-invalid"));
-  ["e-svc","e-name","e-phone","e-email","e-addr","e-send"].forEach(i => $(i).textContent = "");
+  ["f-firstname","f-lastname","f-phone","f-email","f-addr"].forEach(i => $(i).removeAttribute("aria-invalid"));
+  ["e-svc","e-firstname","e-lastname","e-phone","e-email","e-addr","e-send"].forEach(i => $(i).textContent = "");
   const bad = (err, msg, el) => { ok = false; $(err).textContent = msg; if (el) el.setAttribute("aria-invalid","true"); if (!first) first = el || $(err); };
   if (!chosen().length) bad("e-svc","Ajoutez au moins une prestation.");
-  if ($("f-name").value.trim().length < 3) bad("e-name","Indiquez votre nom et prénom.",$("f-name"));
+  if ($("f-firstname").value.trim().length < 2) bad("e-firstname","Indiquez votre prénom.",$("f-firstname"));
+  if ($("f-lastname").value.trim().length < 2) bad("e-lastname","Indiquez votre nom.",$("f-lastname"));
   if (($("f-phone").value.match(/\d/g)||[]).length < 9) bad("e-phone","Numéro de téléphone incomplet.",$("f-phone"));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($("f-email").value.trim())) bad("e-email","Adresse email invalide.",$("f-email"));
   if ($("f-addr").value.trim().length < 8) bad("e-addr","Indiquez l'adresse complète (rue, code postal, ville).",$("f-addr"));
@@ -167,6 +168,7 @@ function validate(){
   return ok;
 }
 
+function fullName(){ return ($("f-firstname").value.trim() + " " + $("f-lastname").value.trim()).trim(); }
 /* texte transmis à Calendly (question personnalisée n°5 : "Détail du devis") */
 function recapText(){
   const L = [];
@@ -185,7 +187,7 @@ function calendlyAnswers(){
 }
 function calendlyLink(){
   const u = new URL(CONFIG.calendlyUrl);
-  u.searchParams.set("name", $("f-name").value.trim());
+  u.searchParams.set("name", fullName());
   u.searchParams.set("email", $("f-email").value.trim());
   Object.entries(calendlyAnswers()).forEach(([k,v]) => u.searchParams.set(k, v));
   u.searchParams.set("hide_gdpr_banner","1"); u.searchParams.set("primary_color", CONFIG.color);
@@ -208,7 +210,7 @@ function showFallback(){
 }
 function openCalendar(){
   $("steps").hidden = true; $("calstep").hidden = false; $("booked").hidden = true; $("credit-note").hidden = !$("f-credit").checked; renderBubble();
-  fillDl($("recap2"), summaryRows().concat([["Nom",$("f-name").value.trim()],["Téléphone",$("f-phone").value.trim()],["Email",$("f-email").value.trim()],["Adresse",$("f-addr").value.trim()]]));
+  fillDl($("recap2"), summaryRows().concat([["Nom",fullName()],["Téléphone",$("f-phone").value.trim()],["Email",$("f-email").value.trim()],["Adresse",$("f-addr").value.trim()]]));
   const el = $("cal"); el.textContent = ""; el.style.minHeight = "760px"; $("cal-fallback").hidden = true;
   const timer = setTimeout(() => { if (!el.querySelector("iframe")) showFallback(); }, 8000);
   loadCalendly(ok => {
@@ -217,7 +219,7 @@ function openCalendar(){
       window.Calendly.initInlineWidget({
         url: CONFIG.calendlyUrl + (CONFIG.calendlyUrl.includes("?") ? "&" : "?") + "hide_gdpr_banner=1&primary_color=" + CONFIG.color,
         parentElement: el,
-        prefill: { name: $("f-name").value.trim(), email: $("f-email").value.trim(), customAnswers: calendlyAnswers() }
+        prefill: { name: fullName(), email: $("f-email").value.trim(), customAnswers: calendlyAnswers() }
       });
     } catch(e){ showFallback(); }
   });
