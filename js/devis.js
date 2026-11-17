@@ -201,7 +201,7 @@ function showFallback(){
 function openCalendar(){
   $("steps").hidden = true; $("calstep").hidden = false; $("booked").hidden = true; $("credit-note").hidden = !$("f-credit").checked; renderBubble();
   fillDl($("recap2"), summaryRows().concat([["Nom",$("f-name").value.trim()],["Téléphone",$("f-phone").value.trim()],["Email",$("f-email").value.trim()],["Adresse",$("f-addr").value.trim()]]));
-  const el = $("cal"); el.textContent = ""; el.style.minHeight = "680px"; $("cal-fallback").hidden = true;
+  const el = $("cal"); el.textContent = ""; el.style.minHeight = "760px"; $("cal-fallback").hidden = true;
   const timer = setTimeout(() => { if (!el.querySelector("iframe")) showFallback(); }, 8000);
   loadCalendly(ok => {
     if (!ok){ clearTimeout(timer); showFallback(); return; }
@@ -253,7 +253,13 @@ $("win-remove").onclick = () => { WIN.forEach(w => win[w.id] = 0); qty.vitres = 
 dlg.addEventListener("click", (ev) => { if (ev.target === dlg) closeWin(); });
 
 window.addEventListener("message", (ev) => {
-  if (ev.origin !== "https://calendly.com" || !ev.data || ev.data.event !== "calendly.event_scheduled") return;
+  if (ev.origin !== "https://calendly.com" || !ev.data || !ev.data.event) return;
+  if (ev.data.event === "calendly.page_height") {
+    const h = Number(ev.data.payload && ev.data.payload.height || ev.data.payload);
+    if (h) $("cal").style.height = Math.max(760, Math.ceil(h)) + "px";
+    return;
+  }
+  if (ev.data.event !== "calendly.event_scheduled") return;
   track('generate_lead', { method: 'calendly' });
   const b = $("booked"); b.hidden = false;
   b.textContent = "Rendez-vous confirmé ! Vous recevez un email de confirmation." + ($("f-credit").checked ? " Vous allez aussi recevoir un email d'Abby pour votre avance immédiate : pensez à vérifier vos spams." : " À très vite.");
