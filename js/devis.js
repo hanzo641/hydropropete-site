@@ -130,10 +130,10 @@ function fillDl(dl, rows){
 }
 function renderRecap(){ fillDl($("recap"), summaryRows()); $("credit-box").classList.toggle("qd-on", $("f-credit").checked); $("credit-info").hidden = !$("f-credit").checked; }
 function renderBubble(){
-  const b = $("bubble"), e = estimate(), show = chosen().length > 0 && !$("steps").hidden;
+  const b = $("bubble"), info = $("bubble-info"), e = estimate(), show = chosen().length > 0 && !$("steps").hidden;
   b.hidden = !show; document.body.classList.toggle("has-bubble", show);
   if (!show) return;
-  b.textContent = "";
+  info.textContent = "";
   const col = (cls, label, value, sub) => {
     const d = document.createElement("div"); d.className = cls;
     const a = document.createElement("small"); a.textContent = label;
@@ -144,10 +144,10 @@ function renderBubble(){
   };
   if (e.count){
     const plus = e.quote ? " + devis" : "";
-    b.append(col("qd-l", "Total estimé", eur(e.net) + plus, e.disc ? "remise 2e article incluse" : "déplacement inclus à Pau"),
+    info.append(col("qd-l", "Total estimé", eur(e.net) + plus, e.disc ? "remise 2e article incluse" : "déplacement inclus à Pau"),
              col("qd-r", "Avec l'avance immédiate", eur(e.net/2) + plus, "vous payez la moitié"));
   } else {
-    b.append(col("qd-l", "Total estimé", "Sur devis", "tarif précis après votre demande"),
+    info.append(col("qd-l", "Total estimé", "Sur devis", "tarif précis après votre demande"),
              col("qd-r", "Avance immédiate", "50 %", "vous payez la moitié"));
   }
 }
@@ -276,6 +276,7 @@ window.addEventListener("message", (ev) => {
   b.scrollIntoView({behavior:"smooth",block:"center"});
 });
 
+$("bubble-cta").onclick = () => { $("h-info").scrollIntoView({behavior:"smooth",block:"start"}); $("f-firstname").focus({preventScroll:true}); };
 $("ph-hint").textContent = CONFIG.phone;
 $("f-credit").addEventListener("change", renderRecap);
 $("edit").onclick = () => { $("calstep").hidden = true; $("steps").hidden = false; renderBubble(); $("steps").scrollIntoView({behavior:"smooth",block:"start"}); };

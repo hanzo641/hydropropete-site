@@ -120,15 +120,26 @@
   #devis-app .qd-bubble {
     position: fixed; z-index: 20; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
     bottom: calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; max-width: 696px;
-    background: var(--qd-bub-bg); color: var(--qd-bub-fg); border-radius: var(--radius-lg); padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-lg);
+    background: var(--qd-bub-bg); color: var(--qd-bub-fg); border-radius: var(--radius-lg); padding: 12px 14px 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: var(--shadow-lg);
   }
+  #devis-app .qd-bubble-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: 1; min-width: 0; }
   #devis-app .qd-bubble .qd-l, #devis-app .qd-bubble .qd-r { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
   #devis-app .qd-bubble .qd-r { align-items: flex-end; text-align: right; }
   #devis-app .qd-bubble small { font-size: .72rem; font-weight: 600; opacity: .8; line-height: 1.25; }
   #devis-app .qd-bubble strong { font-size: 1.3rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
   #devis-app .qd-bubble .qd-r strong { background: var(--qd-sun); color: var(--qd-on-sun); border-radius: var(--radius-full); padding: 2px 12px; }
+  #devis-app .qd-bubble-cta {
+    flex: none; font: inherit; font-weight: 700; font-size: .88rem; cursor: pointer; border: 0; border-radius: var(--radius-full);
+    background: var(--qd-cta-bg); color: var(--qd-on-cta); padding: 11px 16px; white-space: nowrap;
+  }
   body.has-bubble { padding-bottom: 104px; }
+  @media (max-width: 420px) {
+    #devis-app .qd-bubble { padding: 10px 10px 10px 14px; }
+    #devis-app .qd-bubble .qd-r { display: none; }
+    #devis-app .qd-bubble strong { font-size: 1.1rem; }
+    #devis-app .qd-bubble-cta { padding: 10px 14px; font-size: .85rem; }
+  }
 
   #devis-app .qd-dlg { border: 0; border-radius: var(--radius-lg); padding: 0; max-width: 440px; width: calc(100% - 24px); background: var(--qd-surface); color: var(--qd-ink); box-shadow: var(--shadow-lg); }
   #devis-app .qd-dlg::backdrop { background: rgba(15, 23, 42, .55); }
@@ -289,7 +300,10 @@
             </div>
           </div>
         </dialog>
-        <div class="qd-bubble" id="bubble" role="status" aria-live="polite" hidden></div>
+        <div class="qd-bubble" id="bubble" role="status" aria-live="polite" hidden>
+          <div class="qd-bubble-info" id="bubble-info"></div>
+          <button type="button" class="qd-bubble-cta" id="bubble-cta">Réserver</button>
+        </div>
       </div>
     </div>
   </main>
