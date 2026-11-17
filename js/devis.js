@@ -177,12 +177,12 @@ function recapText(){
   const m = $("f-msg").value.trim(); if (m) L.push("Précisions : " + m);
   return L.join("\n");
 }
-/* Questions personnalisées Calendly (ordre réel du formulaire) :
-   a1 = Votre Adresse, a3 = Numéro de téléphone, a4 = Quel est le problème rencontré, a5 = Détail du devis.
-   a2 (Quel type de nettoyage, à cases à cocher) ne peut pas être pré-rempli par Calendly. */
+/* Questions personnalisées Calendly (ordre réel du formulaire, vérifié en direct) :
+   a1 = Votre Adresse, a2 = Numéro de téléphone, a3 = Quel est le problème rencontré, a4 = Détail du devis.
+   (La question "Quel type de nettoyage" a été supprimée côté Calendly, ce qui a décalé les suivantes d'un cran.) */
 function calendlyAnswers(){
-  const answers = { a1: $("f-addr").value.trim(), a3: $("f-phone").value.trim(), a5: recapText() };
-  const m = $("f-msg").value.trim(); if (m) answers.a4 = m;
+  const answers = { a1: $("f-addr").value.trim(), a2: $("f-phone").value.trim(), a4: recapText() };
+  const m = $("f-msg").value.trim(); if (m) answers.a3 = m;
   return answers;
 }
 function calendlyLink(){
