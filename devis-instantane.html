@@ -135,10 +135,9 @@
   }
   body.has-bubble { padding-bottom: 104px; }
   @media (max-width: 420px) {
-    #devis-app .qd-bubble { padding: 10px 10px 10px 14px; }
-    #devis-app .qd-bubble .qd-r { display: none; }
+    #devis-app .qd-bubble { flex-direction: column; align-items: stretch; padding: 12px 14px; gap: 8px; }
     #devis-app .qd-bubble strong { font-size: 1.1rem; }
-    #devis-app .qd-bubble-cta { padding: 10px 14px; font-size: .85rem; }
+    #devis-app .qd-bubble-cta { width: 100%; padding: 11px 14px; font-size: .92rem; }
   }
 
   #devis-app .qd-dlg { border: 0; border-radius: var(--radius-lg); padding: 0; max-width: 440px; width: calc(100% - 24px); background: var(--qd-surface); color: var(--qd-ink); box-shadow: var(--shadow-lg); }
