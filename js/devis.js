@@ -27,6 +27,7 @@ const SERVICES = [
 
 const $ = (id) => document.getElementById(id);
 const qty = {};
+let bubbleDismissed = false;
 const WIN = [
   {id:"classic", name:"Fenêtre classique", sub:"Moins de 1 m², 2,50 € le pan", price:2.5, label:["fenêtre","fenêtres"]},
   {id:"porte", name:"Porte-fenêtre", sub:"De 1 à 2 m², 4 € le pan", price:4, label:["porte-fenêtre","portes-fenêtres"]},
@@ -130,7 +131,7 @@ function fillDl(dl, rows){
 }
 function renderRecap(){ fillDl($("recap"), summaryRows()); $("credit-box").classList.toggle("qd-on", $("f-credit").checked); $("credit-info").hidden = !$("f-credit").checked; }
 function renderBubble(){
-  const b = $("bubble"), info = $("bubble-info"), e = estimate(), show = chosen().length > 0 && !$("steps").hidden;
+  const b = $("bubble"), info = $("bubble-info"), e = estimate(), show = chosen().length > 0 && !$("steps").hidden && !bubbleDismissed;
   b.hidden = !show; document.body.classList.toggle("has-bubble", show);
   if (!show) return;
   info.textContent = "";
@@ -151,7 +152,7 @@ function renderBubble(){
              col("qd-r", "Avance immédiate", "50 %", "vous payez la moitié"));
   }
 }
-function changed(){ renderSvcs(); renderEstimate(); renderRecap(); renderBubble(); $("e-svc").textContent = ""; }
+function changed(){ bubbleDismissed = false; renderSvcs(); renderEstimate(); renderRecap(); renderBubble(); $("e-svc").textContent = ""; }
 
 function validate(){
   let ok = true, first = null;
@@ -279,9 +280,9 @@ window.addEventListener("message", (ev) => {
   b.scrollIntoView({behavior:"smooth",block:"center"});
 });
 
-$("bubble-cta").onclick = () => { $("h-info").scrollIntoView({behavior:"smooth",block:"start"}); $("f-firstname").focus({preventScroll:true}); };
+$("bubble-cta").onclick = () => { bubbleDismissed = true; renderBubble(); $("h-info").scrollIntoView({behavior:"smooth",block:"start"}); $("f-firstname").focus({preventScroll:true}); };
 $("ph-hint").textContent = CONFIG.phone;
 $("f-credit").addEventListener("change", renderRecap);
-$("edit").onclick = () => { $("calstep").hidden = true; $("steps").hidden = false; renderBubble(); $("steps").scrollIntoView({behavior:"smooth",block:"start"}); };
+$("edit").onclick = () => { $("calstep").hidden = true; $("steps").hidden = false; bubbleDismissed = false; renderBubble(); $("steps").scrollIntoView({behavior:"smooth",block:"start"}); };
 $("form").addEventListener("submit", (ev) => { ev.preventDefault(); if (validate()) openCalendar(); });
 changed();
